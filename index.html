@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="data:," rel="icon"/>
+<link href="assets/img/favicon-granja.png" rel="icon"/>
 <title>Desempenho Zootécnico</title>
 <script>
         (() => {
@@ -19,11 +19,12 @@
             }
         })();
     </script>
-<link href="assets/css/app.css?v=8.0" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist/index.css" rel="stylesheet"/>
+<link href="assets/css/app.css?v=integracao-1" rel="stylesheet"/>
+<link href="assets/vendor/geist/index.css" rel="stylesheet"/>
 </head>
-<body>
+<body data-page="desempenho">
 <div class="app-shell">
+<div class="notice" role="note">Indicadores em validação: as regras de médias e do intervalo de datas aguardam atualização no serviço de dados. O indicador Vazio permanece indisponível até essa atualização.</div>
 <header class="page-header">
 <div>
 <div class="eyebrow">
@@ -37,10 +38,6 @@
             </p>
 </div>
 <div class="header-toolbar">
-<a class="icon-button icon-button-label" href="formulas.html">
-<span>ƒx</span>
-                Fórmulas
-            </a>
 <button aria-label="Alternar tema" class="icon-button" data-theme-toggle="" title="Alternar tema" type="button">
 <span data-theme-icon="">☾</span>
 </button>
@@ -88,6 +85,10 @@
 <div class="checkbox-multiselect" id="produtor"></div>
 </div>
 <div class="filter-field">
+<span>Galpão</span>
+<div class="checkbox-multiselect" id="galpao"></div>
+</div>
+<div class="filter-field">
 <span>Técnico</span>
 <div class="checkbox-multiselect" id="tecnico"></div>
 </div>
@@ -96,10 +97,6 @@
 <div class="filter-field">
 <span>Tipo de Linhagem</span>
 <div class="checkbox-multiselect" id="tipoLinhagem"></div>
-</div>
-<div class="filter-field">
-<span>Linhagem</span>
-<div class="checkbox-multiselect" id="linhagem"></div>
 </div>
 </div>
 </section>
@@ -139,6 +136,7 @@
 <span>Descrição</span>
 <p id="formulaModalDescricao"></p>
 </div>
+<div id="formulaModalExplicacao"></div>
 <div class="info-block" id="formulaModalPonderacaoContainer">
 <span>Ponderação</span>
 <p id="formulaModalPonderacao"></p>
@@ -149,18 +147,20 @@
 </div>
 <details class="code-details">
 <summary>
-                    Ver DAX original
+                    Ver DAX de referência
                 </summary>
 <pre><code id="formulaModalDax"></code></pre>
 </details>
 </div>
 </section>
 </div>
-<script src="assets/js/config.js?v=8.0"></script>
-<script src="assets/js/metrics.js?v=8.0"></script>
-<script src="assets/js/api.js?v=8.0"></script>
-<script src="assets/js/theme.js?v=8.0"></script>
-<script src="assets/js/filters.js?v=8.0"></script>
-<script src="assets/js/dashboard.js?v=8.0"></script>
+<script src="assets/js/config.js?v=integracao-1"></script>
+<script src="assets/js/api.js?v=integracao-1"></script>
+<script src="assets/js/metrics.js?v=integracao-1"></script>
+<script src="assets/js/formula-ui.js?v=integracao-1"></script>
+<script src="assets/js/theme.js?v=integracao-1"></script>
+<script src="assets/js/filters.js?v=integracao-1"></script>
+<script src="assets/js/dashboard.js?v=integracao-1"></script>
+<script src="assets/js/sidebar.js?v=integracao-1"></script>
 </body>
 </html>

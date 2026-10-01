@@ -1,0 +1,3 @@
+BIUnavailable.show({ errorId: "mensagemErroLotes", cardsId: "cardsLotes", labels: ["Lotes em Criação", "Aves Alojadas", "Mortalidade no Período", "Mortalidade (%)", "Peso Médio Geral"], cardClass: "lotes-kpi-card", bodyId: "tabelaLotesBody", filterFields: [["periodoDias","Semana de avaliação"],["tipoGranja","Tipo de Granja"],["produtor","Produtor"],["modelo","Modelo"],["galpao","Galpão"],["tecnico","Técnico"],["mistLinha","Mist Linha"]] });
+["chartMortalidade","chartPesoSemanal","chartCrescimento"].forEach(id => { document.getElementById(id).textContent = "Dados indisponíveis"; });
+BIUnavailable.formulas({ prefix: "Lotes", catalog: FORMULAS_LOTES, attribute: "data-lotes-formula" });

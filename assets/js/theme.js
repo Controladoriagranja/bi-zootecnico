@@ -1,8 +1,13 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Tema visual, sem fórmulas de indicadores.
+ */
 (() => {
     const STORAGE_KEY = "bi-zootecnico-theme";
 
     function temaInicial() {
-        const salvo = localStorage.getItem(STORAGE_KEY);
+        let salvo = null;
+        try { salvo = localStorage.getItem(STORAGE_KEY); } catch (_) {}
 
         if (salvo === "light" || salvo === "dark") {
             return salvo;
@@ -46,10 +51,7 @@
                     ? "light"
                     : "dark";
 
-            localStorage.setItem(
-                STORAGE_KEY,
-                novo
-            );
+            try { localStorage.setItem(STORAGE_KEY, novo); } catch (_) {}
 
             aplicarTema(novo);
         },

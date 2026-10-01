@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Exibe valor, rankings e evolução recebidos de detalhes; não recalcula médias.
+ */
 const params =
     new URLSearchParams(
         window.location.search
@@ -50,12 +54,15 @@ const inheritedKeys = [
     "tipo_granja",
     "modelo",
     "tipo_linhagem",
-    "linhagem"
+    "linhagem",
+    "data_inicio",
+    "data_fim"
 ];
 
 
 let detalhesData = null;
 let requestController = null;
+let detailRequestId = 0;
 
 
 function semAno2022(series) {
@@ -111,11 +118,15 @@ function allFilters() {
 
 
 async function carregarIndicadores() {
-    // O catálogo de fórmulas é estático e já está em metrics.js.
-    // Não depende mais de endpoint /formulas.
-    metricCatalog = BI_METRIC_ORDER
-        .map(metricId => METRICAS[metricId])
-        .filter(Boolean);
+    const response = { metricas: BI_METRIC_ORDER.map(id => METRICAS[id]) };
+
+    metricCatalog =
+        Array.isArray(response.metricas)
+            ? response.metricas
+            : [];
+
+    metricCatalog = metricCatalog.filter(metric => BI_METRIC_ORDER.includes(metric.id));
+    if (!metricCatalog.some(metric => metric.id === metricId)) metricId = "gmd";
 
     const select =
         document.getElementById(
@@ -249,6 +260,8 @@ function render() {
     const metric =
         detalhesData.indicador;
 
+    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metric.id]], "formula-detalhe");
+
     document
         .getElementById(
             "tituloDetalhes"
@@ -261,7 +274,7 @@ function render() {
             "subtituloDetalhes"
         )
         .textContent =
-        "Rankings e evolução usando a mesma fórmula oficial do indicador.";
+        "Rankings e evolução recebidos do serviço de dados; regras em validação.";
 
     document
         .getElementById(
@@ -298,19 +311,25 @@ function render() {
     ZooCharts.ranking(
         rankingTecnicosChart,
         detalhesData.ranking_tecnicos,
-        metric.nome
+        metric.nome,
+        metric.unidade,
+        metric.casas_decimais ?? 2
     );
 
     ZooCharts.ranking(
         rankingProdutoresChart,
         detalhesData.ranking_produtores,
-        metric.nome
+        metric.nome,
+        metric.unidade,
+        metric.casas_decimais ?? 2
     );
 
     ZooCharts.evolution(
         evolucaoChart,
         detalhesData.evolucao,
-        metric.nome
+        metric.nome,
+        metric.casas_decimais ?? 2,
+        metric.unidade
     );
 }
 
@@ -318,6 +337,13 @@ function render() {
 async function carregarDetalhes(
     initial = false
 ) {
+    const requestId = ++detailRequestId;
+    document.getElementById("mensagemErro").classList.add("hidden");
+    document.getElementById("kpiValor").textContent = "—";
+    document.getElementById("kpiNome").textContent = METRICAS[metricId]?.nome || "Indicador";
+    document.getElementById("tituloDetalhes").textContent = "Detalhamento • " + (METRICAS[metricId]?.nome || "Indicador");
+    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metricId]].filter(Boolean), "formula-detalhe");
+    rankingTecnicosChart?.clear(); rankingProdutoresChart?.clear(); evolucaoChart?.clear();
     if (requestController) {
         requestController.abort();
     }
@@ -333,7 +359,7 @@ async function carregarDetalhes(
         .remove("hidden");
 
     try {
-        detalhesData =
+        const response =
             await apiGet(
                 APP_CONFIG
                     .endpoints
@@ -349,9 +375,12 @@ async function carregarDetalhes(
                 }
             );
 
+        if (requestId !== detailRequestId) return;
+        detalhesData = response;
         render();
     }
     catch (error) {
+        if (requestId !== detailRequestId) return;
         if (
             error.name
             === "AbortError"
@@ -373,6 +402,7 @@ async function carregarDetalhes(
         el.classList.remove("hidden");
     }
     finally {
+        if (requestId !== detailRequestId) return;
         document
             .getElementById(
                 "dashboardAtualizando"
@@ -507,8 +537,14 @@ async function iniciar() {
         preserve: true
     });
 
+    atualizarUrl();
     await carregarDetalhes(true);
 }
 
 
-iniciar();
+iniciar().catch(error => {
+  const el = document.getElementById("mensagemErro");
+  el.textContent = error.message || "Não foi possível iniciar o detalhamento.";
+  el.classList.remove("hidden");
+  document.getElementById("dashboardAtualizando").classList.add("hidden");
+});

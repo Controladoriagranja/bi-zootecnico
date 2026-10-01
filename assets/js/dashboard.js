@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Exibe resultados de desempenho e abre fórmulas; não calcula médias dos indicadores.
+ */
 const FIRST_FILTERS = [
     {
         id: "ano",
@@ -36,6 +40,12 @@ const FIRST_FILTERS = [
         multi: true
     },
     {
+        id: "galpao",
+        apiKey: "galpao",
+        search: true,
+        multi: true
+    },
+    {
         id: "tecnico",
         apiKey: "tecnico",
         search: true,
@@ -45,12 +55,6 @@ const FIRST_FILTERS = [
         id: "tipoLinhagem",
         apiKey: "tipo_linhagem",
         search: false,
-        multi: true
-    },
-    {
-        id: "linhagem",
-        apiKey: "linhagem",
-        search: true,
         multi: true
     }
 ];
@@ -62,6 +66,7 @@ const FIRST_FILTERS = [
 let formulasCatalogo = {};
 let dashboardData = null;
 let performanceController = null;
+let performanceRequestId = 0;
 
 const sortState = {};
 
@@ -129,6 +134,7 @@ function errorMessage(message) {
             "mensagemErro"
         );
 
+    document.getElementById("loadingDashboard").classList.add("hidden");
     el.textContent = message;
     el.classList.remove("hidden");
 }
@@ -579,7 +585,7 @@ function metricCard(
         </header>
 
         <div class="metric-table-wrapper">
-            <table class="metric-table">
+            <table class="metric-table metric-table-desktop">
                 <thead>
                     <tr>
                         <th class="month-cell">
@@ -643,6 +649,7 @@ function renderDashboard() {
         );
 
     container.innerHTML = "";
+    if (!dashboardData.anos?.length) { const empty = document.createElement("div"); empty.className = "notice"; empty.textContent = "Nenhum registro encontrado para os filtros selecionados."; container.appendChild(empty); }
 
     BI_METRIC_ORDER.forEach(
         metricId => {
@@ -679,7 +686,10 @@ function renderDashboard() {
 async function carregarDashboard(
     initial = false
 ) {
+    const requestId = ++performanceRequestId;
     clearError();
+    document.getElementById("indicadores").classList.add("hidden");
+    document.getElementById("loadingDashboard").classList.remove("hidden");
 
     if (performanceController) {
         performanceController.abort();
@@ -702,10 +712,12 @@ async function carregarDashboard(
                 }
             );
 
+        if (requestId !== performanceRequestId) return;
         dashboardData = response;
         renderDashboard();
     }
     catch (error) {
+        if (requestId !== performanceRequestId) return;
         if (
             error.name ===
             "AbortError"
@@ -731,6 +743,8 @@ function abrirFormula(metricId) {
     if (!metric) {
         return;
     }
+
+    document.getElementById("formulaModalExplicacao").innerHTML = FormulaUI.explanation(metric);
 
     document
         .getElementById(
@@ -959,30 +973,23 @@ async function iniciar() {
     try {
         filters.register();
 
+        const formulas = { metricas: BI_METRIC_ORDER.map(id => METRICAS[id]) };
+        await filters.loadOptions({ preserve: false });
+
         formulasCatalogo = {};
 
-        BI_METRIC_ORDER.forEach(
-            metricId => {
-                const metric =
-                    METRICAS[metricId];
-
-                if (metric) {
-                    formulasCatalogo[
-                        metricId
-                    ] = metric;
-                }
+        formulas.metricas.forEach(
+            metric => {
+                formulasCatalogo[
+                    metric.id
+                ] = metric;
             }
         );
-
-        await filters.loadOptions({
-            preserve: false
-        });
 
         await carregarDashboard(true);
     }
     catch (error) {
         console.error(error);
-
         errorMessage(
             error.message
             || "Falha ao iniciar."
