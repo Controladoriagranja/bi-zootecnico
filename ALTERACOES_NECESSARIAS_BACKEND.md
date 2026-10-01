@@ -1,3 +1,5 @@
+> Atualização: o usuário autorizou editar a cópia _backend-zootecnico-referencia. As capacidades abaixo foram implementadas nessa cópia; implantação, consultas PostgreSQL reais e ligação das novas telas permanecem pendentes. Consulte ../_backend-zootecnico-referencia/LEIA-ME-INTEGRACAO.md.
+
 # ALTERAÇÃO NECESSÁRIA NO BACKEND
 
 Relatório de 01/10/2026. Somente documentação: nenhum Python, serviço, Worker, CENTRAL, credencial ou infraestrutura foi alterado. Primeiro usar registry.py; evoluir helpers/router apenas quando a capacidade declarativa não existir.
@@ -40,12 +42,12 @@ Teste: datas, duplicatas, empate, chaves incompletas, semanas atingidas, pesos z
 ## 3. Histórico de Lotes
 
 Arquivo provável: registry.py e camada analítica genérica.
-Tabela confirmada pelo usuário: zootecnico.mortalidade_peso_abertos. Não utilizar fechados nesta tela.
+Tabela definida pela instrução mais recente: zootecnico.mortalidade_peso_fechados. Essa orientação substitui a escolha anterior por abertos.
 Endpoint analítico: ausente; definir no backend. Reutilizar capacidades de lotes quando equivalentes.
 Filtros: ano, tipo_granja, produtor, modelo_aviario, galp, tecnico e linhagem. Confirmar calendário do campo ano, sem substituir por ano de carga.
 Deduplicação: mesma identidade composta e última versão.
 Métricas: contagem de lotes, aves iniciais, mortalidade acumulada das colunas 07/14/21/28/35 (não 42), média simples do peso atual.
-A tabela de abertos não contém ps_abate nem data_abate. Peso atual deve usar primeiro valor válido de peso_med_35, 28, 21, 14, 07, convertido de g para kg. O fallback de Ps Abate do HTML legado não se aplica a esta fonte.
+A tabela de fechados contém ps_abate e data_abate. Preservar a regra original do Histórico: usar ps_abate numérico em kg; na ausência, primeiro peso válido de peso_med_35, 28, 21, 14, 07 convertido de g para kg. Não substituir o calendário de negócio por periodo_fim.
 Detalhes: hierarquia semana → produtor → galpão; por semana %M, %D e %M+D e médias simples de peso. Rodapés recalculados no contexto, não soma de percentuais.
 Risco: misturar períodos/exportações e contagens de níveis de agrupamento.
 Teste: total versus hierarquia, 35/42, fallback de peso, unidade g/kg, ano e deduplicação.
@@ -62,7 +64,7 @@ Filtros: data, destino/unidade, integrado (produtor), galpao, tecnico, tipo_gran
 Métricas: soma qtde_programada, soma qtde_real, soma dif_qtde_rxp; contagem de diferenças válidas != 0; Dif % = soma diferenças / soma programada × 100. Denominador zero é null. Nenhuma média ponderada de indicadores nesta tela.
 Detalhes: resumo por unidade; cards e rodapé do contexto completo; modal Ver produtores por unidade e no Total, com registros paginados, totais independentes da página, ordenação permitida e identificação de fonte.
 Diferença já existe: nunca recalcular como real - programada. Campos de peso/AxP/retirada/cargas/equipe existem, mas não incluir indicadores novos sem requisito.
-Técnico não existe nas tabelas RxP. Resolver no backend por codigo ↔ base_dinamica.cod_prod, último abate com técnico válido. Alternativa por nome exato normalizado somente se unívoco. Manter sem vínculo nos totais. Validar desempates: schema atual não contém Data_Analise original; documentar equivalência com metadados disponíveis, sem assumir automaticamente.
+Técnico não existe nas tabelas RxP. Regra confirmada pelo usuário: codigo ↔ base_dinamica.cod_prod, último abate com técnico válido; alternativa por nome exato normalizado somente se unívoco; manter sem vínculo nos totais. Validar desempates: schema atual não contém Data_Analise original; documentar equivalência com metadados disponíveis, sem assumir automaticamente.
 
 Capacidades sugeridas: fonte composta declarativa com proveniência, agrupamentos, contagem condicional, razão de somas, vínculo de dimensão e detalhes paginados. Registry atual exige ano/mês e rankings fixos: só cadastrar tabelas não basta.
 Risco: duplicar períodos, contar totalizadores, perder registros sem técnico ou somar dados equivalentes das duas fontes.
@@ -78,4 +80,10 @@ Contratos novos devem separar resumo, séries, grupos e detalhes paginados. Indi
 
 ## Fora do escopo
 
-Nenhuma mudança em Cloudflare, VPC, Tunnel, portas, Render, Neon, PostgreSQL ou CENTRAL. matrizes_acerto_produtor e mortalidade_peso_fechados permanecem sem nova tela. O Worker fornecido encaminha /api/* e parâmetros repetidos e guarda Basic Auth internamente. Seu CORS limita a origem existente.
+Nenhuma mudança em Cloudflare, VPC, Tunnel, portas, Render, Neon, PostgreSQL ou CENTRAL. matrizes_acerto_produtor permanece sem nova tela; mortalidade_peso_fechados passa a ser a fonte do Histórico. O Worker fornecido encaminha /api/* e parâmetros repetidos e guarda Basic Auth internamente. Seu CORS limita a origem existente.
+
+## Condições atuais para execução
+
+Os avisos permanecerão até endpoints válidos e valores verificados. A autorização anterior limita edição a bi-zootecnico e proíbe alterar o backend real ou as referências. É necessário indicar uma cópia editável autorizada do serviço e um ambiente PostgreSQL de validação somente leitura. Não enviar credenciais pelo chat. Não houve confirmação semântica de JOIN/UNION nem da vinculação de técnico RxP.
+
+O registry disponível continua cadastrando apenas base_dinamica. Não existem capacidades declarativas para ajuste de Vazio, política de pares nulos, datas text seguras, deduplicação, médias em duas etapas, agrupamentos arbitrários e paginação analítica. Evoluir apenas essas capacidades ausentes, mantendo as rotas e demais BIs existentes.

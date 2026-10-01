@@ -3,3 +3,6 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Dependências isoladas para os testes da cópia de backend
+tests/.backend-test-deps/
