@@ -1,17 +1,17 @@
 {
-  "gerado_em_utc": "2026-10-02T18:10:25.928813+00:00",
-  "cache_frontend": "ajustes-20261002-3",
+  "gerado_em_utc": "2026-10-02T18:25:00.987375+00:00",
+  "cache_frontend": "ajustes-20261002-4",
   "regras_acerto": "acerto-2026-10-02",
   "regras_historico": "historico-fechados-2026-10-02",
   "pacotes": [
     {
       "arquivo": "frontend_bi_zootecnico.zip",
-      "sha256": "d238555f27ce85713c1d589ce61266a0d320377b165726f3be825d7504c856da",
+      "sha256": "aeda6041123578b0192683ab9d700343434958c8fba20e35cdf62cd5b7bfd645",
       "arquivos": {
         "assets/css/app.css": "1766d3ccd528206458e1f31f78be5fcbbead92b16133ec6be8680f743fa5d5ff",
         "assets/img/favicon-granja.png": "71f56be758978af29197c6bf13a2103c441c90e2d64a8689a79de48ba7d46a8e",
         "assets/img/logo-granja-brasilia-branca.png": "c3102d684ec61286b300b3aeceed11ec82eafb3dd2c5caca09d63be4d347945b",
-        "assets/js/api-screen.js": "b34fed53bc4eae147f1660361fcf03da365cffb5059ef0c62b248bb798b80e9e",
+        "assets/js/api-screen.js": "868a8933cc03a19a630d4d925d785579858049f969094ed72970bb3a3a72015a",
         "assets/js/api.js": "5eb2bb35f5c79193c261b33748372dbe7698adb7ce4bc6b42fa67a67e5770615",
         "assets/js/charts.js": "8559d3f3925b2e08b99dff55ae2de7ea9d214f6e4f00b044bb0abc071033891f",
         "assets/js/config.js": "20f7aed27236761aa3503b6ae9f6e0a87c3eb86b607a623fd69fc2aa1674988a",
@@ -21,14 +21,14 @@
         "assets/js/formula-ui.js": "ca5fe1657e52645f34f3c8a263e4d61143d5ba493f1ae0332fbf270f06c2d4b0",
         "assets/js/formulas.js": "6048f95b83beb6c7ce5c160a1b71ad1ac89b3a3a253546042c2bc68e99554c7b",
         "assets/js/historico-formulas.js": "1fbb3c58c150174d1093eedebe8b8c353f4a205eb314da9641a54495db84d949",
-        "assets/js/historico.js": "86f3d4de42b96892f11be2743137dc97f99d4efacdd816e76bc20eefe6acd734",
+        "assets/js/historico.js": "118105ddaee009115454560402e53b681086fb6e511dba05e4214bc7cd0df05e",
         "assets/js/lotes-formulas.js": "59dd53e3717627f997029a29b6d8a07f38066d96916cf716582f56fb4d4ceda8",
-        "assets/js/lotes.js": "dd5b41fdf501e553cccde6ad3468a5efe7c2ffb2a40972ecdb343b7cec67bd10",
+        "assets/js/lotes.js": "25337c9dc0bb32af585bf1ad7dfba9d03f57feed55affebb70defe41130c4f87",
         "assets/js/metrics.js": "82a457c3307bd33d1a1c7385b4dc4a38ae82e2fb4e99165d446efe173b91d11c",
         "assets/js/rxp-formulas.js": "868bd171d331bcb8437d724d09efd00ee0810857e43e493180d6da617e706b4a",
-        "assets/js/rxp.js": "748da9f56f8b62d9f59d2375ea33ee6d768521fdcfeafc1fa3f5b1f8a657d77f",
+        "assets/js/rxp.js": "2cc3c9df836f396303b0a67d4ba3ad652f108a052e9e84a03c61726009da0c64",
         "assets/js/sidebar.js": "214c5b506d6c4b6c7b49689b28320608dbded30ce82250d8c25d76085ae6f1e6",
-        "assets/js/table-sort.js": "3abbab3d6e99ecb90ed308d84e50a0174684f5546b0fc75ce4797c96aee3c28f",
+        "assets/js/table-sort.js": "52668fa0ef027b204426e67904e52ef5f24b04a461998ee8d1dc39e5a1f4c994",
         "assets/js/theme.js": "7d03c8bb8154864c2bf91020face887c2f9d5dcf2ffe4ded07be015b1f677219",
         "assets/js/unavailable.js": "d3591f6e931954ecc086ebbdee32f42c2b7c94848ec860aefb2193d0088c61e3",
         "assets/vendor/echarts/LICENSE": "634293835b43a6dd2094fa39182a3d9a6b9ca43b7fdb9ac354e8037af2a3093a",
@@ -41,17 +41,17 @@
         "assets/vendor/geist/files/geist-vietnamese-wght-normal.woff2": "8fa40e5d248247735eb97a0bd593b8852440430600d6ba01364c31fe0abc1fe1",
         "assets/vendor/geist/index.css": "97fe28a6688629d5a016347a47282efabffc85e5dd49bd953217d048e47c6872",
         "assets/vendor/manifest.json": "b43a6f23a21f2ceccb9f66508dd6d7aa17a758457fa9ab32b9c210d02574412d",
-        "detalhes.html": "1b82d841e3931c3eca01bb181173823f07578bda8aeea87900c1dbf11e86b182",
-        "diferenca-aves-abatidas.html": "4f7e0de8276b903a86f05a8a98c4ff8f6de994b143dd441ede7503621e0b1f89",
-        "formulas.html": "ebdd6613d0023226173cf6522b64076e1f897bff8764842ba42961da1f98daa1",
-        "historico.html": "48b3e21b498ac01f37aaa556e0a74c96335c8c30783a4aabf0e5c76b05413ea6",
-        "index.html": "56ce43b5b60bbe0c81079f419e323945384c8cf3da8122f0d23021a7ad6568e5",
-        "lotes.html": "42948cef13d8ba75659d61e95cc09baf42108ff053c6a45c660352a293a5fd49"
+        "detalhes.html": "b56856857a4207c5c451824e1f0925fdffead934315c393b202c3c0372fccf69",
+        "diferenca-aves-abatidas.html": "893aebb71ac383b8c114da281a14cd8d934b014337b728de86f8ae3bc869c775",
+        "formulas.html": "123131705226398a6d29c3583a89cafca874145a696fd89b046872cf3e3663e4",
+        "historico.html": "75bc0468d11aa4ac7cfcf85b3d9a788e95c82ea95f8efe90260d7711c2f229d1",
+        "index.html": "80f5ef8ef735249c9d13e186c31d5d3130cd33243afb6b13104e950272bc8912",
+        "lotes.html": "06d935321ed497e48156cab2cd88bd6176c6402aa3991a88c00141c4fa83c838"
       }
     },
     {
       "arquivo": "backend_anderson.zip",
-      "sha256": "e3457663eb798f415c602b6c19ce0f6aae38c327646f5b49e9ddc3c2b13c427b",
+      "sha256": "b9b9b7dafce9eb3ab57fda79c89057038ab766965080f4492eb8d0f90d00d32f",
       "arquivos": {
         "analytics.py": "b0001c31cc0c1207afd32f8c6dbcd8ea791cd222b20333cb9f69408f916ee5c9",
         "registry.py": "011a8bae6215f0958a41a1ae6e0eaaa4db7cecf3946c0af06268a079c82bdbe6",
@@ -60,7 +60,7 @@
     },
     {
       "arquivo": "robo_acerto_incremental.zip",
-      "sha256": "2256a179b6359bc466802ae25bf79ab66a495746ac9845f2b460ef2d9d0cdeb7",
+      "sha256": "da056208b3fdb1d9d9a3a8ee8c52c5f4085533c98575ffe3840755f8d4b1960b",
       "arquivos": {
         "COMO_USAR.md": "97040a74cf52e050a4985d5b6acc295690600ec8dcbdc8fcb31db1a06cd6f697",
         "CONFERIR_CARGA.sql": "3e6f742b268fb7d021231f8c34ab28f90c9586a7391006d46c0caf88caa0d09b",
@@ -69,7 +69,7 @@
     },
     {
       "arquivo": "github_pages_publicacao.zip",
-      "sha256": "0dc04e7ccbc7cd21294f29fa14a09a6fdc0d968a38085d30ed2e434e30271092",
+      "sha256": "59db3a25b76034fad452c38dd3d499a661ec3e08e540a179737d025c3ab2f3ef",
       "arquivos": {
         ".github/workflows/deploy-pages.yml": "79ea0b01dbaa545e8e5570a934f0ffd288259cd4523b5358fb28bc886f796cbc",
         "tools/preparar_pages.py": "c2f3bd51a4bb8bc27f3bcca60006e21f3f509f3f1659390b19be8087b7c64902"

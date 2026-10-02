@@ -44,10 +44,11 @@
       headers.forEach((th,index)=>{
         if(th.querySelector('button')||th.classList.contains('action'))return;
         const button=document.createElement('button');button.type='button';
-        button.className='table-sort-button'+(th.classList.contains('num')?' num':'');
+        const kind=table.classList.contains('history-table')?'history-sort':table.classList.contains('abate-table')?'abate-sort-button':'table-sort-button';
+        button.className=kind+(th.classList.contains('num')?' num':'');
         const label=document.createElement('span');label.textContent=th.textContent.trim();
         const icon=document.createElement('span');icon.className='sort-icon';icon.setAttribute('aria-hidden','true');
-        button.append(label,icon);th.replaceChildren(button);
+        button.append(kind==='history-sort'?document.createTextNode(label.textContent+' '):label,icon);th.replaceChildren(button);
         button.addEventListener('click',()=>{
           const old=states.get(table);
           states.set(table,{index,direction:old?.index===index?-old.direction:1});

@@ -22,21 +22,32 @@ window.ApiScreen = (() => {
     const narrow=el.clientWidth<500;
     const axis={type:"value",axisLabel:{color:muted,fontSize:10,formatter:v=>number(v,Number.isInteger(v)?0:1)},splitLine:{lineStyle:{color:border,opacity:.6}},axisTick:{show:false},axisLine:{show:false}};
     const percent=series.some(s=>s.yAxisIndex===1);
+    const readable={color:text,backgroundColor:c('--card'),fontSize:12,fontWeight:600,padding:[3,4],borderRadius:4,distance:12};
+    function referenceSeries(s,i) {
+      const base={type:'line',connectNulls:false,smooth:false,symbol:'circle',symbolSize:5,lineStyle:{width:2,color:i?accent:primary},itemStyle:{color:i?accent:primary,borderRadius:s.type==='bar'?horizontal?5:[4,4,0,0]:0},barMaxWidth:horizontal?24:42,
+        tooltip:{valueFormatter:v=>number(v,s.name.includes('Qtde')?0:2)+(s.name.includes('%')?'%':'')},...s};
+      if(horizontal)return {...base,label:{show:true,position:'right',color:text,formatter:p=>p.value==null?'':number(p.value,2)+'%'},labelLayout:{hideOverlap:true}};
+      if(el.id==='chartMortalidade')return i===0?{...base,itemStyle:{color:primary,borderRadius:[8,8,2,2]},label:{show:true,position:'insideTop',distance:6,color:'#fff',backgroundColor:'rgba(0,0,0,.55)',padding:[3,3],borderRadius:3,fontSize:11,fontWeight:700,formatter:p=>p.value==null?'':number(p.value)},labelLayout:{hideOverlap:true}}:
+        {...base,symbolSize:8,smooth:.32,lineStyle:{color:accent,width:3},label:{show:true,position:'top',...readable,color:'#211b1d',backgroundColor:accent,formatter:p=>p.value==null?'':number(p.value,2)+'%'},labelLayout:{hideOverlap:true,moveOverlap:'shiftY'}};
+      if(el.id==='chartPesoSemanal')return {...base,barMaxWidth:54,itemStyle:{color:primary,borderRadius:[10,10,3,3]},label:{show:true,position:'top',...readable,formatter:p=>p.value==null?'':number(p.value,2)},labelLayout:{hideOverlap:true}};
+      if(el.id==='chartCrescimento')return {...base,smooth:.42,symbolSize:7,lineStyle:{color:primary,width:4,cap:'round'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:echarts.color.modifyAlpha(primary,.42)},{offset:1,color:echarts.color.modifyAlpha(primary,.06)}]}},label:{show:true,position:'top',...readable,formatter:p=>p.value==null?'':number(p.value,2)},labelLayout:{hideOverlap:true,moveOverlap:'shiftY'}};
+      if(el.id==='chartGalpaoDetalhe')return {...base,smooth:.25,symbolSize:7,lineStyle:{color:primary,width:3},label:{show:true,position:'top',color:text,formatter:p=>p.value==null?'':number(p.value,2)+'%'},labelLayout:{hideOverlap:true}};
+      return base;
+    }
     instance.resize();
     instance.setOption({animationDuration:350,textStyle:{fontFamily:getComputedStyle(document.body).fontFamily},color:[primary,accent],
       tooltip:{trigger:"axis",confine:true,renderMode:"richText",backgroundColor:c("--card"),borderColor:border,textStyle:{color:text},axisPointer:{type:horizontal?"shadow":"line"}},
       legend:{show:true,top:0,textStyle:{color:muted,fontSize:11}},
-      grid:{left:horizontal?(narrow?94:124):(narrow?46:58),right:horizontal?58:percent?48:24,top:horizontal?36:46,bottom:38},
-      xAxis:horizontal?{...axis,min:0,axisLabel:{...axis.axisLabel,formatter:v=>number(v,Number.isInteger(v)?0:1)+"%"}}:{type:"category",data:labels,boundaryGap:series.some(s=>s.type==="bar"),axisLine:{lineStyle:{color:border}},axisTick:{show:false},axisLabel:{color:muted,fontSize:10,hideOverlap:true}},
+      grid:{left:horizontal?(narrow?94:124):(narrow?46:48),right:horizontal?58:percent?48:28,top:horizontal?36:el.id==='chartCrescimento'?42:34,bottom:el.id==='chartCrescimento'?46:42},
+      xAxis:horizontal?{...axis,min:0,axisLabel:{...axis.axisLabel,formatter:v=>number(v,Number.isInteger(v)?0:1)+"%"}}:{type:"category",data:labels,boundaryGap:series.some(s=>s.type==="bar"),...(el.id==='chartCrescimento'?{name:'Idade',nameLocation:'middle',nameGap:30,nameTextStyle:{color:muted,fontSize:10}}:{}),axisLine:{lineStyle:{color:border}},axisTick:{show:false},axisLabel:{color:muted,fontSize:narrow?10:11,interval:0,hideOverlap:narrow,formatter:v=>narrow?String(v).replace(' dias','d'):v}},
       yAxis:horizontal?{type:"category",data:labels,inverse:true,axisLine:{show:false},axisTick:{show:false},axisLabel:{color:text,fontSize:11,width:narrow?78:110,overflow:"truncate"}}:percent?[axis,{...axis,position:"right",axisLabel:{...axis.axisLabel,formatter:v=>number(v,1)+"%"},splitLine:{show:false}}]:axis,
-      series:series.map((s,i)=>({type:"line",connectNulls:false,smooth:false,symbol:"circle",symbolSize:5,lineStyle:{width:2,color:i?accent:primary},itemStyle:{color:i?accent:primary,borderRadius:s.type==="bar"?horizontal?5:[4,4,0,0]:0},barMaxWidth:horizontal?24:42,
-        tooltip:{valueFormatter:v=>number(v,s.name.includes("Qtde")?0:2)+(s.name.includes("%")?"%":"")},...s}))},true);
+      series:series.map(referenceSeries)},true);
   }
   function chart(id, labels, series, horizontal = false, onClick = null) {
     const el = element(id);
     if (!el || !window.echarts) return;
     let record=charts.get(id);
-    if (!record) { el.textContent=""; record={instance:echarts.init(el),element:el}; charts.set(id,record); observer?.observe(el); }
+    if (!record) { el.textContent=""; record={instance:echarts.init(el,null,{renderer:'svg'}),element:el}; charts.set(id,record); observer?.observe(el); }
     Object.assign(record,{labels,series,horizontal,active:true});
     record.instance.off("click");
     if(onClick)record.instance.on("click",onClick);

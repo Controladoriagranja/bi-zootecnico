@@ -4,13 +4,19 @@
   const signed=(value,decimals=0)=>`${value>0?"+":""}${N(value,decimals)}`;
   const percent=value=>value==null?"—":`${signed(value,2)}%`;
   const pill=value=>`<span class="abate-diff-pill ${state(value)}">${signed(value)}</span>`;
+  const date=value=>/^\d{4}-\d{2}-\d{2}/.test(String(value||''))?String(value).slice(0,10).split('-').reverse().join('/'):H(value);
+  function detailRow(r) {
+    const fields=[['Unidade',H(r.unidade)],['Produtor',`<strong>${H(r.produtor)}</strong>`],['Técnico',H(r.tecnico)],['Data',date(r.data)],['Galpão',H(r.galpao)],['Lote',H(r.lote)],['Tipo Granja',H(r.tipo_granja)],['Modelo Aviário',H(r.modelo)],['Qtde Programada',N(r.programada)],['Qtde Real',N(r.real)],['Dif %',percent(r.difPercent)],['Dif Qtde RxP',pill(r.difQtdeRxP)]];
+    return `<tr class="abate-row ${state(r.difQtdeRxP)}">${fields.map(([label,value],i)=>`<td data-label="${label}"${i>=8?' class="num"':''}>${value}</td>`).join('')}</tr>`;
+  }
   let data,context={},unit="",page=1,detailAbort,detailId=0,opener;
   const pager=document.createElement("div");pager.className="card-actions";
   pager.innerHTML='<button class="mini-button" id="rxpPrevious" type="button">Anterior</button><span id="rxpPage" role="status"></span><button class="mini-button" id="rxpNext" type="button">Próxima</button>';
   E("tabelaProdutoresAbate").closest(".abate-table-wrap").after(pager);
   function close(){++detailId;detailAbort?.abort();E("modalAbate").classList.add("hidden");opener?.focus();}
   function row(label,c,index) {
-    return `<tr class="abate-row ${state(c.diferenca)}"><td><strong>${H(label)}</strong></td><td class="num">${N(c.programada)}</td><td class="num">${N(c.real)}</td><td class="num">${percent(c.difPercent)}</td><td class="num">${pill(c.diferenca)}</td><td class="num">${N(c.registrosComDiferenca)}</td><td class="action"><button class="mini-button" type="button" data-rxp-unit="${index}">Ver produtores</button></td></tr>`;
+    const tag=index===-1?'th':'td';
+    return `<tr class="abate-row ${state(c.diferenca)}"><${tag}><strong>${H(label)}</strong></${tag}><${tag} class="num">${N(c.programada)}</${tag}><${tag} class="num">${N(c.real)}</${tag}><${tag} class="num">${percent(c.difPercent)}</${tag}><${tag} class="num">${pill(c.diferenca)}</${tag}><${tag} class="num">${N(c.registrosComDiferenca)}</${tag}><${tag} class="action"><button class="mini-button" type="button" data-rxp-unit="${index}">Ver produtores</button></${tag}></tr>`;
   }
   function render(result,params){
     data=result;context=params;
@@ -42,7 +48,7 @@
       E("modalDiferenca").textContent=signed(result.cards.diferenca);
       E("modalDifPercent").textContent=percent(result.cards.difPercent);
       ["modalDiferenca","modalDifPercent"].forEach(k=>E(k).className=`abate-summary-diff ${state(result.cards.diferenca)}`);
-      E("tabelaProdutoresAbate").innerHTML=result.dados.length?result.dados.map(r=>`<tr class="abate-row ${state(r.difQtdeRxP)}">${[r.unidade,r.produtor,r.tecnico,r.data,r.galpao,r.lote,r.tipo_granja,r.modelo].map(v=>`<td>${H(v)}</td>`).join("")}<td class="num">${N(r.programada)}</td><td class="num">${N(r.real)}</td><td class="num">${percent(r.difPercent)}</td><td class="num">${pill(r.difQtdeRxP)}</td></tr>`).join(""):'<tr><td colspan="12">Nenhum registro.</td></tr>';
+      E("tabelaProdutoresAbate").innerHTML=result.dados.length?result.dados.map(detailRow).join(''):'<tr><td colspan="12" class="abate-empty">Nenhum registro.</td></tr>';
       E("rxpPage").textContent=`Página ${page} de ${Math.max(1,result.total_paginas)} · ${N(result.total)} registros`;
       E("rxpPrevious").disabled=page<=1;E("rxpNext").disabled=page>=result.total_paginas;
     }catch(error){if(error.name!=="AbortError"&&id===detailId){E("tabelaProdutoresAbate").innerHTML=`<tr><td colspan="12">${H(error.message)}</td></tr>`;E("rxpPage").textContent="Consulta não concluída";}}

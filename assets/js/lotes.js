@@ -13,7 +13,7 @@
     E("cardsLotes").innerHTML = spec.map(([key,label,decimals=0],i)=>`<article class="card lotes-reference-kpi"><span class="lotes-kpi-topline"></span><div class="lotes-reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[i]}</svg></div><div><div class="lotes-reference-label">${H(label)}</div><div class="lotes-reference-value">${N(values?.[key],decimals)}${key==="mortalidade"&&values?.[key]!=null?"%":""}</div></div><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="${formulas[i]}" title="Ver fórmula"><span class="formula-fx">ƒx</span></button></article>`).join("");
   }
   let data, sort = "aves", descending = true;
-  const cells = c => [N(c.aves),N(c.mortes),N(c.mortalidade,2),N(c.peso,2)].map(v=>`<td class="num">${v}</td>`).join("");
+  const cells = (c,tag='td') => [N(c.aves),N(c.mortes),c.mortalidade==null?'—':N(c.mortalidade,2)+'%',N(c.peso,2)].map(v=>`<${tag} class="num">${v}</${tag}>`).join("");
   function table() {
     if (!data) return;
     document.querySelectorAll('[data-sort]').forEach(button=>{
@@ -28,8 +28,8 @@
       if (x == null) return y == null ? 0 : 1; if (y == null) return -1;
       return (typeof x === "number" ? x-y : String(x).localeCompare(String(y),"pt-BR",{numeric:true})) * (descending?-1:1);
     });
-    E("tabelaLotesBody").innerHTML = list.length ? list.map(g=>`<tr><td>${H(g.tipo_granja)}</td><td>${H(g.produtor)}</td><td>${H(g.linhagem)}</td>${cells(g.cards)}</tr>`).join("") : '<tr><td colspan="7">Nenhum lote para os filtros selecionados.</td></tr>';
-    E("tabelaLotesFoot").innerHTML = `<tr><td colspan="3">Total</td>${cells(data.cards)}</tr>`;
+    E("tabelaLotesBody").innerHTML = list.length ? list.map(g=>`<tr class="lotes-producer-row"><td>${H(g.tipo_granja)}</td><td><strong>${H(g.produtor)}</strong></td><td>${H(g.linhagem)}</td>${cells(g.cards)}</tr>`).join("") : '<tr><td colspan="7">Nenhum lote para os filtros selecionados.</td></tr>';
+    E("tabelaLotesFoot").innerHTML = `<tr><th colspan="3">Total</th>${cells(data.cards,'th')}</tr>`;
   }
   function barns() {
     if (!data) return;
@@ -66,8 +66,8 @@
       const weeks=data.weekly, labels=weeks.map(w=>`${w.idade} dias`);
       FORMULAS_LOTES.splice(0,FORMULAS_LOTES.length,...buildLotesFormulas(weeks.map(w=>w.idade),data.pinto==null));
       A.chart("chartMortalidade",labels,[{name:"M+D (Qtde)",type:"bar",data:weeks.map(w=>w.mortes)},{name:"M+D (%)",yAxisIndex:1,data:weeks.map(w=>w.mortalidade)}]);
-      A.chart("chartPesoSemanal",labels,[{name:"Peso médio",data:weeks.map(w=>w.peso)}]);
-      A.chart("chartCrescimento",data.pinto==null?labels:["0 dias",...labels],[{name:"Peso médio",data:data.pinto==null?weeks.map(w=>w.peso):[data.pinto,...weeks.map(w=>w.peso)]}]);
+      A.chart("chartPesoSemanal",labels,[{name:"Média da Coluna",type:'bar',data:weeks.map(w=>w.peso)}]);
+      A.chart("chartCrescimento",data.pinto==null?labels:["0 dias",...labels],[{name:"Peso",data:data.pinto==null?weeks.map(w=>w.peso):[data.pinto,...weeks.map(w=>w.peso)]}]);
     }});
   BIUnavailable.formulas({prefix:"Lotes",catalog:FORMULAS_LOTES,attribute:"data-lotes-formula"});
 })();

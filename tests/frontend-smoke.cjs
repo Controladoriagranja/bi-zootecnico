@@ -50,6 +50,18 @@ async function main(){
         ? document.querySelector('#historyKpis strong')?.textContent==='1'
         : document.body.innerText.includes('Produtor teste')||document.body.innerText.includes('60,00')||document.body.innerText.includes('AVE NOVA'),name);
       if(name==='lotes'){
+        const appearance=await page.evaluate(()=>{
+          const option=id=>echarts.getInstanceByDom(document.getElementById(id)).getOption();
+          return {growth:option('chartCrescimento').series[0],weight:option('chartPesoSemanal').series[0],mortality:option('chartMortalidade').series[0]};
+        });
+        assert.equal(appearance.growth.areaStyle.color.type,'linear');
+        assert.equal(appearance.growth.areaStyle.color.colorStops.length,2);
+        assert.equal(appearance.growth.label.show,true);
+        assert.equal(appearance.weight.type,'bar');assert.equal(appearance.weight.label.show,true);
+        assert.equal(appearance.mortality.label.fontWeight,700);
+        assert.equal(await page.locator('#tabelaLotesFoot th').count(),5);
+        await fs.mkdir(path.join(projectRoot,'tests/frontend-previews'),{recursive:true});
+        await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/lotes-visual.png'),fullPage:true});
         await page.locator('#tabGalpoes').click();
         const style=await page.evaluate(()=>({color:echarts.getInstanceByDom(document.querySelector('#chartGalpoesRanking')).getOption().series[0].itemStyle.color,primary:getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),bar:echarts.getInstanceByDom(document.querySelector('#chartGalpoesRanking')).getOption().series[0].barMaxWidth}));
         assert.equal(style.color,style.primary);assert.equal(style.bar,24);
@@ -58,13 +70,23 @@ async function main(){
         assert((await page.locator('#galpaoDrawerResumo').innerText()).includes('COBB'));
       }
       if(name==='historico'){
+        assert.equal(await page.locator('#historyTableHead .history-col-combined').count(),5);
+        assert.equal(await page.locator('#historyKpis [data-historico-formula]').count(),4);
+        assert.equal(await page.locator('#historyTableBody .history-level-0').count(),1);
         assert.deepEqual(await page.locator('[data-history-year]').allTextContents(),['2026','2025','2023']);
         assert.equal(await page.locator('[data-history-year].active').innerText(),'2026');
         await page.locator('[data-history-node]').first().click();assert((await page.locator('#historyTableBody').innerText()).includes('Produtor teste'));
       }
       if(name==='diferenca-aves-abatidas'){
+        assert.equal(await page.locator('#tabelaUnidadesAbateTotal th').count(),7);
         assert.equal(await page.locator('#tabelaUnidadesAbate .abate-diff-pill.is-negative').innerText(),'-10');
         await page.locator('[data-rxp-unit]').first().click();await page.locator('#tabelaProdutoresAbate').getByText('Produtor teste').waitFor();
+        assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label]').count(),12);
+        assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label="Produtor"] strong').innerText(),'Produtor teste');
+        assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label="Data"]').innerText(),'02/10/2026');
+        await page.setViewportSize({width:390,height:844});
+        await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/rxp-mobile.png'),fullPage:true});
+        await page.setViewportSize({width:1365,height:900});
       }
       assert.deepEqual(errors,[],name+': '+errors.join('; '));
       assert(requests.some(p=>p.endsWith(name==='detalhes'?'/detalhes':'/resumo')),name);

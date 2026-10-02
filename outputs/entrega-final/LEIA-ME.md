@@ -2,6 +2,8 @@
 
 Pacotes preparados localmente em 02/10/2026. Nenhuma publicação no servidor foi executada. Os nomes e conteúdos internos de cada ZIP foram conferidos contra os arquivos de origem; hashes estão em `manifesto.json` e `SHA256SUMS.txt`.
 
+O frontend incorpora os [ajustes visuais da referência ZIP](AJUSTES_VISUAIS.md): degradê, rótulos, barras de peso, hierarquia e tabelas formatadas, com cache `ajustes-20261002-4`. Esta atualização visual não requer alteração do backend.
+
 | Arquivo | Destino e conteúdo |
 | --- | --- |
 | [frontend_bi_zootecnico.zip](frontend_bi_zootecnico.zip) | Hospedagem do BI: seis HTMLs na raiz e a pasta `assets/`. Não inclui backend, testes, SQL, planilhas ou snapshots. |
@@ -43,7 +45,7 @@ Instruções e limites da conferência estão no `COMO_USAR.md` dentro do ZIP e 
 - Histórico: fonte de fechados preservada, ano pela data de abate, somente de 2023 até o ano atual; expansão semana → produtor → galpão.
 - RxP: AVE NOVA/REAL ALIMENTOS e diferença oficial, com destaques visuais e detalhes paginados.
 - Todas as telas de dados: “Aplicando filtros…” no canto inferior direito durante consultas, desaparecendo ao concluir, cancelar ou falhar.
-- Tabelas: ordenação por clique nos cabeçalhos, com setas no visual existente, mantendo totais e hierarquia. Nos detalhes paginados do RxP, ordena a página carregada. Cache atualizado para `ajustes-20261002-3`.
+- Tabelas: ordenação por clique nos cabeçalhos, com setas no visual existente, mantendo totais e hierarquia. Nos detalhes paginados do RxP, ordena a página carregada. Cache atualizado para `ajustes-20261002-4`.
 
 A importação manual do relatório bruto está separada dos pacotes de publicação: veja [COMO_IMPORTAR.md](../importacao-acerto/COMO_IMPORTAR.md). Esse SQL foi gerado, mas não executado no banco.
 
