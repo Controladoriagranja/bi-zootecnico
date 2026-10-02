@@ -32,10 +32,11 @@ async function run() {
   await check('Erro de rede sanitizado',async()=>{const c=client({fetchImpl:async()=>{throw Error('internal-secret');}});await assert.rejects(c.get('/api/bi/zootecnico/filtros'),e=>!e.message.includes('internal-secret'));});
   await check('AbortError preservado',async()=>{const abort=Object.assign(Error('cancelled'),{name:'AbortError'});const c=client({fetchImpl:async()=>{throw abort;}});await assert.rejects(c.get('/api/bi/zootecnico/filtros'),e=>e===abort);});
   await check('JSON inválido tratado',async()=>{const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>{throw Error('bad-json');}})});await assert.rejects(c.get('/api/bi/zootecnico/resumo'),e=>e.code==='INVALID_JSON');});
-  await check('Vazio não exibe cálculo incompatível; demais valores preservados',async()=>{
-    const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>({indicadores:{vazio:{por_ano:{2026:[6,20]},totais:{2026:9}},iep:{totais:{2026:360}}}})})});
-    const data=await c.get('/api/bi/zootecnico/resumo');assert.equal(data.indicadores.vazio.totais[2026],null);assert.equal(data.indicadores.vazio.por_ano[2026][0],null);assert.equal(data.indicadores.iep.totais[2026],360);
-    await assert.rejects(c.get('/api/bi/zootecnico/detalhes',{indicador:'vazio'}),e=>e.code==='RULE_PENDING');assert.equal(c.calls.length,1);
+  await check('Recusa backend antigo e permite Vazio somente na nova fonte',async()=>{
+    const old=client();await assert.rejects(old.get('/api/bi/zootecnico/resumo'),e=>e.code==='SOURCE_PENDING');
+    const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>({rules_version:'acerto-2026-10-02',arquivo:'zootecnico.vw_desempenho_acerto',indicadores:{vazio:{por_ano:{2026:[14,18]},totais:{2026:16}},iep:{totais:{2026:360}}}})})});
+    const data=await c.get('/api/bi/zootecnico/resumo');assert.equal(data.indicadores.vazio.totais[2026],16);assert.equal(data.indicadores.vazio.por_ano[2026][0],14);assert.equal(data.indicadores.iep.totais[2026],360);
+    await c.get('/api/bi/zootecnico/detalhes',{indicador:'vazio'});assert.equal(c.calls.length,2);
   });
   await check('Recusa caminho fora da API',async()=>{const c=client();await assert.rejects(c.get('/outside'),e=>e.code==='CONFIG_ERROR');assert.equal(c.calls.length,0);});
   await check('Normalização api-db de meses e linhagem',async()=>{

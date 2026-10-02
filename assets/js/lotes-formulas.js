@@ -1,6 +1,5 @@
 /**
- * MAPA DE FÓRMULAS: ./FORMULAS.md
- * Textos das oito fórmulas de Lotes; os cálculos executáveis ficam em lotes.js.
+ * Textos das fórmulas de Lotes; os cálculos executáveis ficam na API.
  */
 (() => {
   const WEEKS = [7, 14, 21, 28, 35, 42];

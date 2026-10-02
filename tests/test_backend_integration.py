@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT / "tests" / ".backend-test-deps"))
-BACKEND = ROOT.parent / "_backend-zootecnico-referencia"
+BACKEND = ROOT.parent / "_backend-zootecnico-referencia" / "bi_generic"
 spec=importlib.util.spec_from_file_location("bi_generic",BACKEND / "__init__.py",submodule_search_locations=[str(BACKEND)])
 module=importlib.util.module_from_spec(spec);sys.modules["bi_generic"]=module;spec.loader.exec_module(module)
 from bi_generic import analytics as a, sql_utils as s, router as r
@@ -44,7 +44,9 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(len(BI_REGISTRY['rxp']['sources']),2)
         for metric in BI_REGISTRY['zootecnico']['metrics'].values():
             if metric['aggregation']=='weighted_avg': self.assertEqual(metric['null_policy'],'valid_pairs')
-        self.assertEqual(BI_REGISTRY['zootecnico']['date_column'],'data_de_abate')
+        self.assertEqual(BI_REGISTRY['zootecnico']['date_column'],'data_abate')
+        self.assertEqual(BI_REGISTRY['zootecnico']['table'],'vw_desempenho_acerto')
+        self.assertTrue(all(m['aggregation'] in {'avg','sum'} for m in BI_REGISTRY['zootecnico']['metrics'].values()))
     def test_numeric_safe(self):
         for v in ('1.234,56','nan','1e2','',None): self.assertIsNone(a.number(v))
         self.assertEqual(a.number(' -12,5 '),Decimal('-12.5'))
@@ -58,7 +60,8 @@ class BackendTests(unittest.TestCase):
             self.assertEqual(cm.exception.status_code,422)
     def test_vazio_sql_valid_pairs(self):
         q=s.metrica_expr(BI_REGISTRY['zootecnico']['metrics']['vazio']).as_string()
-        for part in ('< 7','> 18','THEN 14','IS NOT NULL'): self.assertIn(part,q)
+        for part in ('> 14','THEN 14','AVG('): self.assertIn(part,q)
+        self.assertNotIn('< 7',q)
     def test_calendar_sql_guarded(self):
         q=s.date_texto('data_de_abate').as_string()
         self.assertIn('make_date',q);self.assertIn('BETWEEN 1 AND 12',q);self.assertIn('EXTRACT(day',q)

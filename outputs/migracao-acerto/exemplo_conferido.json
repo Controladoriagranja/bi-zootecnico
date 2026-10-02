@@ -1,0 +1,22 @@
+{
+  "fonte": "acerto lote(Recuperado Automaticamente).xlsx",
+  "aba": "Relatório",
+  "linha": 2,
+  "campos": {
+    "mort": 2462,
+    "aloj": 18500,
+    "qt_aves": 16038,
+    "ida": 41.9,
+    "ps_med": 2.878,
+    "pes_total": 46150,
+    "consumo_racao": 75864
+  },
+  "resultados": {
+    "mortalidade": 13.308108108108108,
+    "peso_medio": 2.8775408405038037,
+    "idade": 41.9,
+    "gmd": 68.68735083532219,
+    "ca": 1.6438569880823402
+  },
+  "ambiente": "DuckDB local; pendente validar PostgreSQL"
+}

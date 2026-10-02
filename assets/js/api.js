@@ -63,10 +63,6 @@ async function apiGet(endpoint, params = {}, options = {}) {
     url.searchParams.append(key, String(value));
   });
 
-  if (endpoint === APP_CONFIG.endpoints.detalhes && params.indicador === "vazio") {
-    throw new ApiError("O indicador Vazio aguarda atualização da regra de cálculo no serviço de dados.", 503, "RULE_PENDING");
-  }
-
   let response;
 
   try {
@@ -104,14 +100,12 @@ async function apiGet(endpoint, params = {}, options = {}) {
     };
     throw new ApiError(messages[response.status] || "Não foi possível concluir a consulta.", response.status);
   }
-  try {
-    const data = await response.json();
-    if (endpoint === APP_CONFIG.endpoints.desempenho && data.indicadores?.vazio) {
-      const metric = data.indicadores.vazio;
-      metric.por_ano = Object.fromEntries(Object.entries(metric.por_ano || {}).map(([year, values]) => [year, values.map(() => null)]));
-      metric.totais = Object.fromEntries(Object.keys(metric.totais || {}).map(year => [year, null]));
-    }
-    return data;
-  }
+  let data;
+  try { data = await response.json(); }
   catch (_) { throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON"); }
+  if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
+      && (data.rules_version !== "acerto-2026-10-02" || data.arquivo !== "zootecnico.vw_desempenho_acerto")) {
+    throw new ApiError("O serviço ainda não está usando a fonte de acerto e as regras atualizadas. Publique a view e o backend antes de consultar estas telas.", 503, "SOURCE_PENDING");
+  }
+  return data;
 }

@@ -66,8 +66,8 @@ window.FORMULAS_HISTORICO = [
       "Peso Med.-35"
     ],
     "passos": [
-      "Aplicar ano, dimensões e a deduplicação aprovada de lotes abertos.",
-      "Usar o primeiro peso semanal válido na ordem 35, 28, 21, 14 e 7 dias; converter de gramas para kg.",
+      "Aplicar ano, dimensões e a deduplicação aprovada de lotes fechados.",
+      "Usar ps_abate quando válido; caso ausente, usar o primeiro peso semanal válido na ordem 35, 28, 21, 14 e 7 dias e converter de gramas para kg.",
       "Calcular a média simples dos valores válidos. Zero é válido; ausência permanece null."
     ]
   },

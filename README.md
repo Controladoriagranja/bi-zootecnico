@@ -1,18 +1,17 @@
 # BI Zootécnico
 
-Integração do visual de bi-zootecnico-desenvolvimento-local com o cliente HTTP de bi-zootecnico-api-db. Implementação realizada somente neste diretório em 01/10/2026. Referências e infraestrutura não foram alteradas.
+Frontend integrado à API. Em 02/10/2026, a migração para Acerto foi implementada neste projeto e na cópia autorizada `_backend-zootecnico-referencia/bi_generic/`, usando a versão do backend fornecida pelo Anderson. Consulte [MIGRACAO_ACERTO.md](MIGRACAO_ACERTO.md) para o mapeamento, arquivos, SQL e publicação.
 
 ## Situação da entrega
 
 - Seis páginas, sidebar, temas, CSS, imagens, ECharts 5.6.0 e Geist Variable 5.3.0 locais.
-- Desempenho: filtros e resumo em /api/bi/zootecnico. Detalhamento: KPI, rankings e evolução no endpoint genérico existente.
+- Desempenho e Detalhamento: `/api/bi/zootecnico`, configurado para `zootecnico.vw_desempenho_acerto`. Acerto é a fonte principal; galpões e campos ausentes da base dinâmica são complementos por vínculo único. Modelo e Tipo priorizam galpões, com alternativa na base quando faltar valor.
 - Valores vêm da API; não existem snapshots, Parquets, mocks ou SQL no fluxo publicado.
-- Vazio permanece sem valor: o backend fornecido ainda não substitui valores fora de 7–18 por 14. Seu detalhamento apresenta uma mensagem, sem requisição incompatível.
-- As demais médias e filtros de calendário/galpão estão em validação: a referência ainda diverge da regra local aprovada.
-- Lotes, Histórico e RxP preservam o HTML/CSS e catálogos de fórmulas, mas apresentam indisponibilidade explícita. Os motores analíticos locais não foram transportados para produção. Filtros de dados, rankings, expansão e detalhes dessas telas aguardam contratos de backend.
-- RxP deverá considerar as duas fontes, separadas por unidade, com total consolidado e detalhe de produtores. Não há endpoint analítico correspondente na referência.
+- Fórmulas individuais conforme a planilha, consolidadas por média simples. Nenhuma média ponderada nas telas migradas. Vazio troca somente valores maiores que 14 por 14.
+- Lotes, Histórico e RxP ligados à API, preservando respectivamente abertos, fechados e as duas fontes oficiais de RxP. Filtros, resumo e detalhes usam os contratos do backend.
+- Avisos estáticos retirados conforme solicitado; erro Agrosys e falhas da API/sessão permanecem.
 
-Esta entrega não encerra a migração nem está validada para publicação. Consulte [ALTERACOES_NECESSARIAS_BACKEND.md](ALTERACOES_NECESSARIAS_BACKEND.md) e [INTEGRACAO.md](INTEGRACAO.md).
+A implementação local foi testada, e a view já foi aplicada e conferida no PostgreSQL pelo usuário. Foi autorizada a exclusão de acertos sem Tipo de Granja (atualmente 24516/522); falta reaplicar o SQL atualizado, publicar o pacote de backend/frontend e conferir fórmulas/API reais. Os documentos de 01/10 registram etapas anteriores; as instruções atuais estão em [MIGRACAO_ACERTO.md](MIGRACAO_ACERTO.md).
 
 ## Autenticação e dados
 
@@ -36,4 +35,4 @@ Com Node já instalado, execute: node tests/integration-checks.cjs
 
 Node é usado apenas nos testes; não há build ou dependência Node no frontend. O teste não consulta produção, não precisa de token real e não grava nas referências.
 
-Resultado: 23 verificações de HTTP/contratos, sintaxe e assets passaram. Evidência: tests/INTEGRATION_REPORT.json. Browser/mobile, sessão CENTRAL e comparação PostgreSQL → API → interface continuam pendentes; nenhum navegador estava conectado à ferramenta de computer-use.
+Resultado atual: 23 verificações de frontend, 21 testes de backend e 6 testes de fórmulas passaram. Cinco telas abriram em Chrome isolado com respostas sintéticas; foram conferidos interação, falha da API e retorno vazio. Sessão CENTRAL e comparação PostgreSQL → API → interface continuam pendentes. Screenshots e testes não fazem parte do frontend publicado.

@@ -15,10 +15,12 @@ class FilterController {
         includeDependentRefresh = true,
         contextProvider = null,
         filtersEndpoint = null,
-        optionsProvider = null
+        optionsProvider = null,
+        optionsObserver = null
     }) {
         this.fields = fields;
         this.optionsProvider = optionsProvider;
+        this.optionsObserver = optionsObserver;
         this.onChange = onChange;
         this.includeDependentRefresh = includeDependentRefresh;
         this.contextProvider = contextProvider;
@@ -518,6 +520,7 @@ normalizeOptions(field, raw) {
         if (requestId !== this.refreshId) {
             return false;
         }
+        this.optionsObserver?.(response);
 
         // Read live selections after await; never restore a stale snapshot.
         const latest = this.values();
