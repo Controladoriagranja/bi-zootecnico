@@ -34,8 +34,10 @@
     clear:()=>{data=null;A.cards("historyKpis",null,spec,"history-kpi");E("historyTableBody").innerHTML='<tr><td colspan="18">Consultando…</td></tr>';E("historyTableFoot").innerHTML="";},
     onOptions:options=>{
       const host=document.querySelector(".history-year-filter");
-      host.innerHTML=(options.ano||[]).map(y=>`<button type="button" class="history-year-button ${String(y)===year?"active":""}" data-history-year="${H(y)}" role="radio" aria-checked="${String(y)===year}">${H(y)}</button>`).join("");
-      host.querySelectorAll("[data-history-year]").forEach(b=>b.addEventListener("click",()=>{year=year===b.dataset.historyYear?"":b.dataset.historyYear;screen.refresh();}));
+      const years=[...new Set((options.ano||[]).map(String).filter(y=>/^\d{4}$/.test(y)&&Number(y)>=2023&&Number(y)<=new Date().getFullYear()))].sort((a,b)=>Number(b)-Number(a));
+      if(!years.includes(year))year=years[0]||"";
+      host.innerHTML=years.map(y=>`<button type="button" class="history-year-button ${y===year?"active":""}" data-history-year="${H(y)}" role="radio" aria-checked="${y===year}">${H(y)}</button>`).join("");
+      host.querySelectorAll("[data-history-year]").forEach(b=>b.addEventListener("click",()=>{year=b.dataset.historyYear;screen.refresh();}));
     },render:result=>{data=result;expanded.clear();A.cards("historyKpis",result.cards,spec,"history-kpi");renderTable();}});
   document.querySelectorAll("[data-history-view]").forEach(b=>b.addEventListener("click",()=>{view=b.dataset.historyView;document.querySelectorAll("[data-history-view]").forEach(x=>{x.classList.toggle("active",x===b);x.setAttribute("aria-checked",String(x===b));});renderTable();}));
   document.querySelector(".history-year-filter").innerHTML="";

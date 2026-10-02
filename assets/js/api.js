@@ -20,7 +20,35 @@ function getPortalToken() {
   }
 }
 
+const ApiActivity = (() => {
+  let pending = 0, notice;
+  function update() {
+    if (typeof document === "undefined" || !document.body) return;
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = "apiFilterProgress";
+      notice.className = "api-filter-progress hidden";
+      notice.setAttribute("role", "status");
+      notice.setAttribute("aria-live", "polite");
+      notice.textContent = "Aplicando filtros…";
+      document.body.appendChild(notice);
+    }
+    notice.classList.toggle("hidden", pending === 0);
+  }
+  return { begin() {
+    pending++; update();
+    let finished = false;
+    return () => { if (!finished) { finished = true; pending--; update(); } };
+  }};
+})();
+
 async function apiGet(endpoint, params = {}, options = {}) {
+  const finish = ApiActivity.begin();
+  try { return await requestApi(endpoint, params, options); }
+  finally { finish(); }
+}
+
+async function requestApi(endpoint, params = {}, options = {}) {
   if (!endpoint) {
     throw new Error("Endpoint da API não informado.");
   }
@@ -102,7 +130,10 @@ async function apiGet(endpoint, params = {}, options = {}) {
   }
   let data;
   try { data = await response.json(); }
-  catch (_) { throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON"); }
+  catch (error) {
+    if (error?.name === "AbortError") throw error;
+    throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON");
+  }
   if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
       && (data.rules_version !== "acerto-2026-10-02" || data.arquivo !== "zootecnico.vw_desempenho_acerto")) {
     throw new ApiError("O serviço ainda não está usando a fonte de acerto e as regras atualizadas. Publique a view e o backend antes de consultar estas telas.", 503, "SOURCE_PENDING");

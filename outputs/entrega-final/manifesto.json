@@ -1,0 +1,87 @@
+{
+  "gerado_em_utc": "2026-10-02T17:40:30.264040+00:00",
+  "cache_frontend": "ajustes-20261002-2",
+  "regras_acerto": "acerto-2026-10-02",
+  "regras_historico": "historico-fechados-2026-10-02",
+  "pacotes": [
+    {
+      "arquivo": "frontend_bi_zootecnico.zip",
+      "sha256": "0a4d7966fa32871d3fdaecca0efe521cde0eb6107fac1dde68ff63490b11d912",
+      "arquivos": {
+        "assets/css/app.css": "1766d3ccd528206458e1f31f78be5fcbbead92b16133ec6be8680f743fa5d5ff",
+        "assets/img/favicon-granja.png": "71f56be758978af29197c6bf13a2103c441c90e2d64a8689a79de48ba7d46a8e",
+        "assets/img/logo-granja-brasilia-branca.png": "c3102d684ec61286b300b3aeceed11ec82eafb3dd2c5caca09d63be4d347945b",
+        "assets/js/api-screen.js": "b34fed53bc4eae147f1660361fcf03da365cffb5059ef0c62b248bb798b80e9e",
+        "assets/js/api.js": "5eb2bb35f5c79193c261b33748372dbe7698adb7ce4bc6b42fa67a67e5770615",
+        "assets/js/charts.js": "8559d3f3925b2e08b99dff55ae2de7ea9d214f6e4f00b044bb0abc071033891f",
+        "assets/js/config.js": "20f7aed27236761aa3503b6ae9f6e0a87c3eb86b607a623fd69fc2aa1674988a",
+        "assets/js/dashboard.js": "872029c09fb88d10487079bc61f4a528b70e227a25bb622f298b403d2d01ee96",
+        "assets/js/detalhes.js": "4bd3efc6f5fb3c36bb8853eac7166bc642ee33155db933252d446967d78ab58c",
+        "assets/js/filters.js": "ce1ee4516135e3317fe9f2eb106b7ecbcb53dc8dcd790be38e966ba5f82874e0",
+        "assets/js/formula-ui.js": "ca5fe1657e52645f34f3c8a263e4d61143d5ba493f1ae0332fbf270f06c2d4b0",
+        "assets/js/formulas.js": "6048f95b83beb6c7ce5c160a1b71ad1ac89b3a3a253546042c2bc68e99554c7b",
+        "assets/js/historico-formulas.js": "1fbb3c58c150174d1093eedebe8b8c353f4a205eb314da9641a54495db84d949",
+        "assets/js/historico.js": "ebaf03714bdd2725d35dae2c7729ed449f45722c5739e6c5b1a0306e7203e861",
+        "assets/js/lotes-formulas.js": "59dd53e3717627f997029a29b6d8a07f38066d96916cf716582f56fb4d4ceda8",
+        "assets/js/lotes.js": "11716bc4a40ef49691ab6b5f921257c0296c5a1abd5fdd400834771c944852ea",
+        "assets/js/metrics.js": "82a457c3307bd33d1a1c7385b4dc4a38ae82e2fb4e99165d446efe173b91d11c",
+        "assets/js/rxp-formulas.js": "868bd171d331bcb8437d724d09efd00ee0810857e43e493180d6da617e706b4a",
+        "assets/js/rxp.js": "748da9f56f8b62d9f59d2375ea33ee6d768521fdcfeafc1fa3f5b1f8a657d77f",
+        "assets/js/sidebar.js": "214c5b506d6c4b6c7b49689b28320608dbded30ce82250d8c25d76085ae6f1e6",
+        "assets/js/theme.js": "7d03c8bb8154864c2bf91020face887c2f9d5dcf2ffe4ded07be015b1f677219",
+        "assets/js/unavailable.js": "d3591f6e931954ecc086ebbdee32f42c2b7c94848ec860aefb2193d0088c61e3",
+        "assets/vendor/echarts/LICENSE": "634293835b43a6dd2094fa39182a3d9a6b9ca43b7fdb9ac354e8037af2a3093a",
+        "assets/vendor/echarts/echarts.min.js": "bf4a223524e40b77c304bec67e1222cf551f14880cf42c69dc046558e11c07b1",
+        "assets/vendor/geist/LICENSE": "71609cbb5c78b5870d712eab73a31d76622635c6ed034ab5cee3b9ecbda8685f",
+        "assets/vendor/geist/files/geist-cyrillic-ext-wght-normal.woff2": "2317fa4bb293c9c0b110e18315d529235c47a0ddd3338cea3d8c7955e927899e",
+        "assets/vendor/geist/files/geist-cyrillic-wght-normal.woff2": "6894439694946a589d157ece003086960a6a4013d74a813dab7602efdb3d8c09",
+        "assets/vendor/geist/files/geist-latin-ext-wght-normal.woff2": "824f485b5d26e2f2da3c2b236132ece1bc8e4e43373452950bb0e40548b4313f",
+        "assets/vendor/geist/files/geist-latin-wght-normal.woff2": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+        "assets/vendor/geist/files/geist-vietnamese-wght-normal.woff2": "8fa40e5d248247735eb97a0bd593b8852440430600d6ba01364c31fe0abc1fe1",
+        "assets/vendor/geist/index.css": "97fe28a6688629d5a016347a47282efabffc85e5dd49bd953217d048e47c6872",
+        "assets/vendor/manifest.json": "b43a6f23a21f2ceccb9f66508dd6d7aa17a758457fa9ab32b9c210d02574412d",
+        "detalhes.html": "8bc9a16cd11a4b14610ddd70cefbb55858ad087788c417f9b2f00b6adc3c4914",
+        "diferenca-aves-abatidas.html": "87d5d74cc87bd8d95f93cbf492e2236d132f95886639fb56960c8220b66dd42a",
+        "formulas.html": "da470a97f6fb3e4e4365dbbb6fdf845fa2cbdc1475ec986e8e75f73aba0ea2e4",
+        "historico.html": "227c5693354b5a00adbd825450a0d83c30c27e33a668f515003c1e2fa816691d",
+        "index.html": "7bd46622919deb4b0438027e6109094965220be43e7ec0c171bc6c64f09cece7",
+        "lotes.html": "d51cbca8ed6104b2d5570a57ccade236a758c17513f82596952ca0c9c978f6e0"
+      }
+    },
+    {
+      "arquivo": "backend_anderson.zip",
+      "sha256": "b405e337fcb7a161b83b070b73813135d46d2cb3659907316ad1f7bf176efd0f",
+      "arquivos": {
+        "analytics.py": "b0001c31cc0c1207afd32f8c6dbcd8ea791cd222b20333cb9f69408f916ee5c9",
+        "registry.py": "011a8bae6215f0958a41a1ae6e0eaaa4db7cecf3946c0af06268a079c82bdbe6",
+        "sql_utils.py": "0410b2e6770bc2e89097e837384ae0ba413acb92649281878cc6eea0c2bd2b4a"
+      }
+    },
+    {
+      "arquivo": "robo_acerto_incremental.zip",
+      "sha256": "14e86799b9b2134f136fd39ea41d0c6fc85385b47b4cf17804e575c182aa5d72",
+      "arquivos": {
+        "COMO_USAR.md": "97040a74cf52e050a4985d5b6acc295690600ec8dcbdc8fcb31db1a06cd6f697",
+        "CONFERIR_CARGA.sql": "3e6f742b268fb7d021231f8c34ab28f90c9586a7391006d46c0caf88caa0d09b",
+        "acerto_lote_resultado_geral_incremental.py": "e22307defaa6745cdb07410b47df73a8de1699e02387bf92466ded53689fbd2e"
+      }
+    },
+    {
+      "arquivo": "github_pages_publicacao.zip",
+      "sha256": "bfea2319743d387ad54446206ce5117d999c16a74fc17c1528893cc3fd1395a3",
+      "arquivos": {
+        ".github/workflows/deploy-pages.yml": "79ea0b01dbaa545e8e5570a934f0ffd288259cd4523b5358fb28bc886f796cbc",
+        "tools/preparar_pages.py": "c2f3bd51a4bb8bc27f3bcca60006e21f3f509f3f1659390b19be8087b7c64902"
+      }
+    }
+  ],
+  "sql": {
+    "sql/01_criar_view_desempenho_acerto.sql": "4f7328ddf56157042c1cb683b04b41724a6737498e0c8e1e3ae6c40aca3eb661",
+    "sql/02_validar_vinculos.sql": "5fc766f5f87bc45867a74f8d3e84c5e156bc22dc3bfc509e48cb723d044acb40",
+    "sql/03_conferir_calculos.sql": "d891cd83ff5eec754426f4eb7d8d31432f961e71da801bc3b91413bc29bbb223",
+    "sql/04_revisar_cadastro.sql": "925b78ca0dfb4a0a26ce4eb8452a392ff18a189ffa3ffb1675ce0f3d36fcdad3",
+    "sql/05_conferir_complemento_base.sql": "7cbac91334e429009ca6c01f54f70d7bdea060719a80024c3293f4831f0ba672",
+    "sql/06_validar_complemento.sql": "3b39f880116f3622236ada98af7362fd5967cfa7f52a9ffe4ccf26324c69cf2c"
+  },
+  "publicado_no_servidor": false
+}

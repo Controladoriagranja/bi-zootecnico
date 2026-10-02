@@ -7,3 +7,4 @@ __pycache__/
 # Dependências isoladas para os testes da cópia de backend
 tests/.backend-test-deps/
 tests/frontend-previews/
+_site/

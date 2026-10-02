@@ -2,6 +2,8 @@
 
 Pacote preparado em 02/10/2026: [backend_anderson.zip](outputs/migracao-acerto/backend_anderson.zip). Contém somente `registry.py`, `sql_utils.py` e `analytics.py`, obtidos da cópia de trabalho `_backend-zootecnico-referencia/bi_generic/`. O serviço importa `bi_generic.router`, e o Dockerfile copia essa pasta para `/app/bi_generic`.
 
+Pacote atualizado nesta entrega: inclui também o **Histórico pelo ano da data de abate, de 2023 até o ano atual**, e os dados de idade/linhagem usados nos detalhes de galpão. A coluna `ano` de fechados não é usada para montar o calendário, pois contém valores inválidos. Lotes e RxP mantêm suas fontes e regras.
+
 ## 1. Aplicar a última regra no PostgreSQL
 
 No Adminer, banco `bi_granja`, Comando SQL, execute novamente todo o arquivo [01_criar_view_desempenho_acerto.sql](outputs/migracao-acerto/01_criar_view_desempenho_acerto.sql).
@@ -79,6 +81,19 @@ Teste também `/api/bi/zootecnico/detalhes?indicador=mortalidade&ano=2026&mes=9`
 Publique as seis páginas (`index.html`, `detalhes.html`, `lotes.html`, `historico.html`, `diferenca-aves-abatidas.html`, `formulas.html`) e `assets/` na hospedagem atual. Abra pela CENTRAL.
 
 Confirme filtros, Vazio, rankings e gráficos em Index/Desempenho e Detalhamento. Lotes, Histórico e RxP devem continuar respondendo em seus próprios endpoints e fontes. O Worker atual já encaminha `/api/bi/…`; a nova view é usada internamente pelo backend.
+
+Todos os CSS/JS das páginas recebem a versão de cache `ajustes-20261002-2`. Confira que os arquivos publicados são os da raiz `bi-zootecnico`, junto com `assets/`.
+
+Teste também:
+
+- Lotes: três gráficos em vinho/dourado, abas Produtores/Galpões, ranking e detalhes de galpão; alternar tema e redimensionar a janela.
+- Histórico: `/api/bi/historico-fechados/filtros` deve retornar somente anos válidos a partir de 2023. `/resumo?ano=2023` e `/detalhes?ano=2023&tamanho=5` devem conter exclusivamente abates de 2023 e versão `historico-fechados-2026-10-02`.
+- Qualquer tela de dados: aplicar/trocar filtros e conferir “Aplicando filtros…” no canto inferior direito, incluindo troca rápida e falha da consulta. O aviso deve desaparecer ao terminar.
+- RxP: destaque visual da diferença oficial e modal de produtores, preservando AVE NOVA/REAL ALIMENTOS e os exemplos já conferidos no banco.
+
+## 6. Instalar o robô incremental separadamente
+
+O robô não fica dentro do Docker da API. Instale-o no ambiente Agrosys_Extractor do computador que executa as extrações, conforme [outputs/robo-acerto/COMO_USAR.md](outputs/robo-acerto/COMO_USAR.md). Ele preenche Acerto desde janeiro de 2023, com retomada por mês. A publicação de backend/frontend pode ser feita antes do preenchimento completo, mas só exibirá os registros existentes no banco.
 
 ## Recuperação se o código do serviço falhar
 

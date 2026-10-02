@@ -92,13 +92,13 @@ Backend a transferir: **`_backend-zootecnico-referencia/bi_generic/`**, pacote u
 | --- | --- |
 | `bi_generic/registry.py` | Nova fonte zootécnico, filtros por abate, métricas declarativas e médias simples; demais registries preservados |
 | `bi_generic/sql_utils.py` | Fórmulas estruturadas, números tipados, cap de Vazio e comparação de datas tipadas; extensão necessária do helper genérico |
-| `bi_generic/analytics.py` | Campos aditivos de mortalidade/descarte no Histórico e Dif % por registro RxP para evitar cálculo no navegador |
+| `bi_generic/analytics.py` | Campos aditivos de mortalidade/descarte no Histórico, ano pelo abate desde 2023, idade/linhagens dos galpões e Dif % por registro RxP para evitar cálculo no navegador |
 | `outputs/migracao-acerto/01_criar_view_desempenho_acerto.sql` | View, complemento Modelo/Tipo e exclusão autorizada de acertos sem Tipo; SELECT para a conta de leitura |
 | `02_validar_vinculos.sql`, `03_conferir_calculos.sql` | Conferência de cardinalidade, vínculos, duplicidade, estrutura e fórmulas no PostgreSQL |
 | `04_revisar_cadastro.sql`, `05_conferir_complemento_base.sql`, `06_validar_complemento.sql` | Diagnóstico dos campos ausentes e conferência após complementar Modelo/Tipo pela base |
 | `assets/js/api.js` | Validação da nova fonte; Vazio liberado; autenticação/erros/cache preservados |
 | `assets/js/metrics.js` | Catálogo das fórmulas atuais e explicações de média simples |
-| `assets/js/filters.js` | Observação das opções para atualizar anos do Histórico |
+| `assets/js/filters.js` | Observação das opções para atualizar anos do Histórico; cancelamento de consultas substituídas sem erro não tratado |
 | `assets/js/api-screen.js` | Renderização compartilhada, filtros, cancelamento, erros, cards e gráficos da API |
 | `assets/js/lotes.js`, `historico.js`, `rxp.js` | Renderizadores ligados aos respectivos contratos; filtros, agrupamentos e detalhes |
 | `assets/js/historico-formulas.js`, `lotes-formulas.js` | Explicações alinhadas à API e às semanas selecionadas |
@@ -145,4 +145,16 @@ Arquivo `acerto lote(Recuperado Automaticamente).xlsx`, aba Relatório, linha 2:
 
 A execução local das expressões reproduziu esses valores. O arquivo `exemplo_conferido.json` guarda os componentes/resultados. A planilha tem 133 lotes de setembro, enquanto o CSV tem 137 nesse mês: alinhe o conjunto antes de comparar totais; não inclua linhas Total/Mínimo/Máximo da planilha como lotes.
 
-Validação executada: 21 testes de backend, 6 testes de fórmulas e 23 verificações do frontend passaram; cinco telas verificadas em Chrome isolado com dados sintéticos, incluindo falha e resposta vazia. Os testes SQL de expressão usam DuckDB e não substituem execução PostgreSQL. A criação da view, contagens, vínculos e complemento de Modelo/Tipo foram conferidos pelo usuário no PostgreSQL. Permanecem pendentes reaplicar a exclusão autorizada de acertos sem Tipo, publicação, comparação das fórmulas com a planilha e conferência autenticada da API real.
+Validação executada: 23 testes de backend, 6 testes de fórmulas, 16 testes do robô e 23 verificações do frontend passaram; cinco telas verificadas em Chrome isolado com dados sintéticos, incluindo troca rápida, aviso de filtros, falha e resposta vazia. Os gráficos de Lotes foram conferidos também em celular e tema escuro. Os testes SQL de expressão usam DuckDB e não substituem execução PostgreSQL. A criação da view, contagens, vínculos e complemento de Modelo/Tipo foram conferidos pelo usuário no PostgreSQL. Permanecem pendentes reaplicar a exclusão autorizada de acertos sem Tipo, publicação, comparação das fórmulas com a planilha e conferência autenticada da API real.
+
+## Ajustes visuais e robô desta entrega
+
+O helper `assets/js/api-screen.js` havia simplificado as opções do ECharts ao conectar os dados da API. Foram restaurados o tema vinho/dourado, formatação brasileira dos eixos/tooltips, barras de ranking, linhas de peso, redimensionamento e troca de tema. `assets/js/lotes.js` preserva os cards, ranking e detalhes do galpão; `assets/js/rxp.js` recupera os destaques da diferença oficial, sem refazer a diferença no frontend. A estrutura de HTML/CSS continua baseada na referência `novos`.
+
+`assets/js/api.js` e `assets/css/app.css` exibem “Aplicando filtros…” no canto inferior direito enquanto houver consulta pendente. O contador acompanha todas as telas de dados e termina também em cancelamento/falha. `dashboard.js`, `detalhes.js` e `filters.js` tratam consultas substituídas durante troca rápida de filtros.
+
+`registry.py` configura o calendário do Histórico em `data_abate`, desde 2023 até o ano atual, conforme confirmação do usuário. `analytics.py` aplica esse recorte antes das opções e agregações; o frontend abre no ano válido mais recente. A fonte continua sendo `mortalidade_peso_fechados`.
+
+O robô foi preparado separadamente em [outputs/robo-acerto/COMO_USAR.md](outputs/robo-acerto/COMO_USAR.md). Cobre desde janeiro de 2023, com checkpoint por mês, exportações de até sete dias, retries e conferência de chaves/hashes antes do COMMIT. Leu a planilha fornecida com 133 lotes. Não houve extração no Agrosys real nesta preparação.
+
+Para transferir o pacote atualizado, siga [ATUALIZAR_BACKEND_ANDERSON.md](ATUALIZAR_BACKEND_ANDERSON.md).

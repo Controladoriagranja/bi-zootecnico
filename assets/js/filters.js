@@ -509,13 +509,15 @@ normalizeOptions(field, raw) {
 
         this.refreshController = new AbortController();
 
-        const response = this.optionsProvider ? await this.optionsProvider(current) : await apiGet(
-            this.filtersEndpoint,
-            current,
-            {
-                signal: this.refreshController.signal
-            }
-        );
+        let response;
+        try {
+            response = this.optionsProvider ? await this.optionsProvider(current) : await apiGet(
+                this.filtersEndpoint, current, {signal: this.refreshController.signal}
+            );
+        } catch (error) {
+            if(error.name === "AbortError" || requestId !== this.refreshId)return false;
+            throw error;
+        }
 
         if (requestId !== this.refreshId) {
             return false;
@@ -581,6 +583,7 @@ normalizeOptions(field, raw) {
         if (JSON.stringify(latest) !== JSON.stringify(this.values())) {
             return this.loadOptions({ preserve: true });
         }
+        return true;
     }
 
     invalidateRefresh() {

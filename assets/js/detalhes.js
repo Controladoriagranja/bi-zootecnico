@@ -274,7 +274,7 @@ function render() {
             "subtituloDetalhes"
         )
         .textContent =
-        "Rankings e evolução recebidos do serviço de dados; regras em validação.";
+        "Rankings e evolução dos indicadores zootécnicos.";
 
     document
         .getElementById(
@@ -437,6 +437,25 @@ const evolucaoChart =
     );
 
 
+async function atualizarFiltrosDetalhes(preserve) {
+    ++detailRequestId;
+    requestController?.abort();
+    detalhesData=null;
+    document.getElementById("kpiValor").textContent="—";
+    rankingTecnicosChart.clear();rankingProdutoresChart.clear();evolucaoChart.clear();
+    document.getElementById("dashboardAtualizando").classList.remove("hidden");
+    document.getElementById("mensagemErro").classList.add("hidden");
+    try {
+        if(await filters.loadOptions({preserve}) === false)return;
+        atualizarUrl();
+        await carregarDetalhes(false);
+    }catch(error){
+        if(error.name === "AbortError")return;
+        const el=document.getElementById("mensagemErro");el.textContent=error.message;el.classList.remove("hidden");
+        document.getElementById("dashboardAtualizando").classList.add("hidden");
+    }
+}
+
 rankingTecnicosChart.on(
     "click",
     async paramsChart => {
@@ -445,12 +464,7 @@ rankingTecnicosChart.on(
             paramsChart.name
         );
 
-        await filters.loadOptions({
-            preserve: true
-        });
-
-        atualizarUrl();
-        carregarDetalhes(false);
+        await atualizarFiltrosDetalhes(true);
     }
 );
 
@@ -463,12 +477,7 @@ rankingProdutoresChart.on(
             paramsChart.name
         );
 
-        await filters.loadOptions({
-            preserve: true
-        });
-
-        atualizarUrl();
-        carregarDetalhes(false);
+        await atualizarFiltrosDetalhes(true);
     }
 );
 
@@ -490,12 +499,7 @@ document
         async () => {
             filters.clear();
 
-            await filters.loadOptions({
-                preserve: false
-            });
-
-            atualizarUrl();
-            carregarDetalhes(false);
+            await atualizarFiltrosDetalhes(false);
         }
     );
 
@@ -527,15 +531,15 @@ async function iniciar() {
     filters.register();
 
     // Carrega opções respeitando os filtros herdados da primeira página.
-    await filters.loadOptions({
+    if(await filters.loadOptions({
         preserve: false
-    });
+    }) === false)return;
 
     await aplicarParametrosUrl();
 
-    await filters.loadOptions({
+    if(await filters.loadOptions({
         preserve: true
-    });
+    }) === false)return;
 
     atualizarUrl();
     await carregarDetalhes(true);

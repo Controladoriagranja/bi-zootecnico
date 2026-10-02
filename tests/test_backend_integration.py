@@ -87,6 +87,31 @@ class BackendTests(unittest.TestCase):
     def test_history_excludes_week42(self):
         c=BI_REGISTRY['historico-fechados'];row={'aves':100,'mort35':1,'mort42':90}
         self.assertEqual(a.stats([row],c,c['weeks'])['mortes'],1)
+    def test_history_calendar_uses_abate_and_not_corrupt_ano(self):
+        c=BI_REGISTRY['historico-fechados']
+        rows=[{'id':1,'ano':'2097.47','recepcao':'2022-12-01','abate':'2023-01-09','aves':100},
+              {'id':2,'ano':'2026','recepcao':'2022-01-01','abate':'2022-02-01','aves':200},
+              {'id':3,'ano':'2026','abate':'invalid','aves':300},
+              {'id':4,'ano':'2026','abate':'2027-01-01','aves':400},
+              {'id':5,'ano':'2090','abate':'2026-09-14','aves':500}]
+        conn=Connection({'mortalidade_peso_fechados':rows})
+        prepared=a.prepare_rows(conn,c,date(2026,10,2))
+        self.assertEqual([r['ano'] for r in prepared],['2023','2026'])
+        filters=a.query_payload(c,request(),lambda:bank(conn),'filtros')
+        self.assertEqual(filters['ano'],['2026','2023'])
+        result=a.query_payload(c,request([('ano','2023')]),lambda:bank(conn),'resumo')
+        self.assertEqual(result['cards']['aves'],100)
+        details=a.query_payload(c,request(),lambda:bank(conn),'detalhes')
+        self.assertEqual(details['total'],2)
+        self.assertEqual(details['cards']['aves'],600)
+    def test_barn_drawer_metadata_from_api(self):
+        c=BI_REGISTRY['lotes-abertos']
+        rows=[{'produtor':'A','galpao':'G','linhagem':'COBB','idade':7,'aves':100},
+              {'produtor':'A','galpao':'G','linhagem':'ROSS','idade':14,'aves':200}]
+        group=a.groups(rows,['produtor','galpao'],c,[7])[0]
+        self.assertEqual(group['idade_atual'],14)
+        self.assertEqual(group['linhagens'],['COBB','ROSS'])
+        self.assertEqual(group['cards']['aves'],300)
     def test_latest_snapshot_before_filter(self):
         c=BI_REGISTRY['lotes-abertos'];arrival=date(2026,9,20)
         rows=[{'id':1,'codigo':'A','lote':'1','galpao':'G','recepcao':arrival,'versao':date(2026,9,21),'aves':100},{'id':2,'codigo':'A','lote':'1','galpao':'G','recepcao':arrival,'versao':date(2026,9,22),'aves':200}]

@@ -32,12 +32,12 @@
     E("galpaoRankingTitulo").textContent = better ? "Top 10 galpões com melhor resultado" : "Top 10 galpões com pior resultado";
     E("galpaoRankingList").innerHTML = list.map((g,i)=>`<button class="lotes-galpao-rank-row" type="button" data-barn="${i}"><span class="lotes-galpao-rank-pos">${i+1}</span><span class="lotes-galpao-rank-name"><strong>${H(g.galpao)}</strong><small>${H(g.produtor)}</small></span><span class="lotes-galpao-rank-metric"><strong>${N(g.cards.aves)}</strong><small>Aves</small></span><span class="lotes-galpao-rank-metric"><strong>${N(g.cards.peso,2)}</strong><small>Peso</small></span><span class="lotes-galpao-rank-highlight"><strong>${N(g.cards.mortalidade,2)}${g.cards.mortalidade==null?"":"%"}</strong><small>Mortalidade</small></span><span class="lotes-galpao-detail-cta"><span>Ver detalhes</span><small>Galpão e evolução</small><b>›</b></span></button>`).join("") || '<div class="lotes-galpao-empty">Nenhum galpão para os filtros selecionados.</div>';
     E("galpaoRankingList").querySelectorAll("[data-barn]").forEach(b=>b.addEventListener("click",()=>drawer(list[Number(b.dataset.barn)])));
-    A.chart("chartGalpoesRanking",list.slice(0,10).map(g=>`${g.produtor} · ${g.galpao}`),[{name:"Mortalidade (%)",type:"bar",data:list.slice(0,10).map(g=>g.cards.mortalidade)}],true);
+    A.chart("chartGalpoesRanking",list.slice(0,10).map(g=>`${g.produtor} · ${g.galpao}`),[{name:"Mortalidade (%)",type:"bar",data:list.slice(0,10).map(g=>g.cards.mortalidade)}],true,p=>{if(list[p.dataIndex])drawer(list[p.dataIndex]);});
   }
   function drawer(g) {
     E("galpaoDrawerTitulo").textContent = `Galpão ${g.galpao}`; E("galpaoDrawerProdutor").textContent = g.produtor;
-    E("galpaoDrawerResumo").innerHTML = spec.map(([key,label,decimals=0])=>`<div><small>${H(label)}</small><strong>${N(g.cards[key],decimals)}${key==="mortalidade"&&g.cards[key]!=null?"%":""}</strong></div>`).join("");
-    E("galpaoDrawerTabela").innerHTML = g.weekly.map(w=>`<tr><td>${w.idade} dias</td><td>${N(w.peso,2)}</td><td>${N(w.mortalidade,2)}%</td></tr>`).join("");
+    E("galpaoDrawerResumo").innerHTML = [["Idade atual",g.idade_atual==null?"—":N(g.idade_atual)+" dias"],["Linhagem",(g.linhagens||[]).join(" / ")||"—"],["Aves alojadas",N(g.cards.aves)],["Média de peso",N(g.cards.peso,2)],["Mortalidade",N(g.cards.mortalidade,2)+(g.cards.mortalidade==null?"":"%")]].map(([label,value])=>`<div><small>${H(label)}</small><strong>${H(value)}</strong></div>`).join("");
+    E("galpaoDrawerTabela").innerHTML = g.weekly.map(w=>`<tr><td>${w.idade} dias</td><td class="num">${N(w.peso,2)}</td><td class="num lotes-mortality-cell">${N(w.mortalidade,2)}${w.mortalidade==null?"":"%"}</td></tr>`).join("");
     E("galpaoDrawer").classList.remove("hidden"); E("galpaoDrawer").setAttribute("aria-hidden","false");
     document.body.classList.add("lotes-drawer-open");
     A.chart("chartGalpaoDetalhe",g.weekly.map(w=>`${w.idade} dias`),[{name:"Mortalidade (%)",data:g.weekly.map(w=>w.mortalidade)}]);

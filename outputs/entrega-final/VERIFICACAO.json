@@ -1,0 +1,59 @@
+{
+  "pacotes_conferidos": 4,
+  "frontend_arquivos": 38,
+  "site_pages_identico_ao_pacote": true,
+  "telas": [
+    {
+      "page": "index",
+      "requests": 12,
+      "errors": [],
+      "producerFilter": true,
+      "filterProgress": true,
+      "filterApiFailure": true,
+      "apiFailureClearsValues": true,
+      "emptyResponse": true
+    },
+    {
+      "page": "detalhes",
+      "requests": 13,
+      "errors": [],
+      "producerFilter": true,
+      "filterProgress": true,
+      "filterApiFailure": true,
+      "apiFailureClearsValues": true,
+      "emptyResponse": true
+    },
+    {
+      "page": "lotes",
+      "requests": 12,
+      "errors": [],
+      "producerFilter": true,
+      "filterProgress": true,
+      "filterApiFailure": true,
+      "apiFailureClearsValues": true,
+      "emptyResponse": true
+    },
+    {
+      "page": "historico",
+      "requests": 12,
+      "errors": [],
+      "producerFilter": true,
+      "filterProgress": true,
+      "filterApiFailure": true,
+      "apiFailureClearsValues": true,
+      "emptyResponse": true
+    },
+    {
+      "page": "diferenca-aves-abatidas",
+      "requests": 13,
+      "errors": [],
+      "producerFilter": true,
+      "filterProgress": true,
+      "filterApiFailure": true,
+      "apiFailureClearsValues": true,
+      "emptyResponse": true
+    }
+  ],
+  "acesso_agrosys_postgresql_reais": false,
+  "publicado": false
+}

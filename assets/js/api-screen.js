@@ -15,20 +15,38 @@ window.ApiScreen = (() => {
   function cards(id, data, specifications, className) {
     element(id).innerHTML = specifications.map(([key, label, decimals = 0, suffix = ""]) => `<article class="card ${className}"><span>${escape(label)}</span><strong>${number(data?.[key], decimals)}${data?.[key]==null?"":escape(suffix)}</strong></article>`).join("");
   }
-  function chart(id, labels, series, horizontal = false) {
+  function drawChart(record) {
+    const {instance,labels,series,horizontal,element:el}=record;
+    const css=getComputedStyle(document.documentElement), c=name=>css.getPropertyValue(name).trim();
+    const primary=c("--primary"), accent=c("--accent"), muted=c("--muted-foreground"), border=c("--border"), text=c("--foreground");
+    const narrow=el.clientWidth<500;
+    const axis={type:"value",axisLabel:{color:muted,fontSize:10,formatter:v=>number(v,Number.isInteger(v)?0:1)},splitLine:{lineStyle:{color:border,opacity:.6}},axisTick:{show:false},axisLine:{show:false}};
+    const percent=series.some(s=>s.yAxisIndex===1);
+    instance.resize();
+    instance.setOption({animationDuration:350,textStyle:{fontFamily:getComputedStyle(document.body).fontFamily},color:[primary,accent],
+      tooltip:{trigger:"axis",confine:true,renderMode:"richText",backgroundColor:c("--card"),borderColor:border,textStyle:{color:text},axisPointer:{type:horizontal?"shadow":"line"}},
+      legend:{show:true,top:0,textStyle:{color:muted,fontSize:11}},
+      grid:{left:horizontal?(narrow?94:124):(narrow?46:58),right:horizontal?58:percent?48:24,top:horizontal?36:46,bottom:38},
+      xAxis:horizontal?{...axis,min:0,axisLabel:{...axis.axisLabel,formatter:v=>number(v,Number.isInteger(v)?0:1)+"%"}}:{type:"category",data:labels,boundaryGap:series.some(s=>s.type==="bar"),axisLine:{lineStyle:{color:border}},axisTick:{show:false},axisLabel:{color:muted,fontSize:10,hideOverlap:true}},
+      yAxis:horizontal?{type:"category",data:labels,inverse:true,axisLine:{show:false},axisTick:{show:false},axisLabel:{color:text,fontSize:11,width:narrow?78:110,overflow:"truncate"}}:percent?[axis,{...axis,position:"right",axisLabel:{...axis.axisLabel,formatter:v=>number(v,1)+"%"},splitLine:{show:false}}]:axis,
+      series:series.map((s,i)=>({type:"line",connectNulls:false,smooth:false,symbol:"circle",symbolSize:5,lineStyle:{width:2,color:i?accent:primary},itemStyle:{color:i?accent:primary,borderRadius:s.type==="bar"?horizontal?5:[4,4,0,0]:0},barMaxWidth:horizontal?24:42,
+        tooltip:{valueFormatter:v=>number(v,s.name.includes("Qtde")?0:2)+(s.name.includes("%")?"%":"")},...s}))},true);
+  }
+  function chart(id, labels, series, horizontal = false, onClick = null) {
     const el = element(id);
     if (!el || !window.echarts) return;
-    let instance = charts.get(id);
-    if (!instance) { el.textContent = ""; instance = echarts.init(el); charts.set(id, instance); }
-    const style = getComputedStyle(document.documentElement);
-    const colors = ["--primary","--accent"].map(key=>style.getPropertyValue(key).trim()).filter(Boolean);
-    instance.setOption({color:colors,tooltip:{trigger:"axis",renderMode:"richText"},legend:{top:0},grid:{left:horizontal?160:60,right:30,top:45,bottom:45},
-      xAxis: horizontal ? {type:"value"} : {type:"category",data:labels},
-      yAxis: horizontal ? {type:"category",data:labels,inverse:true} : series.some(s=>s.yAxisIndex===1) ? [{type:"value"},{type:"value"}] : {type:"value"},
-      series:series.map(s => ({type:"line",connectNulls:false,...s}))}, true);
+    let record=charts.get(id);
+    if (!record) { el.textContent=""; record={instance:echarts.init(el),element:el}; charts.set(id,record); observer?.observe(el); }
+    Object.assign(record,{labels,series,horizontal,active:true});
+    record.instance.off("click");
+    if(onClick)record.instance.on("click",onClick);
+    drawChart(record);
+    requestAnimationFrame(()=>record.instance.resize());
   }
-  function clearCharts() { charts.forEach(c => c.clear()); }
-  window.addEventListener("resize", () => charts.forEach(c => c.resize()));
+  function clearCharts() { charts.forEach(r => {r.active=false;r.instance.clear();r.instance.off("click");}); }
+  const observer=typeof ResizeObserver==="undefined"?null:new ResizeObserver(entries=>entries.forEach(e=>{const r=[...charts.values()].find(r=>r.element===e.target);if(r?.active)drawChart(r);}));
+  window.addEventListener("resize", () => charts.forEach(r => {if(r.active)drawChart(r);}));
+  document.addEventListener("dashboard:theme-changed",()=>charts.forEach(r=>{if(r.active)drawChart(r);}));
   function connect({bi, fields, errorId, clearId, render, clear, context = () => ({}), onOptions = null}) {
     let requestId = 0, abort;
     const endpoint = action => `/api/bi/${bi}/${action}`;

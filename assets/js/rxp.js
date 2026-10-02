@@ -1,16 +1,24 @@
 (() => {
   const A=ApiScreen,E=A.element,H=A.escape,N=A.number;
+  const state=value=>value<0?"is-negative":value>0?"is-positive":"is-zero";
+  const signed=(value,decimals=0)=>`${value>0?"+":""}${N(value,decimals)}`;
+  const percent=value=>value==null?"—":`${signed(value,2)}%`;
+  const pill=value=>`<span class="abate-diff-pill ${state(value)}">${signed(value)}</span>`;
   let data,context={},unit="",page=1,detailAbort,detailId=0,opener;
   const pager=document.createElement("div");pager.className="card-actions";
   pager.innerHTML='<button class="mini-button" id="rxpPrevious" type="button">Anterior</button><span id="rxpPage" role="status"></span><button class="mini-button" id="rxpNext" type="button">Próxima</button>';
   E("tabelaProdutoresAbate").closest(".abate-table-wrap").after(pager);
   function close(){++detailId;detailAbort?.abort();E("modalAbate").classList.add("hidden");opener?.focus();}
   function row(label,c,index) {
-    return `<tr><td>${H(label)}</td><td class="num">${N(c.programada)}</td><td class="num">${N(c.real)}</td><td class="num">${N(c.difPercent,2)}%</td><td class="num">${N(c.diferenca)}</td><td class="num">${N(c.registrosComDiferenca)}</td><td><button class="mini-button" type="button" data-rxp-unit="${index}">Ver produtores</button></td></tr>`;
+    return `<tr class="abate-row ${state(c.diferenca)}"><td><strong>${H(label)}</strong></td><td class="num">${N(c.programada)}</td><td class="num">${N(c.real)}</td><td class="num">${percent(c.difPercent)}</td><td class="num">${pill(c.diferenca)}</td><td class="num">${N(c.registrosComDiferenca)}</td><td class="action"><button class="mini-button" type="button" data-rxp-unit="${index}">Ver produtores</button></td></tr>`;
   }
   function render(result,params){
     data=result;context=params;
     [["kpiProgramada","programada"],["kpiReal","real"],["kpiDiferenca","diferenca"],["kpiRegistros","registrosComDiferenca"]].forEach(([id,key])=>E(id).textContent=N(data.cards[key]));
+    E("kpiDiferenca").textContent=signed(data.cards.diferenca);
+    const card=E("kpiDiferenca").closest(".abate-kpi-diff");
+    card.classList.remove("is-negative","is-positive","is-zero");card.classList.add(state(data.cards.diferenca));
+    E("kpiDiferencaLegenda").textContent=data.cards.diferenca<0?"aves abaixo do programado":data.cards.diferenca>0?"aves acima do programado":"sem diferença no contexto atual";
     E("statusRxp").textContent="Dados recebidos da API";
     E("periodoRxp").textContent="AVE NOVA / REAL ALIMENTOS";
     E("tabelaUnidadesAbate").innerHTML=data.groups.length?data.groups.map((g,i)=>row(g.unidade,g.cards,i)).join(""):'<tr><td colspan="7">Nenhum registro para os filtros selecionados.</td></tr>';
@@ -31,7 +39,10 @@
       if(id!==detailId)return;
       if(!Array.isArray(result.dados)||!result.cards||!Number.isInteger(result.total))throw new Error("Contrato de detalhes incompatível.");
       [["modalProgramada","programada",0],["modalReal","real",0],["modalDiferenca","diferenca",0],["modalDifPercent","difPercent",2]].forEach(([k,v,d])=>E(k).textContent=N(result.cards[v],d));
-      E("tabelaProdutoresAbate").innerHTML=result.dados.length?result.dados.map(r=>`<tr>${[r.unidade,r.produtor,r.tecnico,r.data,r.galpao,r.lote,r.tipo_granja,r.modelo].map(v=>`<td>${H(v)}</td>`).join("")}<td class="num">${N(r.programada)}</td><td class="num">${N(r.real)}</td><td class="num">${N(r.difPercent,2)}%</td><td class="num">${N(r.difQtdeRxP)}</td></tr>`).join(""):'<tr><td colspan="12">Nenhum registro.</td></tr>';
+      E("modalDiferenca").textContent=signed(result.cards.diferenca);
+      E("modalDifPercent").textContent=percent(result.cards.difPercent);
+      ["modalDiferenca","modalDifPercent"].forEach(k=>E(k).className=`abate-summary-diff ${state(result.cards.diferenca)}`);
+      E("tabelaProdutoresAbate").innerHTML=result.dados.length?result.dados.map(r=>`<tr class="abate-row ${state(r.difQtdeRxP)}">${[r.unidade,r.produtor,r.tecnico,r.data,r.galpao,r.lote,r.tipo_granja,r.modelo].map(v=>`<td>${H(v)}</td>`).join("")}<td class="num">${N(r.programada)}</td><td class="num">${N(r.real)}</td><td class="num">${percent(r.difPercent)}</td><td class="num">${pill(r.difQtdeRxP)}</td></tr>`).join(""):'<tr><td colspan="12">Nenhum registro.</td></tr>';
       E("rxpPage").textContent=`Página ${page} de ${Math.max(1,result.total_paginas)} · ${N(result.total)} registros`;
       E("rxpPrevious").disabled=page<=1;E("rxpNext").disabled=page>=result.total_paginas;
     }catch(error){if(error.name!=="AbortError"&&id===detailId){E("tabelaProdutoresAbate").innerHTML=`<tr><td colspan="12">${H(error.message)}</td></tr>`;E("rxpPage").textContent="Consulta não concluída";}}

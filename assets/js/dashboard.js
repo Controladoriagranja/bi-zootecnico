@@ -857,10 +857,7 @@ document
                 periodFilter.fim.value = "";
             }
 
-            await filters.loadOptions({
-                preserve: false
-            });
-            carregarDashboard(false);
+            await atualizarFiltrosDashboard(false);
         }
     );
 
@@ -923,11 +920,17 @@ async function applyPeriod() {
         return;
     }
 
-    try {
-        await filters.loadOptions({
-            preserve: true
-        });
+    await atualizarFiltrosDashboard(true);
+}
 
+async function atualizarFiltrosDashboard(preserve) {
+    ++performanceRequestId;
+    performanceController?.abort();
+    dashboardData=null;
+    document.getElementById("indicadores").classList.add("hidden");
+    document.getElementById("loadingDashboard").classList.remove("hidden");
+    try {
+        if(await filters.loadOptions({preserve}) === false)return;
         await carregarDashboard(false);
     }
     catch (error) {
@@ -974,7 +977,7 @@ async function iniciar() {
         filters.register();
 
         const formulas = { metricas: BI_METRIC_ORDER.map(id => METRICAS[id]) };
-        await filters.loadOptions({ preserve: false });
+        const applied=await filters.loadOptions({ preserve: false });
 
         formulasCatalogo = {};
 
@@ -986,7 +989,7 @@ async function iniciar() {
             }
         );
 
-        await carregarDashboard(true);
+        if(applied !== false)await carregarDashboard(true);
     }
     catch (error) {
         console.error(error);
