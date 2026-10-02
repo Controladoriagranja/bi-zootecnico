@@ -82,7 +82,7 @@ Publique as seis páginas (`index.html`, `detalhes.html`, `lotes.html`, `histori
 
 Confirme filtros, Vazio, rankings e gráficos em Index/Desempenho e Detalhamento. Lotes, Histórico e RxP devem continuar respondendo em seus próprios endpoints e fontes. O Worker atual já encaminha `/api/bi/…`; a nova view é usada internamente pelo backend.
 
-Todos os CSS/JS das páginas recebem a versão de cache `ajustes-20261002-2`. Confira que os arquivos publicados são os da raiz `bi-zootecnico`, junto com `assets/`.
+Todos os CSS/JS das páginas recebem a versão de cache `ajustes-20261002-3`. Confira que os arquivos publicados são os da raiz `bi-zootecnico`, junto com `assets/`.
 
 Teste também:
 

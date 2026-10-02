@@ -12,6 +12,7 @@ Frontend integrado à API. Em 02/10/2026, a migração para Acerto foi implement
 - Avisos estáticos retirados conforme solicitado; erro Agrosys e falhas da API/sessão permanecem.
 - ECharts de Lotes e destaques de RxP restaurados no tema da referência `novos`; aviso “Aplicando filtros…” no canto inferior direito durante consultas, inclusive cancelamento e erro.
 - Histórico usa ano da **data de abate**, desde 2023, em filtros e agregados. Valores corrompidos da coluna `ano` deixam de alimentar o calendário.
+- Cabeçalhos de tabelas permitem ordenação por clique, preservando totais e hierarquia do Histórico. Nos detalhes paginados do RxP, a ordenação aplica-se à página carregada.
 - [Robô incremental de Acerto](outputs/robo-acerto/COMO_USAR.md) preparado para toda a faixa desde 01/01/2023, com checkpoint, retries, exportações curtas e conferência Excel → PostgreSQL antes do COMMIT.
 
 A implementação local foi testada, e a view já foi aplicada e conferida no PostgreSQL pelo usuário. Foi autorizada a exclusão de acertos sem Tipo de Granja (atualmente 24516/522); falta reaplicar o SQL atualizado, publicar o pacote de backend/frontend e conferir fórmulas/API reais. Os documentos de 01/10 registram etapas anteriores; as instruções atuais estão em [MIGRACAO_ACERTO.md](MIGRACAO_ACERTO.md).

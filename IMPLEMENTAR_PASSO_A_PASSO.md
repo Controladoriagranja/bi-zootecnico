@@ -46,7 +46,7 @@ No GitHub Desktop, abra o repositório local `bi-zootecnico` na branch `main`. R
 
 No repositório `Controladoriagranja/bi-zootecnico` no GitHub, abra **Settings → Pages → Build and deployment → Source → GitHub Actions**. Em **Actions**, confira o workflow **Publicar BI Zootecnico**. Se o push já ocorreu, use **Run workflow** na branch `main`. Espere as etapas de build e deploy ficarem verdes. [Procedimento oficial do GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-O workflow publica somente os seis HTMLs e `assets/`. Use o endereço mostrado em Settings → Pages; para este repositório, o endereço esperado é `https://controladoriagranja.github.io/bi-zootecnico/`. Abra o BI pela CENTRAL para receber a autenticação. Os arquivos usam versão de cache `ajustes-20261002-2`.
+O workflow publica somente os seis HTMLs e `assets/`. Use o endereço mostrado em Settings → Pages; para este repositório, o endereço esperado é `https://controladoriagranja.github.io/bi-zootecnico/`. Abra o BI pela CENTRAL para receber a autenticação. Os arquivos usam versão de cache `ajustes-20261002-3`.
 
 O Worker atual já encaminha as rotas: não há alteração de Worker nesta entrega.
 

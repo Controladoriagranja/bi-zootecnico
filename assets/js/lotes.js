@@ -16,6 +16,12 @@
   const cells = c => [N(c.aves),N(c.mortes),N(c.mortalidade,2),N(c.peso,2)].map(v=>`<td class="num">${v}</td>`).join("");
   function table() {
     if (!data) return;
+    document.querySelectorAll('[data-sort]').forEach(button=>{
+      const active=button.dataset.sort===sort;
+      button.classList.toggle('active',active);
+      button.closest('th').setAttribute('aria-sort',active?(descending?'descending':'ascending'):'none');
+      button.querySelector('.sort-icon').textContent=active?(descending?'↓':'↑'):'↕';
+    });
     const keys = {tipo:"tipo_granja",produtor:"produtor",linhagem:"linhagem"};
     const list = [...data.groups].sort((a,b)=>{
       const x = keys[sort] ? a[keys[sort]] : a.cards[sort], y = keys[sort] ? b[keys[sort]] : b.cards[sort];

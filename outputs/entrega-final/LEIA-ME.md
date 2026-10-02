@@ -43,6 +43,9 @@ Instruções e limites da conferência estão no `COMO_USAR.md` dentro do ZIP e 
 - Histórico: fonte de fechados preservada, ano pela data de abate, somente de 2023 até o ano atual; expansão semana → produtor → galpão.
 - RxP: AVE NOVA/REAL ALIMENTOS e diferença oficial, com destaques visuais e detalhes paginados.
 - Todas as telas de dados: “Aplicando filtros…” no canto inferior direito durante consultas, desaparecendo ao concluir, cancelar ou falhar.
+- Tabelas: ordenação por clique nos cabeçalhos, com setas no visual existente, mantendo totais e hierarquia. Nos detalhes paginados do RxP, ordena a página carregada. Cache atualizado para `ajustes-20261002-3`.
+
+A importação manual do relatório bruto está separada dos pacotes de publicação: veja [COMO_IMPORTAR.md](../importacao-acerto/COMO_IMPORTAR.md). Esse SQL foi gerado, mas não executado no banco.
 
 Validação local: 45 testes Python, 23 verificações de frontend e cinco telas no Chrome com dados sintéticos. A planilha fornecida foi lida com 133 lotes. Aplicação do SQL atualizado, publicação, extração real e conferência PostgreSQL → API → interface permanecem como etapas no ambiente do Anderson.
 

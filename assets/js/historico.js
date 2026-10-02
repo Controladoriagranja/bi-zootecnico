@@ -21,7 +21,7 @@
       const next=[...path,node.valor],key=JSON.stringify(next),id=sequence++,open=expanded.has(key);
       buttons.push([id,key]);
       const label=node.campo==="semana"?`Semana ${node.valor}`:node.valor;
-      rows.push(`<tr><td style="padding-left:${12+path.length*20}px">${node.children.length?`<button class="mini-button" type="button" data-history-node="${id}" aria-expanded="${open}">${open?"−":"+"}</button> `:""}${node.campo!=="galpao"?H(label):""}</td><td>${node.campo==="galpao"?H(label):""}</td>${values(node.cards,node.weekly)}</tr>`);
+      rows.push(`<tr data-sort-depth="${path.length}"><td style="padding-left:${12+path.length*20}px">${node.children.length?`<button class="mini-button" type="button" data-history-node="${id}" aria-expanded="${open}">${open?"−":"+"}</button> `:""}${node.campo!=="galpao"?H(label):""}</td><td>${node.campo==="galpao"?H(label):""}</td>${values(node.cards,node.weekly)}</tr>`);
       if(open)traverse(node.children,next);
     });}
     traverse(data.hierarchy||[]);
