@@ -1,12 +1,12 @@
 {
-  "gerado_em_utc": "2026-10-02T18:25:00.987375+00:00",
+  "gerado_em_utc": "2026-10-02T20:02:22.612481+00:00",
   "cache_frontend": "ajustes-20261002-4",
   "regras_acerto": "acerto-2026-10-02",
   "regras_historico": "historico-fechados-2026-10-02",
   "pacotes": [
     {
       "arquivo": "frontend_bi_zootecnico.zip",
-      "sha256": "aeda6041123578b0192683ab9d700343434958c8fba20e35cdf62cd5b7bfd645",
+      "sha256": "688b517c4d232005b9df75d3d4141e3a05bf5c68f8a07cb42780ea9ea7597ae0",
       "arquivos": {
         "assets/css/app.css": "1766d3ccd528206458e1f31f78be5fcbbead92b16133ec6be8680f743fa5d5ff",
         "assets/img/favicon-granja.png": "71f56be758978af29197c6bf13a2103c441c90e2d64a8689a79de48ba7d46a8e",
@@ -43,7 +43,7 @@
         "assets/vendor/manifest.json": "b43a6f23a21f2ceccb9f66508dd6d7aa17a758457fa9ab32b9c210d02574412d",
         "detalhes.html": "b56856857a4207c5c451824e1f0925fdffead934315c393b202c3c0372fccf69",
         "diferenca-aves-abatidas.html": "893aebb71ac383b8c114da281a14cd8d934b014337b728de86f8ae3bc869c775",
-        "formulas.html": "123131705226398a6d29c3583a89cafca874145a696fd89b046872cf3e3663e4",
+        "formulas.html": "258b67494f83b976605bbf99b66cd641c7db94a229034d7c5ab6e0bc2555711a",
         "historico.html": "75bc0468d11aa4ac7cfcf85b3d9a788e95c82ea95f8efe90260d7711c2f229d1",
         "index.html": "80f5ef8ef735249c9d13e186c31d5d3130cd33243afb6b13104e950272bc8912",
         "lotes.html": "06d935321ed497e48156cab2cd88bd6176c6402aa3991a88c00141c4fa83c838"
@@ -51,7 +51,7 @@
     },
     {
       "arquivo": "backend_anderson.zip",
-      "sha256": "b9b9b7dafce9eb3ab57fda79c89057038ab766965080f4492eb8d0f90d00d32f",
+      "sha256": "6ea19c8cfd13dd7821c6e16508e9eb07a7bd7a9d6b2a7c84ddcd3d2b040b3070",
       "arquivos": {
         "analytics.py": "b0001c31cc0c1207afd32f8c6dbcd8ea791cd222b20333cb9f69408f916ee5c9",
         "registry.py": "011a8bae6215f0958a41a1ae6e0eaaa4db7cecf3946c0af06268a079c82bdbe6",
@@ -60,7 +60,7 @@
     },
     {
       "arquivo": "robo_acerto_incremental.zip",
-      "sha256": "da056208b3fdb1d9d9a3a8ee8c52c5f4085533c98575ffe3840755f8d4b1960b",
+      "sha256": "54de52355116bf019a71a37deb951cedaf18e0d3b54e7224289fb9325eb7e9f7",
       "arquivos": {
         "COMO_USAR.md": "97040a74cf52e050a4985d5b6acc295690600ec8dcbdc8fcb31db1a06cd6f697",
         "CONFERIR_CARGA.sql": "3e6f742b268fb7d021231f8c34ab28f90c9586a7391006d46c0caf88caa0d09b",
@@ -69,7 +69,7 @@
     },
     {
       "arquivo": "github_pages_publicacao.zip",
-      "sha256": "59db3a25b76034fad452c38dd3d499a661ec3e08e540a179737d025c3ab2f3ef",
+      "sha256": "54caaf82f58fb00797b10f5ebfbe5c5751f556ba06f169752f33f6d25aabf450",
       "arquivos": {
         ".github/workflows/deploy-pages.yml": "79ea0b01dbaa545e8e5570a934f0ffd288259cd4523b5358fb28bc886f796cbc",
         "tools/preparar_pages.py": "c2f3bd51a4bb8bc27f3bcca60006e21f3f509f3f1659390b19be8087b7c64902"
