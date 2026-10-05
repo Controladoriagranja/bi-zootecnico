@@ -15,7 +15,7 @@
     "mortalidade": 13.308108108108108,
     "peso_medio": 2.8775408405038037,
     "idade": 41.9,
-    "gmd": 68.68735083532219,
+    "gmd": 68.67639237479246,
     "ca": 1.6438569880823402
   },
   "ambiente": "DuckDB local; pendente validar PostgreSQL"

@@ -1,5 +1,7 @@
 # Entrega final para transferência
 
+**Atualização vigente de 05/10/2026:** veja [ATUALIZACAO_2026_10_05.md](ATUALIZACAO_2026_10_05.md). Os ZIPs foram atualizados para `acerto-2026-10-05` e cache `ajustes-20261005-1`. As regras de média simples geral e limite de 14 mencionadas abaixo descrevem a entrega anterior e foram substituídas. Atualize backend antes de publicar o frontend novo.
+
 Pacotes preparados localmente em 02/10/2026. Nenhuma publicação no servidor foi executada. Os nomes e conteúdos internos de cada ZIP foram conferidos contra os arquivos de origem; hashes estão em `manifesto.json` e `SHA256SUMS.txt`.
 
 O frontend incorpora os [ajustes visuais da referência ZIP](AJUSTES_VISUAIS.md): degradê, rótulos, barras de peso, hierarquia e tabelas formatadas, com cache `ajustes-20261002-4`. Esta atualização visual não requer alteração do backend.

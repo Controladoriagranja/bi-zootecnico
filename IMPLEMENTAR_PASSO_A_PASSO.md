@@ -1,5 +1,7 @@
 # Instalação e publicação — 02/10/2026
 
+**Atualização de 05/10:** para publicar as regras atuais, siga [ATUALIZACAO_2026_10_05.md](outputs/entrega-final/ATUALIZACAO_2026_10_05.md). As regras anteriores de médias e Vazio descritas aqui foram substituídas. Esta atualização não exige recriar a view existente.
+
 Verificação local concluída: 45 testes Python, 23 verificações de frontend e cinco telas no Chrome, com filtros reais da interface, cancelamento, erro e resposta vazia usando API simulada. Os quatro ZIPs e o site preparado para Pages foram conferidos byte a byte. Veja [VERIFICACAO.json](outputs/entrega-final/VERIFICACAO.json). Nenhum commit, push, deploy ou acesso ao Agrosys/PostgreSQL real foi executado nesta conferência.
 
 ## 1. PostgreSQL

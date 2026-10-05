@@ -34,7 +34,7 @@ async function run() {
   await check('JSON inválido tratado',async()=>{const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>{throw Error('bad-json');}})});await assert.rejects(c.get('/api/bi/zootecnico/resumo'),e=>e.code==='INVALID_JSON');});
   await check('Recusa backend antigo e permite Vazio somente na nova fonte',async()=>{
     const old=client();await assert.rejects(old.get('/api/bi/zootecnico/resumo'),e=>e.code==='SOURCE_PENDING');
-    const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>({rules_version:'acerto-2026-10-02',arquivo:'zootecnico.vw_desempenho_acerto',indicadores:{vazio:{por_ano:{2026:[14,18]},totais:{2026:16}},iep:{totais:{2026:360}}}})})});
+    const c=client({fetchImpl:async()=>({ok:true,status:200,json:async()=>({rules_version:'acerto-2026-10-05',arquivo:'zootecnico.vw_desempenho_acerto',indicadores:{vazio:{por_ano:{2026:[14,18]},totais:{2026:16}},iep:{totais:{2026:360}}}})})});
     const data=await c.get('/api/bi/zootecnico/resumo');assert.equal(data.indicadores.vazio.totais[2026],16);assert.equal(data.indicadores.vazio.por_ano[2026][0],14);assert.equal(data.indicadores.iep.totais[2026],360);
     await c.get('/api/bi/zootecnico/detalhes',{indicador:'vazio'});assert.equal(c.calls.length,2);
   });

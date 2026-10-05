@@ -135,7 +135,7 @@ async function requestApi(endpoint, params = {}, options = {}) {
     throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON");
   }
   if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
-      && (data.rules_version !== "acerto-2026-10-02" || data.arquivo !== "zootecnico.vw_desempenho_acerto")) {
+      && (data.rules_version !== "acerto-2026-10-05" || data.arquivo !== "zootecnico.vw_desempenho_acerto")) {
     throw new ApiError("O serviço ainda não está usando a fonte de acerto e as regras atualizadas. Publique a view e o backend antes de consultar estas telas.", 503, "SOURCE_PENDING");
   }
   return data;

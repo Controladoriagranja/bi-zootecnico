@@ -1,18 +1,18 @@
 {
-  "gerado_em_utc": "2026-10-02T20:02:22.612481+00:00",
-  "cache_frontend": "ajustes-20261002-4",
-  "regras_acerto": "acerto-2026-10-02",
+  "gerado_em_utc": "2026-10-05T20:31:02.956771+00:00",
+  "cache_frontend": "ajustes-20261005-1",
+  "regras_acerto": "acerto-2026-10-05",
   "regras_historico": "historico-fechados-2026-10-02",
   "pacotes": [
     {
       "arquivo": "frontend_bi_zootecnico.zip",
-      "sha256": "688b517c4d232005b9df75d3d4141e3a05bf5c68f8a07cb42780ea9ea7597ae0",
+      "sha256": "0ebaed175dc572c40fcf7755ec2aaf6f57219bfb25610e137cdbfd8d6d99572e",
       "arquivos": {
         "assets/css/app.css": "1766d3ccd528206458e1f31f78be5fcbbead92b16133ec6be8680f743fa5d5ff",
         "assets/img/favicon-granja.png": "71f56be758978af29197c6bf13a2103c441c90e2d64a8689a79de48ba7d46a8e",
         "assets/img/logo-granja-brasilia-branca.png": "c3102d684ec61286b300b3aeceed11ec82eafb3dd2c5caca09d63be4d347945b",
         "assets/js/api-screen.js": "868a8933cc03a19a630d4d925d785579858049f969094ed72970bb3a3a72015a",
-        "assets/js/api.js": "5eb2bb35f5c79193c261b33748372dbe7698adb7ce4bc6b42fa67a67e5770615",
+        "assets/js/api.js": "193a484d5d9d5becaafedaecd861f17155c0a1d2aa8acb76ef7dcc8ab5831338",
         "assets/js/charts.js": "8559d3f3925b2e08b99dff55ae2de7ea9d214f6e4f00b044bb0abc071033891f",
         "assets/js/config.js": "20f7aed27236761aa3503b6ae9f6e0a87c3eb86b607a623fd69fc2aa1674988a",
         "assets/js/dashboard.js": "872029c09fb88d10487079bc61f4a528b70e227a25bb622f298b403d2d01ee96",
@@ -24,10 +24,10 @@
         "assets/js/historico.js": "118105ddaee009115454560402e53b681086fb6e511dba05e4214bc7cd0df05e",
         "assets/js/lotes-formulas.js": "59dd53e3717627f997029a29b6d8a07f38066d96916cf716582f56fb4d4ceda8",
         "assets/js/lotes.js": "25337c9dc0bb32af585bf1ad7dfba9d03f57feed55affebb70defe41130c4f87",
-        "assets/js/metrics.js": "82a457c3307bd33d1a1c7385b4dc4a38ae82e2fb4e99165d446efe173b91d11c",
+        "assets/js/metrics.js": "8100b7c8b0f228fd31cb463dbffa97971a6c0ab2e3ebd65bd316c6b03fa03fee",
         "assets/js/rxp-formulas.js": "868bd171d331bcb8437d724d09efd00ee0810857e43e493180d6da617e706b4a",
         "assets/js/rxp.js": "2cc3c9df836f396303b0a67d4ba3ad652f108a052e9e84a03c61726009da0c64",
-        "assets/js/sidebar.js": "214c5b506d6c4b6c7b49689b28320608dbded30ce82250d8c25d76085ae6f1e6",
+        "assets/js/sidebar.js": "09f933d155dd6855ba6b4898e7304408042d54ab864c53ea67ccab383b72fdc1",
         "assets/js/table-sort.js": "52668fa0ef027b204426e67904e52ef5f24b04a461998ee8d1dc39e5a1f4c994",
         "assets/js/theme.js": "7d03c8bb8154864c2bf91020face887c2f9d5dcf2ffe4ded07be015b1f677219",
         "assets/js/unavailable.js": "d3591f6e931954ecc086ebbdee32f42c2b7c94848ec860aefb2193d0088c61e3",
@@ -41,26 +41,26 @@
         "assets/vendor/geist/files/geist-vietnamese-wght-normal.woff2": "8fa40e5d248247735eb97a0bd593b8852440430600d6ba01364c31fe0abc1fe1",
         "assets/vendor/geist/index.css": "97fe28a6688629d5a016347a47282efabffc85e5dd49bd953217d048e47c6872",
         "assets/vendor/manifest.json": "b43a6f23a21f2ceccb9f66508dd6d7aa17a758457fa9ab32b9c210d02574412d",
-        "detalhes.html": "b56856857a4207c5c451824e1f0925fdffead934315c393b202c3c0372fccf69",
-        "diferenca-aves-abatidas.html": "893aebb71ac383b8c114da281a14cd8d934b014337b728de86f8ae3bc869c775",
-        "formulas.html": "258b67494f83b976605bbf99b66cd641c7db94a229034d7c5ab6e0bc2555711a",
-        "historico.html": "75bc0468d11aa4ac7cfcf85b3d9a788e95c82ea95f8efe90260d7711c2f229d1",
-        "index.html": "80f5ef8ef735249c9d13e186c31d5d3130cd33243afb6b13104e950272bc8912",
-        "lotes.html": "06d935321ed497e48156cab2cd88bd6176c6402aa3991a88c00141c4fa83c838"
+        "detalhes.html": "f1c01b5038183372fb486fcff5f2f5ed185a6548926bcca58639fa22f77e6c5a",
+        "diferenca-aves-abatidas.html": "e90617674d6e33b043f60e0b63d3f23f0dfcdd67e0ac8931903a4bd2470c5c86",
+        "formulas.html": "e1884c4bafef24680256a0ad2f738e7a359a55e5512dadef142dc2524d3211f7",
+        "historico.html": "d04a5bf168933c1bca4a629aa2af8562331875701d56d09018130f9e20d96ab0",
+        "index.html": "e732e4612c270e2a797d11120b0cad601bc3536b6fdb6e62b3e1caa7ae64242f",
+        "lotes.html": "f181af0d7f5bd2b4595c8647cc075a87f0b8f5265889e54d1fbe96509166e77b"
       }
     },
     {
       "arquivo": "backend_anderson.zip",
-      "sha256": "6ea19c8cfd13dd7821c6e16508e9eb07a7bd7a9d6b2a7c84ddcd3d2b040b3070",
+      "sha256": "6316023bd208fd88159c32858455d441dd60afe220375a7b8e894b9587c53c89",
       "arquivos": {
         "analytics.py": "b0001c31cc0c1207afd32f8c6dbcd8ea791cd222b20333cb9f69408f916ee5c9",
-        "registry.py": "011a8bae6215f0958a41a1ae6e0eaaa4db7cecf3946c0af06268a079c82bdbe6",
-        "sql_utils.py": "0410b2e6770bc2e89097e837384ae0ba413acb92649281878cc6eea0c2bd2b4a"
+        "registry.py": "7aa5dad8e653d918c8ab08b6898a0e94265275e1aad42fd5dfc0faa6e55ed2af",
+        "sql_utils.py": "b6906ef32377c8af7585bb067b62eeaf6ebc14bdaac4b556f640ed87df75ae7f"
       }
     },
     {
       "arquivo": "robo_acerto_incremental.zip",
-      "sha256": "54de52355116bf019a71a37deb951cedaf18e0d3b54e7224289fb9325eb7e9f7",
+      "sha256": "0b27b198d536528f90149d74973519ae8f88de237eeea99f604959458e3fa1d7",
       "arquivos": {
         "COMO_USAR.md": "97040a74cf52e050a4985d5b6acc295690600ec8dcbdc8fcb31db1a06cd6f697",
         "CONFERIR_CARGA.sql": "3e6f742b268fb7d021231f8c34ab28f90c9586a7391006d46c0caf88caa0d09b",
@@ -69,7 +69,7 @@
     },
     {
       "arquivo": "github_pages_publicacao.zip",
-      "sha256": "54caaf82f58fb00797b10f5ebfbe5c5751f556ba06f169752f33f6d25aabf450",
+      "sha256": "8282d047de4f82b831c71a7909611c1d25bf8ce4bcd86740c1b11fe872af4a0a",
       "arquivos": {
         ".github/workflows/deploy-pages.yml": "79ea0b01dbaa545e8e5570a934f0ffd288259cd4523b5358fb28bc886f796cbc",
         "tools/preparar_pages.py": "c2f3bd51a4bb8bc27f3bcca60006e21f3f509f3f1659390b19be8087b7c64902"
@@ -79,7 +79,7 @@
   "sql": {
     "sql/01_criar_view_desempenho_acerto.sql": "4f7328ddf56157042c1cb683b04b41724a6737498e0c8e1e3ae6c40aca3eb661",
     "sql/02_validar_vinculos.sql": "5fc766f5f87bc45867a74f8d3e84c5e156bc22dc3bfc509e48cb723d044acb40",
-    "sql/03_conferir_calculos.sql": "d891cd83ff5eec754426f4eb7d8d31432f961e71da801bc3b91413bc29bbb223",
+    "sql/03_conferir_calculos.sql": "8698cf6425af5eedd22a3b71381bae30438965e4b10eff186d84abf4b3a11121",
     "sql/04_revisar_cadastro.sql": "925b78ca0dfb4a0a26ce4eb8452a392ff18a189ffa3ffb1675ce0f3d36fcdad3",
     "sql/05_conferir_complemento_base.sql": "7cbac91334e429009ca6c01f54f70d7bdea060719a80024c3293f4831f0ba672",
     "sql/06_validar_complemento.sql": "3b39f880116f3622236ada98af7362fd5967cfa7f52a9ffe4ccf26324c69cf2c"

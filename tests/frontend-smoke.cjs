@@ -7,7 +7,7 @@ const root = path.resolve(process.env.BI_FRONTEND_ROOT || projectRoot);
 const weekly=[7,14,21,28,35].map(idade=>({idade,mortes:10,mortalidade:1,mortalidade_sem_descartes:0.8,descarte_percent:0.2,peso:100*idade}));
 const cards={lotes:1,aves:1000,mortes:50,mortalidade:5,peso:2100,peso_atual:3};
 const rxpCards={programada:100,real:90,diferenca:-10,registrosComDiferenca:1,difPercent:-10};
-const meta={rules_version:'acerto-2026-10-02',arquivo:'zootecnico.vw_desempenho_acerto',atualizado_em:'2026-10-02T12:00:00'};
+const meta={rules_version:'acerto-2026-10-05',arquivo:'zootecnico.vw_desempenho_acerto',atualizado_em:'2026-10-02T12:00:00'};
 async function main(){
   const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
   const results=[];

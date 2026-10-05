@@ -158,3 +158,7 @@ O helper `assets/js/api-screen.js` havia simplificado as opções do ECharts ao 
 O robô foi preparado separadamente em [outputs/robo-acerto/COMO_USAR.md](outputs/robo-acerto/COMO_USAR.md). Cobre desde janeiro de 2023, com checkpoint por mês, exportações de até sete dias, retries e conferência de chaves/hashes antes do COMMIT. Leu a planilha fornecida com 133 lotes. Não houve extração no Agrosys real nesta preparação.
 
 Para transferir o pacote atualizado, siga [ATUALIZAR_BACKEND_ANDERSON.md](ATUALIZAR_BACKEND_ANDERSON.md).
+# Atualização vigente de fórmulas
+
+As regras de consolidação foram alteradas em 05/10/2026. Consulte [ATUALIZACAO_2026_10_05.md](outputs/entrega-final/ATUALIZACAO_2026_10_05.md); a implementação usa `acerto-2026-10-05`. As referências anteriores à média simples geral, GPD com ps_med original e Vazio limitado a 14 neste documento são histórico da migração, não a regra atual.
+

@@ -46,7 +46,7 @@ class BackendTests(unittest.TestCase):
             if metric['aggregation']=='weighted_avg': self.assertEqual(metric['null_policy'],'valid_pairs')
         self.assertEqual(BI_REGISTRY['zootecnico']['date_column'],'data_abate')
         self.assertEqual(BI_REGISTRY['zootecnico']['table'],'vw_desempenho_acerto')
-        self.assertTrue(all(m['aggregation'] in {'avg','sum'} for m in BI_REGISTRY['zootecnico']['metrics'].values()))
+        self.assertTrue(all(m['aggregation'] in {'avg','sum','ratio_sums','weighted_avg'} for m in BI_REGISTRY['zootecnico']['metrics'].values()))
     def test_numeric_safe(self):
         for v in ('1.234,56','nan','1e2','',None): self.assertIsNone(a.number(v))
         self.assertEqual(a.number(' -12,5 '),Decimal('-12.5'))
@@ -60,8 +60,8 @@ class BackendTests(unittest.TestCase):
             self.assertEqual(cm.exception.status_code,422)
     def test_vazio_sql_valid_pairs(self):
         q=s.metrica_expr(BI_REGISTRY['zootecnico']['metrics']['vazio']).as_string()
-        for part in ('> 14','THEN 14','AVG('): self.assertIn(part,q)
-        self.assertNotIn('< 7',q)
+        for part in ('SUM(', 'qt_aves', 'IS NOT NULL', 'NULLIF'): self.assertIn(part,q)
+        self.assertNotIn('THEN 14',q)
     def test_calendar_sql_guarded(self):
         q=s.date_texto('data_de_abate').as_string()
         self.assertIn('make_date',q);self.assertIn('BETWEEN 1 AND 12',q);self.assertIn('EXTRACT(day',q)

@@ -1,5 +1,7 @@
 # BI Zootécnico
 
+**Regras atuais — 05/10/2026:** [publicação e fórmulas vigentes](outputs/entrega-final/ATUALIZACAO_2026_10_05.md). Tela renomeada para Desempenho Lotes Fechados. IEP simples, cinco fórmulas por divisão de somas e Vazio sem limite ponderado por aves abatidas. Os registros de regras abaixo descrevem a entrega de 02/10 e foram substituídos onde divergem. Validação atual: 46 testes Python e 23 verificações de frontend; agosto conferido contra 163 lotes da planilha.
+
 Frontend integrado à API. Em 02/10/2026, a migração para Acerto foi implementada neste projeto e na cópia autorizada `_backend-zootecnico-referencia/bi_generic/`, usando a versão do backend fornecida pelo Anderson. Consulte [MIGRACAO_ACERTO.md](MIGRACAO_ACERTO.md) para o mapeamento, arquivos, SQL e publicação.
 
 ## Situação da entrega
