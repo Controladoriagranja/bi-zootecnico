@@ -44,6 +44,19 @@ async function main(){
               else {body.indicador.valor=null;body.ranking_tecnicos=[];body.ranking_produtores=[];body.evolucao.series=[];}
             }else {body.cards=Object.fromEntries(Object.keys(body.cards).map(k=>[k,k==='peso'||k==='peso_atual'||k==='difPercent'||k==='mortalidade'?null:0]));body.groups=[];body.weekly=[];body.galpoes=[];body.hierarchy=[];body.dados=[];body.total=0;}
           }
+          if(u.pathname.includes('/zootecnico/')&&body.indicadores){
+            body.meses_carregados=u.searchParams.getAll('mes_carga').map(Number);
+            body.totais_incluidos=u.searchParams.get('incluir_totais')!=='0';
+            body.meses=Array.from({length:12},(_,i)=>({numero:i+1,nome:String(i+1)}));
+            for(const metric of Object.values(body.indicadores)){
+              metric.por_ano['2026']=metric.por_ano['2026'].map((value,i)=>body.meses_carregados.includes(i+1)?value:null);
+              if(!body.totais_incluidos)metric.totais={'2026':null};
+            }
+          }
+          if(u.pathname.includes('/zootecnico/')&&body.indicador){
+            body.etapa=u.searchParams.get('etapa')||'completo';
+            if(body.etapa==='principal')body.evolucao.series=[];
+          }
           await route.fulfill({contentType:'application/json',body:JSON.stringify(body)});return;
         }
         const relative=decodeURIComponent(u.pathname).replace(/^\//,'');

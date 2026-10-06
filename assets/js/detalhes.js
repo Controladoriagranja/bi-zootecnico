@@ -374,7 +374,7 @@ async function carregarDetalhes(
 
     try {
         const response =
-            await apiGet(
+            await ApiProgressive.details(
                 APP_CONFIG
                     .endpoints
                     .detalhes,
@@ -386,6 +386,13 @@ async function carregarDetalhes(
                     signal:
                         requestController
                             .signal
+                },
+                response => {
+                    if (requestId !== detailRequestId) return;
+                    if (!response.ranking_contexto) throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
+                    detalhesData = response;
+                    render();
+                    if (!response.carga_completa) document.getElementById('tituloEvolucao').textContent += ' · Carregando…';
                 }
             );
 
@@ -546,11 +553,6 @@ async function iniciar() {
     await carregarIndicadores();
     registrarIndicador();
     filters.register();
-
-    // Carrega opções respeitando os filtros herdados da primeira página.
-    if(await filters.loadOptions({
-        preserve: false
-    }) === false)return;
 
     await aplicarParametrosUrl();
 

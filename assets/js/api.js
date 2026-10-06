@@ -48,6 +48,53 @@ async function apiGet(endpoint, params = {}, options = {}) {
   finally { finish(); }
 }
 
+// Apenas transporte e combinação de respostas: fórmulas e totais permanecem no SQL.
+const ApiProgressive = {
+  async summary(endpoint, params, options, onData) {
+    const selected = params.mes ? [].concat(params.mes).map(Number) : Array.from({length:12}, (_, i) => i + 1);
+    const months = [...new Set(selected)].sort((a,b) => a-b);
+    let data;
+    const finish = ApiActivity.begin();
+    try {
+      for (let offset = 0; offset < months.length; offset += 2) {
+        if (options.signal?.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+        const response = await apiGet(endpoint, {...params, mes_carga:months.slice(offset, offset+2), incluir_totais:offset ? '0' : '1'}, options);
+        // Compatibilidade com serviços que já retornam todos os meses.
+        if (!response.meses_carregados) { onData(response); return response; }
+        if (!data) data = response;
+        else {
+          data.anos = [...new Set([...data.anos, ...response.anos])].sort((a,b) => a-b);
+          for (const [id, metric] of Object.entries(response.indicadores)) {
+            const target = data.indicadores[id];
+            for (const [year, values] of Object.entries(metric.por_ano)) {
+              target.por_ano[year] ||= Array(12).fill(null);
+              for (const month of response.meses_carregados) target.por_ano[year][month-1] = values[month-1];
+            }
+          }
+          data.meses_carregados = [...new Set([...data.meses_carregados, ...response.meses_carregados])];
+        }
+        data.carga_completa = offset + 2 >= months.length;
+        onData(data);
+      }
+      return data;
+    } finally { finish(); }
+  },
+  async details(endpoint, params, options, onData) {
+    const finish = ApiActivity.begin();
+    try {
+      const main = await apiGet(endpoint, {...params, etapa:'principal'}, options);
+      main.carga_completa = main.etapa !== 'principal';
+      onData(main);
+      if (main.carga_completa) return main;
+      const evolution = await apiGet(endpoint, {...params, etapa:'evolucao'}, options);
+      main.evolucao = evolution.evolucao;
+      main.carga_completa = true;
+      onData(main);
+      return main;
+    } finally { finish(); }
+  }
+};
+
 async function requestApi(endpoint, params = {}, options = {}) {
   if (!endpoint) {
     throw new Error("Endpoint da API não informado.");

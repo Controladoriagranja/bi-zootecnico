@@ -1,5 +1,7 @@
 # BI Zootécnico
 
+**Carga progressiva — 06/10:** [instalação e testes](outputs/entrega-final/CARGA_PROGRESSIVA_2026_10_06.md). Desempenho carrega dois meses por bloco com totais completos; Detalhamento mostra indicador e rankings antes da evolução. Backend e frontend atualizados juntos, assets `ajustes-20261006-4`.
+
 **Detalhamento — 06/10:** [rankings completos, rolagem e conferência dos totais](outputs/entrega-final/ATUALIZACAO_2026_10_06.md). Pacote de backend com quatro Python incluindo router. Desempenho mantém fórmulas/resultados; CAC Ref retirado das duas telas.
 
 **Regras atuais — 05/10/2026:** [publicação e fórmulas vigentes](outputs/entrega-final/ATUALIZACAO_2026_10_05.md). Tela renomeada para Desempenho Lotes Fechados. IEP simples, cinco fórmulas por divisão de somas e Vazio sem limite ponderado por aves abatidas. Os registros de regras abaixo descrevem a entrega de 02/10 e foram substituídos onde divergem. Validação atual: 46 testes Python e 23 verificações de frontend; agosto conferido contra 163 lotes da planilha.
@@ -46,3 +48,7 @@ Com Node já instalado, execute: node tests/integration-checks.cjs
 Node é usado apenas nos testes; não há build ou dependência Node no frontend. O teste não consulta produção, não precisa de token real e não grava nas referências.
 
 Resultado atual: 23 verificações de frontend e 45 testes Python (23 de backend, 6 de fórmulas e 16 de robô) passaram. Cinco telas abriram em Chrome isolado com respostas sintéticas; foram conferidos interação, troca rápida de filtros, aviso de atividade, falha da API e retorno vazio; gráficos de Lotes também foram conferidos em tema escuro e celular. A leitura real da planilha fornecida foi validada: 133 lotes. Sessão CENTRAL, extração Agrosys e comparação PostgreSQL → API → interface continuam pendentes. Screenshots e testes não fazem parte do frontend publicado.
+# Atualização de carga progressiva — 06/10/2026
+
+Desempenho Lotes Fechados carrega os meses em blocos de dois, preservando os totais completos. Detalhamento mostra o indicador e os rankings antes da evolução. Veja a [instalação e os testes da carga progressiva](outputs/entrega-final/CARGA_PROGRESSIVA_2026_10_06.md). Backend e frontend precisam ser atualizados juntos; assets `ajustes-20261006-4`.
+

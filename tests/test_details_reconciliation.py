@@ -30,6 +30,39 @@ class Database:
         return Result(self.db.execute(query,values or []))
 
 class DetailsReconciliationTests(unittest.TestCase):
+    def test_progressive_summary_keeps_full_totals_and_skips_repeated_totals(self):
+        conn=Database()
+        try:
+            router=r.criar_router(lambda:bank(conn))
+            endpoint=next(route.endpoint for route in router.routes if route.path.endswith('/{bi}/resumo'))
+            complete=endpoint('zootecnico',request([('ano','2026')]))
+            first=endpoint('zootecnico',request([('ano','2026'),('mes_carga','1'),('mes_carga','2')]))
+            self.assertEqual(first['anos'],[2026])
+            self.assertEqual(first['indicadores']['aves_abatidas']['totais'],complete['indicadores']['aves_abatidas']['totais'])
+            self.assertIsNone(first['indicadores']['aves_abatidas']['por_ano']['2026'][6])
+            before=len(conn.queries)
+            july=endpoint('zootecnico',request([('ano','2026'),('mes_carga','7'),('mes_carga','8'),('incluir_totais','0')]))
+            self.assertEqual(len(conn.queries)-before,1)
+            self.assertEqual(july['indicadores']['aves_abatidas']['por_ano']['2026'][6],complete['indicadores']['aves_abatidas']['por_ano']['2026'][6])
+        finally:conn.db.close()
+
+    def test_progressive_details_matches_complete_without_repeating_rankings(self):
+        conn=Database()
+        try:
+            router=r.criar_router(lambda:bank(conn))
+            endpoint=next(route.endpoint for route in router.routes if route.path.endswith('/{bi}/detalhes'))
+            params=[('indicador','ca'),('ano','2026')]
+            complete=endpoint('zootecnico',request(params))
+            main=endpoint('zootecnico',request(params+[('etapa','principal')]))
+            self.assertEqual(main['indicador'],complete['indicador'])
+            self.assertEqual(main['ranking_produtores'],complete['ranking_produtores'])
+            self.assertEqual(main['evolucao']['series'],[])
+            before=len(conn.queries)
+            evolution=endpoint('zootecnico',request(params+[('etapa','evolucao')]))
+            self.assertEqual(len(conn.queries)-before,1)
+            self.assertEqual(evolution['evolucao'],complete['evolucao'])
+        finally:conn.db.close()
+
     def test_every_metric_recomposes_complete_groups_and_keeps_performance_value(self):
         conn=Database()
         try:

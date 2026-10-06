@@ -511,7 +511,7 @@ function metricCard(
                             ];
 
                         const content =
-                            formatValue(
+                            dashboardData.meses_carregados && !dashboardData.meses_carregados.includes(Number(row.monthNumber)) ? 'Carregando…' : formatValue(
                                 value,
                                 metric
                             );
@@ -701,7 +701,7 @@ async function carregarDashboard(
 
     try {
         const response =
-            await apiGet(
+            await ApiProgressive.summary(
                 APP_CONFIG
                     .endpoints
                     .desempenho,
@@ -710,6 +710,11 @@ async function carregarDashboard(
                     signal:
                         performanceController
                             .signal
+                },
+                response => {
+                    if (requestId !== performanceRequestId) return;
+                    dashboardData = response;
+                    renderDashboard();
                 }
             );
 
