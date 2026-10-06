@@ -66,6 +66,8 @@ window.ZooCharts = (() => {
             const narrow = chart.getDom().clientWidth < 500;
             const height = Math.max(narrow ? 360 : 330, state.count * (narrow ? 28 : 22) + 48);
             chart.getDom().style.height = height + "px";
+            const viewport=chart.getDom().closest('.ranking-scroll');
+            if(viewport)viewport.style.maxHeight=(state.count>20?10+20*(height-44)/state.count:height)+'px';
         }
         chart.resize();
         if (state?.kind) {

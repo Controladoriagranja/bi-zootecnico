@@ -125,7 +125,7 @@ async function carregarIndicadores() {
             ? response.metricas
             : [];
 
-    metricCatalog = metricCatalog.filter(metric => BI_METRIC_ORDER.includes(metric.id));
+    metricCatalog = metricCatalog.filter(metric => metric.id !== "cac_ref" && BI_METRIC_ORDER.includes(metric.id));
     if (!metricCatalog.some(metric => metric.id === metricId)) metricId = "gmd";
 
     const select =
@@ -260,6 +260,16 @@ function render() {
     const metric =
         detalhesData.indicador;
 
+    const audit=detalhesData.ranking_contexto;
+    const descriptions={sum:'Soma de todos os grupos.',avg:'Média dos lotes válidos. A média simples dos grupos não reproduz o total quando eles têm quantidades diferentes de lotes.',
+        ratio_sums:'Total calculado pela divisão das somas dos componentes. Somar ou fazer média simples das barras não reproduz esse total.',
+        weighted_avg:metric.id==='vazio'?'Média dos grupos ponderada por aves abatidas, sem limite de 14.':'Média dos grupos ponderada por aves alojadas.'};
+    ['tecnicos','produtores'].forEach(kind=>{
+        const suffix=kind==='tecnicos'?'Tecnicos':'Produtores',rows=detalhesData['ranking_'+kind]||[],context=audit?.[kind];
+        document.getElementById('contextoRanking'+suffix).textContent=`${rows.length} ${kind==='tecnicos'?'técnicos':'produtores'} · ${Math.min(20,rows.length)} visíveis${rows.length>20?' · Role para ver todos':''}${context?.sem_identificacao?' · Inclui registros sem identificação':''}`;
+        document.getElementById('conferenciaRanking'+suffix).textContent=context?`${descriptions[audit.metodo]||''} Total recomposto: ${formatMetric(context.valor_recomposto,metric)}. ${(METRICAS[metric.id]?.descricao||'')}`:'Atualize o backend para conferir a recomposição completa deste ranking.';
+    });
+
     FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metric.id]], "formula-detalhe");
 
     document
@@ -340,6 +350,10 @@ async function carregarDetalhes(
     const requestId = ++detailRequestId;
     document.getElementById("mensagemErro").classList.add("hidden");
     document.getElementById("kpiValor").textContent = "—";
+    ['Tecnicos','Produtores'].forEach(suffix=>{
+        document.getElementById('contextoRanking'+suffix).textContent='';
+        document.getElementById('conferenciaRanking'+suffix).textContent='';
+    });
     document.getElementById("kpiNome").textContent = METRICAS[metricId]?.nome || "Indicador";
     document.getElementById("tituloDetalhes").textContent = "Detalhamento • " + (METRICAS[metricId]?.nome || "Indicador");
     FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metricId]].filter(Boolean), "formula-detalhe");
@@ -376,6 +390,7 @@ async function carregarDetalhes(
             );
 
         if (requestId !== detailRequestId) return;
+        if(!response.ranking_contexto)throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
         detalhesData = response;
         render();
     }
@@ -459,6 +474,7 @@ async function atualizarFiltrosDetalhes(preserve) {
 rankingTecnicosChart.on(
     "click",
     async paramsChart => {
+        if(detalhesData?.ranking_tecnicos?.[paramsChart.dataIndex]?.sem_identificacao)return;
         filters.set(
             "tecnico",
             paramsChart.name
@@ -472,6 +488,7 @@ rankingTecnicosChart.on(
 rankingProdutoresChart.on(
     "click",
     async paramsChart => {
+        if(detalhesData?.ranking_produtores?.[paramsChart.dataIndex]?.sem_identificacao)return;
         filters.set(
             "produtor",
             paramsChart.name

@@ -35,7 +35,7 @@ def archive(target, files):
 def main():
     OUTPUT.mkdir(parents=True,exist_ok=True)
     frontend=frontend_files()
-    backend={name:BACKEND/name for name in ('registry.py','sql_utils.py','analytics.py')}
+    backend={name:BACKEND/name for name in ('registry.py','sql_utils.py','analytics.py','router.py')}
     robot={name:ROOT/'outputs'/'robo-acerto'/name for name in
            ('acerto_lote_resultado_geral_incremental.py','COMO_USAR.md','CONFERIR_CARGA.sql')}
     github={name:ROOT/name for name in
@@ -54,7 +54,7 @@ def main():
         shutil.copyfile(source,target)
         statements[target.relative_to(OUTPUT).as_posix()]=digest(target.read_bytes())
     manifest={'gerado_em_utc':datetime.now(timezone.utc).isoformat(),
-              'cache_frontend':'ajustes-20261006-1',
+              'cache_frontend':'ajustes-20261006-3',
               'regras_acerto':'acerto-2026-10-05',
               'regras_historico':'historico-fechados-2026-10-02',
               'pacotes':packages,'sql':statements,

@@ -1,5 +1,7 @@
 # Atualizar o backend do Anderson
 
+**Entrega vigente de 06/10:** [instalação dos rankings completos](outputs/entrega-final/ATUALIZACAO_2026_10_06.md). Substituir quatro Python, incluindo `router.py`; as instruções antigas de três arquivos abaixo foram substituídas nesta entrega.
+
 **Regras atuais de 05/10/2026:** siga [ATUALIZACAO_2026_10_05.md](outputs/entrega-final/ATUALIZACAO_2026_10_05.md). Os pacotes novos mantêm estes caminhos e serviço, mas exigem `rules_version = acerto-2026-10-05`. IEP simples, fórmulas por divisão de somas e Vazio sem limite ponderado por aves abatidas substituem as regras antigas deste documento.
 
 Pacote preparado em 02/10/2026: [backend_anderson.zip](outputs/migracao-acerto/backend_anderson.zip). Contém somente `registry.py`, `sql_utils.py` e `analytics.py`, obtidos da cópia de trabalho `_backend-zootecnico-referencia/bi_generic/`. O serviço importa `bi_generic.router`, e o Dockerfile copia essa pasta para `/app/bi_generic`.

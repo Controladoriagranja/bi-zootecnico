@@ -732,6 +732,11 @@ input {
   height: 360px;
 }
 
+.ranking-scroll { overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; scrollbar-gutter:stable; min-width:0; }
+.ranking-scroll:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+.ranking-context, .ranking-reconciliation { color:var(--muted-foreground); font-size:12px; line-height:1.5; margin:6px 0 12px; }
+.ranking-reconciliation { padding-top:10px; border-top:1px solid var(--border); }
+
 .chart-evolution {
   height: 390px;
 }

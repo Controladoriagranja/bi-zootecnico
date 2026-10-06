@@ -34,6 +34,10 @@ async function main(){
           }else if(u.pathname.includes('/rxp/')){
             body=u.pathname.endsWith('/resumo')?{...meta,cards:rxpCards,groups:[{unidade:'AVE NOVA',cards:rxpCards}]}:{...meta,cards:rxpCards,pagina:1,total:1,total_paginas:1,dados:[{id:1,fonte:'ave',unidade:'AVE NOVA',produtor:'Produtor teste',tecnico:'Técnico teste',galpao:'A',data:'2026-10-02',lote:'1',programada:100,real:90,difQtdeRxP:-10,difPercent:-10}]};
           }else body={...meta,cards,weekly,groups:[{tipo_granja:'Integrada',produtor:'Produtor teste',linhagem:'COBB',cards,weekly}],galpoes:[{produtor:'Produtor teste',galpao:'A',idade_atual:35,linhagens:['COBB'],cards,weekly}],hierarchy:[{campo:'semana',valor:'40',cards,weekly,children:[{campo:'produtor',valor:'Produtor teste',cards,weekly,children:[]}]}]};
+          if(name==='detalhes'&&body.indicador){
+            body.ranking_produtores=Array.from({length:25},(_,i)=>({nome:i===0?'Produtor teste':`Produtor ${i}`,valor:60}));
+            body.ranking_contexto={metodo:'ratio_sums',visible_rows:20,tecnicos:{grupos:1,lotes:25,sem_identificacao:0,valor_recomposto:60},produtores:{grupos:25,lotes:25,sem_identificacao:0,valor_recomposto:60}};
+          }
           if(scenario==='empty'&&!u.pathname.endsWith('/filtros')){
             if(u.pathname.includes('/zootecnico/')){
               if(body.indicadores){for(const metric of Object.values(body.indicadores)){metric.por_ano={2026:Array(12).fill(null)};metric.totais={2026:null};}}
@@ -49,6 +53,16 @@ async function main(){
       await page.waitForFunction(name=>name==='historico'
         ? document.querySelector('#historyKpis strong')?.textContent==='1'
         : document.body.innerText.includes('Produtor teste')||document.body.innerText.includes('60,00')||document.body.innerText.includes('AVE NOVA'),name);
+      if(name==='detalhes'){
+        await page.waitForFunction(()=>document.querySelector('#rankingProdutores')?.clientHeight>500);
+        assert((await page.locator('#contextoRankingProdutores').innerText()).includes('25 produtores'));
+        assert((await page.locator('#conferenciaRankingProdutores').innerText()).includes('Total recomposto: 60,00'));
+        const viewport=page.locator('#rankingProdutores').locator('..');
+        assert(await viewport.evaluate(el=>el.scrollHeight>el.clientHeight));
+        await viewport.evaluate(el=>el.scrollTop=el.scrollHeight);
+        assert(await viewport.evaluate(el=>el.scrollTop>0));
+        await viewport.evaluate(el=>el.scrollTop=0);
+      }
       if(name==='lotes'){
         const appearance=await page.evaluate(()=>{
           const option=id=>echarts.getInstanceByDom(document.getElementById(id)).getOption();
