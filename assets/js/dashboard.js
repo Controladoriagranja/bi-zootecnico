@@ -69,6 +69,7 @@ let performanceController = null;
 let performanceRequestId = 0;
 
 const sortState = {};
+const DASHBOARD_METRIC_ORDER = BI_METRIC_ORDER.filter(id => id !== "cac_ref");
 
 
 const periodFilter = {
@@ -651,7 +652,7 @@ function renderDashboard() {
     container.innerHTML = "";
     if (!dashboardData.anos?.length) { const empty = document.createElement("div"); empty.className = "notice"; empty.textContent = "Nenhum registro encontrado para os filtros selecionados."; container.appendChild(empty); }
 
-    BI_METRIC_ORDER.forEach(
+    DASHBOARD_METRIC_ORDER.forEach(
         metricId => {
             const metric =
                 dashboardData
@@ -976,7 +977,7 @@ async function iniciar() {
     try {
         filters.register();
 
-        const formulas = { metricas: BI_METRIC_ORDER.map(id => METRICAS[id]) };
+        const formulas = { metricas: DASHBOARD_METRIC_ORDER.map(id => METRICAS[id]) };
         const applied=await filters.loadOptions({ preserve: false });
 
         formulasCatalogo = {};

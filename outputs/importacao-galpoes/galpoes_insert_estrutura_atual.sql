@@ -1,1 +1,0 @@
--- SUBSTITUIDO: executar 01_ampliar_colunas_galpoes.sql e depois 02_importar_galpoes_completo.sql.

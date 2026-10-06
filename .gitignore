@@ -8,3 +8,5 @@ __pycache__/
 tests/.backend-test-deps/
 tests/frontend-previews/
 _site/
+_outputs/
+outputs/
