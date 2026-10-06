@@ -27,7 +27,7 @@ async function main(){
             await route.fulfill({status:503,contentType:'application/json',body:'{"detail":"internal database failure"}'});return;
           }
           let body;
-          if(u.pathname.endsWith('/filtros'))body={ano:['2097.47','2090','2026','2025','2023','2022'],mes:[10],produtor:['Produtor teste'],tipo_granja:['Integrada'],modelo:['Modelo teste'],tecnico:['Técnico teste'],galpao:['A'],mist_linha:['Pura'],tipo_linhagem:['pura'],periodo_dias:['7']};
+          if(u.pathname.endsWith('/filtros'))body={ano:['2097.47','2090','2026','2025','2023','2022'],mes:[7,10],produtor:['Produtor teste'],tipo_granja:['Integrada'],modelo:['Modelo teste'],tecnico:['Técnico teste'],galpao:['A'],mist_linha:['Pura'],tipo_linhagem:['pura'],periodo_dias:['7']};
           else if(u.pathname.includes('/zootecnico/')){
             const metric={id:'gmd',nome:'GPD',valor:60,unidade:'g/dia',casas_decimais:2};
             body=u.pathname.endsWith('/resumo')?{...meta,anos:[2026],meses:[{numero:10,nome:'outubro'}],indicadores:{gmd:{...metric,por_ano:{2026:Array(12).fill(60)},totais:{2026:60}}}}:{...meta,indicador:metric,ranking_tecnicos:[{nome:'Técnico teste',valor:60}],ranking_produtores:[{nome:'Produtor teste',valor:60}],evolucao:{meses:Array.from({length:12},(_,i)=>({numero:i+1,nome:String(i+1)})),series:[{ano:2026,valores:Array(12).fill(60)}]}};
@@ -62,11 +62,24 @@ async function main(){
         const relative=decodeURIComponent(u.pathname).replace(/^\//,'');
         try{const file=path.resolve(root,relative||'index.html');if(!file.startsWith(root+path.sep))throw Error('path');const content=await fs.readFile(file);const ext=path.extname(file);await route.fulfill({body:content,contentType:ext==='.html'?'text/html':ext==='.js'?'application/javascript':ext==='.css'?'text/css':undefined});}catch{await route.fulfill({status:404,body:''});}
       });
-      await page.goto(`http://bi.test/${name}.html`);
+      await page.goto(`http://bi.test/${name}.html${name==='detalhes'?'?indicador=gmd&ano=2026&mes=7&produtor=Produtor+teste':''}`);
       await page.waitForFunction(name=>name==='historico'
         ? document.querySelector('#historyKpis strong')?.textContent==='1'
         : document.body.innerText.includes('Produtor teste')||document.body.innerText.includes('60,00')||document.body.innerText.includes('AVE NOVA'),name);
+      if(name==='index'){
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        const julyLink=page.locator('a.metric-value-link[href*="ano=2026"][href*="mes=7"]').first();
+        const target=new URL(await julyLink.getAttribute('href'),'http://bi.test/');
+        assert.equal(target.searchParams.get('ano'),'2026');
+        assert.deepEqual(target.searchParams.getAll('mes'),['7']);
+        assert.equal(target.searchParams.get('indicador'),'gmd');
+      }
       if(name==='detalhes'){
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        const initialQueries=queries.filter(q=>q.path.endsWith('/detalhes')||q.path.endsWith('/filtros'));
+        assert(initialQueries.length>=3);
+        assert(initialQueries.every(q=>q.params.ano==='2026'&&q.params.mes==='7'&&q.params.produtor==='Produtor teste'),'URL deve preservar o contexto em filtros, principal e evolução');
+        assert.equal(await page.locator('#mes .checkbox-multiselect-label').innerText(),'julho');
         await page.waitForFunction(()=>document.querySelector('#rankingProdutores')?.clientHeight>500);
         assert((await page.locator('#contextoRankingProdutores').innerText()).includes('25 produtores'));
         assert((await page.locator('#conferenciaRankingProdutores').innerText()).includes('Total recomposto: 60,00'));
@@ -123,6 +136,10 @@ async function main(){
       const clearId={index:'limparFiltros',detalhes:'limparFiltrosDetalhes',lotes:'limparFiltrosLotes',historico:'limparFiltrosHistorico','diferenca-aves-abatidas':'limparFiltrosAbate'}[name];
       const errorId={index:'mensagemErro',detalhes:'mensagemErro',lotes:'mensagemErroLotes',historico:'mensagemErroHistorico','diferenca-aves-abatidas':'erroRxp'}[name];
       const producerId={index:'produtor',detalhes:'produtor',lotes:'produtor',historico:'history-filter-producer','diferenca-aves-abatidas':'filtroProdutor'}[name];
+      if(name==='detalhes'){
+        await page.locator('#'+clearId).click();
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+      }
       const previousQueries=queries.length;
       await page.locator('#'+producerId+' .checkbox-multiselect-trigger').click();
       await page.locator('#'+producerId+' input[type="checkbox"][value="Produtor teste"]').check();

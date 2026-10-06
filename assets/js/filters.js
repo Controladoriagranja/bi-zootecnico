@@ -607,12 +607,16 @@ normalizeOptions(field, raw) {
             state.selected = new Set(this.normalizeArray(value)
                 .filter(item => field.apiKey !== "ano" || Number(item) >= 2023));
 
-            if (state.host || state.options.length) {
+            // Ao abrir por URL, as opções ainda não chegaram da API.
+            // Não validar a seleção contra uma lista vazia nesse momento.
+            if (state.options.length) {
                 this.renderMultiOptions(
                     field,
                     state.options,
                     [...state.selected]
                 );
+            } else {
+                this.updateButton(field);
             }
 
             return;
