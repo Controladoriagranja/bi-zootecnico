@@ -54,7 +54,7 @@ def main():
         shutil.copyfile(source,target)
         statements[target.relative_to(OUTPUT).as_posix()]=digest(target.read_bytes())
     manifest={'gerado_em_utc':datetime.now(timezone.utc).isoformat(),
-              'cache_frontend':'ajustes-20261006-5',
+              'cache_frontend':'ajustes-20261007-1',
               'regras_acerto':'acerto-2026-10-05',
               'regras_historico':'historico-fechados-2026-10-02',
               'pacotes':packages,'sql':statements,

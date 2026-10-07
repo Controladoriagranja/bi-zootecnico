@@ -61,8 +61,13 @@
   E("galpaoRanking").addEventListener("change",barns);
   ApiScreen.connect({bi:"lotes-abertos",errorId:"mensagemErroLotes",clearId:"limparFiltrosLotes",
     fields:[["periodoDias","periodo_dias"],["tipoGranja","tipo_granja"],["produtor","produtor"],["modelo","modelo"],["galpao","galpao"],["tecnico","tecnico"],["mistLinha","mist_linha"]],
-    clear:()=>{data=null;close();cards(null);E("tabelaLotesBody").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaLotesFoot").innerHTML="";E("galpaoRankingList").innerHTML="";},
+    clear:()=>{E('periodoRecepcaoLotes').textContent='Consultando período…';data=null;close();cards(null);E("tabelaLotesBody").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaLotesFoot").innerHTML="";E("galpaoRankingList").innerHTML="";},
     render:result=>{data=result;cards(data.cards);table();barns();
+      const period=data.periodo_recepcao;
+      const dateLabel=value=>/^\d{4}-\d{2}-\d{2}$/.test(value||'')?`${value.slice(8,10)}/${value.slice(5,7)}/${value.slice(2,4)}`:null;
+      const from=dateLabel(period?.data_inicio),to=dateLabel(period?.data_fim);
+      E('periodoRecepcaoLotes').textContent=from&&to?`${from} a ${to}`:'Período não informado pela API';
+      E('periodoRecepcaoLotes').title='Filtro por data de recepção · '+(period?.coluna||'data_recepcao');
       const weeks=data.weekly, labels=weeks.map(w=>`${w.idade} dias`);
       FORMULAS_LOTES.splice(0,FORMULAS_LOTES.length,...buildLotesFormulas(weeks.map(w=>w.idade),data.pinto==null));
       A.chart("chartMortalidade",labels,[{name:"M+D (Qtde)",type:"bar",data:weeks.map(w=>w.mortes)},{name:"M+D (%)",yAxisIndex:1,data:weeks.map(w=>w.mortalidade)}]);
