@@ -111,6 +111,9 @@ async function main(){
         assert((await page.locator('#galpaoDrawerResumo').innerText()).includes('COBB'));
       }
       if(name==='historico'){
+        assert.equal(await page.locator('h1').innerText(),'Histórico de Lotes em Criação');
+        assert(requests.some(p=>p.includes('/historico-abertos/')));
+        assert(!requests.some(p=>p.includes('/historico-fechados/')));
         assert.equal(await page.locator('#historyTableHead .history-col-combined').count(),5);
         assert.equal(await page.locator('#historyKpis [data-historico-formula]').count(),4);
         assert.equal(await page.locator('#historyTableBody .history-level-0').count(),1);

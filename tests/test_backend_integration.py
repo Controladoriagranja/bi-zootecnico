@@ -104,6 +104,26 @@ class BackendTests(unittest.TestCase):
         details=a.query_payload(c,request(),lambda:bank(conn),'detalhes')
         self.assertEqual(details['total'],2)
         self.assertEqual(details['cards']['aves'],600)
+    def test_open_history_uses_only_open_table_and_reception_year(self):
+        c=BI_REGISTRY['historico-abertos']
+        self.assertEqual(c['table'],'mortalidade_peso_abertos')
+        self.assertNotIn('abate',c['columns'])
+        self.assertNotIn('peso_abate',c['columns'])
+        self.assertNotIn('age_window',c)
+        rows=[{'id':1,'ano':'2097.47','recepcao':'2023-01-09','aves':100,'mort7':1},
+              {'id':2,'ano':'2026','recepcao':'2022-12-31','aves':200},
+              {'id':3,'ano':'2026','recepcao':'invalid','aves':300},
+              {'id':4,'ano':'2026','recepcao':'2027-01-01','aves':400},
+              {'id':5,'ano':'2090','recepcao':'2026-08-01','aves':500,'mort7':5}]
+        conn=Connection({'mortalidade_peso_abertos':rows})
+        prepared=a.prepare_rows(conn,c,date(2026,10,8))
+        self.assertEqual([r['ano'] for r in prepared],['2023','2026'])
+        result=a.query_payload(c,request([('ano','2023')]),lambda:bank(conn),'resumo')
+        self.assertEqual(result['fontes'],['mortalidade_peso_abertos'])
+        self.assertEqual(result['cards']['aves'],100)
+        self.assertEqual(result['cards']['mortes'],1)
+        self.assertFalse(any('data_abate' in q or 'ps_abate' in q or 'mortalidade_peso_fechados' in q for q,_ in conn.queries))
+        self.assertEqual(BI_REGISTRY['lotes-abertos']['age_window'],[0,45])
     def test_barn_drawer_metadata_from_api(self):
         c=BI_REGISTRY['lotes-abertos']
         rows=[{'produtor':'A','galpao':'G','linhagem':'COBB','idade':7,'aves':100},

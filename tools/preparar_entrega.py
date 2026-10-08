@@ -54,9 +54,9 @@ def main():
         shutil.copyfile(source,target)
         statements[target.relative_to(OUTPUT).as_posix()]=digest(target.read_bytes())
     manifest={'gerado_em_utc':datetime.now(timezone.utc).isoformat(),
-              'cache_frontend':'ajustes-20261007-1',
+              'cache_frontend':'ajustes-20261008-1',
               'regras_acerto':'acerto-2026-10-05',
-              'regras_historico':'historico-fechados-2026-10-02',
+              'regras_historico':'historico-abertos-2026-10-08',
               'pacotes':packages,'sql':statements,
               'publicado_no_servidor':False}
     (OUTPUT/'manifesto.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

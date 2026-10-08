@@ -41,7 +41,7 @@
     E("historyTableBody").querySelectorAll("[data-history-node]").forEach(b=>b.addEventListener("click",()=>{const key=buttons.find(([id])=>id===Number(b.dataset.historyNode))[1];expanded.has(key)?expanded.delete(key):expanded.add(key);renderTable();}));
     document.querySelector(".history-table").dataset.view=view;
   }
-  const screen=A.connect({bi:"historico-fechados",errorId:"mensagemErroHistorico",clearId:"limparFiltrosHistorico",fields:dimensions.map(([id,key])=>['history-filter-'+id,key]),context:()=>year?{ano:year}:{},
+  const screen=A.connect({bi:"historico-abertos",errorId:"mensagemErroHistorico",clearId:"limparFiltrosHistorico",fields:dimensions.map(([id,key])=>['history-filter-'+id,key]),context:()=>year?{ano:year}:{},
     clear:()=>{data=null;cards(null);E("historyTableBody").innerHTML='<tr><td colspan="18">Consultando…</td></tr>';E("historyTableFoot").innerHTML="";},
     onOptions:options=>{
       const host=document.querySelector(".history-year-filter");
