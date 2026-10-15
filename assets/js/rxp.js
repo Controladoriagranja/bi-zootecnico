@@ -25,10 +25,10 @@
     const card=E("kpiDiferenca").closest(".abate-kpi-diff");
     card.classList.remove("is-negative","is-positive","is-zero");card.classList.add(state(data.cards.diferenca));
     E("kpiDiferencaLegenda").textContent=data.cards.diferenca<0?"aves abaixo do programado":data.cards.diferenca>0?"aves acima do programado":"sem diferença no contexto atual";
-    E("statusRxp").textContent="Dados recebidos da API";
+    E("statusRxp").textContent=data.carga_completa===false?"Carregando comparativo…":"Dados recebidos da API";
     E("periodoRxp").textContent="AVE NOVA / REAL ALIMENTOS";
-    E("tabelaUnidadesAbate").innerHTML=data.groups.length?data.groups.map((g,i)=>row(g.unidade,g.cards,i)).join(""):'<tr><td colspan="7">Nenhum registro para os filtros selecionados.</td></tr>';
-    E("tabelaUnidadesAbateTotal").innerHTML=row("Total",data.cards,-1);
+    E("tabelaUnidadesAbate").innerHTML=data.carga_completa===false?'<tr><td colspan="7">Carregando comparativo por unidade…</td></tr>':data.groups.length?data.groups.map((g,i)=>row(g.unidade,g.cards,i)).join(""):'<tr><td colspan="7">Nenhum registro para os filtros selecionados.</td></tr>';
+    E("tabelaUnidadesAbateTotal").innerHTML=data.carga_completa===false?"":row("Total",data.cards,-1);
     document.querySelectorAll("[data-rxp-unit]").forEach(b=>b.addEventListener("click",()=>{
       opener=b;unit=Number(b.dataset.rxpUnit)<0?"":data.groups[Number(b.dataset.rxpUnit)].unidade;page=1;
       E("modalAbateTitulo").textContent=unit?`Produtores · ${unit}`:"Produtores · Todas as unidades";
@@ -56,8 +56,8 @@
   E("rxpPrevious").addEventListener("click",()=>{page--;details();});E("rxpNext").addEventListener("click",()=>{page++;details();});
   ["modalAbateFechar","modalAbateBackdrop"].forEach(id=>E(id).addEventListener("click",close));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!E("modalAbate").classList.contains("hidden"))close();});
-  A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",
-    fields:[["filtroData","data"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
+  A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
+    fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
     clear:()=>{data=null;close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
   BIUnavailable.formulas({prefix:"Rxp",catalog:FORMULAS_RXP,attribute:"data-rxp-formula"});
 })();

@@ -24,5 +24,16 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/api.js'),'utf8
   assert.deepEqual(calls.map(p=>p.etapa),['principal','evolucao']);
   assert.equal(snapshots[0].indicador.valor,321.57);assert.equal(snapshots[0].carga_completa,false);
   assert.equal(snapshots[1].ranking_produtores.length,1);assert.equal(snapshots[1].evolucao.series.length,1);
+  calls=[];snapshots=[];
+  sandbox.apiGet=async(endpoint,p)=>{calls.push(p);return {etapa:p.etapa,cards:{diferenca:-3},groups:p.etapa==='principal'?[]:[{unidade:'AVE NOVA'}]};};
+  const params={ano:['2026'],mes:['9','10'],dia:['15','16']};
+  await sandbox.progress.records('/rxp/resumo',params,{},data=>snapshots.push(JSON.parse(JSON.stringify(data))));
+  assert.deepEqual(calls.map(p=>p.etapa),['principal','grupos']);
+  assert(calls.every(p=>p.ano===params.ano&&p.mes===params.mes&&p.dia===params.dia));
+  assert.equal(snapshots[0].carga_completa,false);assert.equal(snapshots[1].carga_completa,true);
+  assert.equal(snapshots[1].cards.diferenca,-3);
+  calls=[];const cancelled=new AbortController();
+  await assert.rejects(sandbox.progress.records('/rxp/resumo',params,{signal:cancelled.signal},()=>cancelled.abort()),{name:'AbortError'});
+  assert.equal(calls.length,1);
   console.log('Carga progressiva: meses, totais, filtro, cancelamento e etapas conferidos.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

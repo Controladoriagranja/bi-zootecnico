@@ -2746,7 +2746,7 @@ body.side-nav-open {
 }
 
 .abate-page-filters {
-  grid-template-columns: repeat(7, minmax(135px, 1fr));
+  grid-template-columns: repeat(5, minmax(135px, 1fr));
 }
 
 .abate-kpis {

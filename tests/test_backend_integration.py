@@ -5,11 +5,12 @@ from datetime import date, timedelta
 from decimal import Decimal
 from contextlib import contextmanager
 import sys
+import os
 import unittest
 from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT / "tests" / ".backend-test-deps"))
+sys.path.insert(0,os.environ.get("BI_TEST_DEPS",str(ROOT / "tests" / ".backend-test-deps")))
 BACKEND = ROOT.parent / "_backend-zootecnico-referencia" / "bi_generic"
 spec=importlib.util.spec_from_file_location("bi_generic",BACKEND / "__init__.py",submodule_search_locations=[str(BACKEND)])
 module=importlib.util.module_from_spec(spec);sys.modules["bi_generic"]=module;spec.loader.exec_module(module)
@@ -39,6 +40,33 @@ class Connection:
 def bank(conn): yield conn
 
 class BackendTests(unittest.TestCase):
+    def test_rxp_calendar_and_progressive_preserve_official_totals(self):
+        c=BI_REGISTRY['rxp']
+        raw=[{'id':1,'data':'2026-10-15','produtor':'A','galpao':'1','lote':'1','programada':'100','real':'90','difQtdeRxP':'-3'},
+             {'id':2,'data':'2026-09-15','produtor':'B','galpao':'2','lote':'2','programada':'200','real':'180','difQtdeRxP':'-7'},
+             {'id':3,'data':'2025-10-16','produtor':'C','galpao':'3','lote':'3','programada':'50','real':'50','difQtdeRxP':'0'}]
+        conn=Connection({c['sources'][0]['table']:raw,c['sources'][1]['table']:[], 'base_dinamica':[]})
+        params=[('ano','2026'),('mes','09'),('mes','10'),('dia','15')]
+        full=a.query_payload(c,request(params),lambda:bank(conn),'resumo')
+        main=a.query_payload(c,request(params+[('etapa','principal')]),lambda:bank(conn),'resumo')
+        grouped=a.query_payload(c,request(params+[('etapa','grupos')]),lambda:bank(conn),'resumo')
+        self.assertEqual(full['cards']['diferenca'],-10) # Oficial, não real-programada (-30).
+        self.assertEqual(full['cards'],main['cards'])
+        self.assertEqual(full['cards'],grouped['cards'])
+        self.assertEqual(main['groups'],[])
+        self.assertEqual(full['groups'],grouped['groups'])
+        details=a.query_payload(c,request(params),lambda:bank(conn),'detalhes')
+        self.assertEqual(details['total'],2)
+        options=a.query_payload(c,request([('ano','2026'),('mes','10')]),lambda:bank(conn),'filtros')
+        self.assertEqual(options['mes'],['9','10']) # Próprio filtro ignorado.
+        self.assertEqual(options['dia'],['15'])
+        source_queries=[(q,v) for q,v in conn.queries if 'lotes_planejados' in q and 'EXTRACT' in q]
+        self.assertTrue(source_queries)
+        self.assertTrue(all(' IN (%s' in q for q,_ in source_queries))
+        self.assertIn([2026,9,10,15],[v for _,v in source_queries])
+        for args in ([('mes','13')],[('dia','0')],[('etapa','invalid')],[('etapa','principal'),('etapa','grupos')]):
+            with self.assertRaises(HTTPException): a.read_filters(request(args),c,'resumo')
+
     def test_registry_sources(self):
         self.assertEqual(BI_REGISTRY['historico-fechados']['table'],'mortalidade_peso_fechados')
         self.assertEqual(len(BI_REGISTRY['rxp']['sources']),2)

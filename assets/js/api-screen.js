@@ -58,7 +58,7 @@ window.ApiScreen = (() => {
   const observer=typeof ResizeObserver==="undefined"?null:new ResizeObserver(entries=>entries.forEach(e=>{const r=[...charts.values()].find(r=>r.element===e.target);if(r?.active)drawChart(r);}));
   window.addEventListener("resize", () => charts.forEach(r => {if(r.active)drawChart(r);}));
   document.addEventListener("dashboard:theme-changed",()=>charts.forEach(r=>{if(r.active)drawChart(r);}));
-  function connect({bi, fields, errorId, clearId, render, clear, context = () => ({}), onOptions = null}) {
+  function connect({bi, fields, errorId, clearId, render, clear, context = () => ({}), onOptions = null, progressive = false}) {
     let requestId = 0, abort;
     const endpoint = action => `/api/bi/${bi}/${action}`;
     const filters = new FilterController({fields:fields.map(([id,apiKey])=>({id,apiKey,multi:true,search:true})),
@@ -74,10 +74,14 @@ window.ApiScreen = (() => {
         await filters.loadOptions({preserve:true});
         if (id !== requestId) return;
         const params = {...filters.values(),...context()};
-        const data = await apiGet(endpoint("resumo"),params,{signal:abort.signal});
+        const display = data => {
+          if (id !== requestId) return;
+          if (!data.rules_version || !data.cards || !Array.isArray(data.groups)) throw new Error("A API retornou um contrato incompatível.");
+          render(data, params);
+        };
+        if (progressive) await ApiProgressive.records(endpoint("resumo"),params,{signal:abort.signal},display);
+        else display(await apiGet(endpoint("resumo"),params,{signal:abort.signal}));
         if (id !== requestId) return;
-        if (!data.rules_version || !data.cards || !Array.isArray(data.groups)) throw new Error("A API retornou um contrato incompatível.");
-        render(data, params);
         element(errorId).classList.add("hidden");
       } catch (error) {
         if (error.name !== "AbortError" && id === requestId) { clear(); message(errorId,error.message,true); }

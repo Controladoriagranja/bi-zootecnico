@@ -21,19 +21,24 @@ async function main(){
         const u=new URL(route.request().url());
         if(u.hostname.endsWith('workers.dev')){
           requests.push(u.pathname);
-          queries.push({path:u.pathname,params:Object.fromEntries(u.searchParams)});
+          queries.push({path:u.pathname,params:Object.fromEntries(u.searchParams),lists:Object.fromEntries([...new Set(u.searchParams.keys())].map(k=>[k,u.searchParams.getAll(k)]))});
           if(delayMs)await new Promise(resolve=>setTimeout(resolve,delayMs));
           if((scenario==='failure'&&!u.pathname.endsWith('/filtros'))||(scenario==='optionsFailure'&&u.pathname.endsWith('/filtros'))){
             await route.fulfill({status:503,contentType:'application/json',body:'{"detail":"internal database failure"}'});return;
           }
           let body;
-          if(u.pathname.endsWith('/filtros'))body={ano:['2097.47','2090','2026','2025','2023','2022'],mes:[7,10],produtor:['Produtor teste'],tipo_granja:['Integrada'],modelo:['Modelo teste'],tecnico:['Técnico teste'],galpao:['A'],mist_linha:['Pura'],tipo_linhagem:['pura'],periodo_dias:['7']};
+          if(u.pathname.endsWith('/filtros'))body={ano:['2097.47','2090','2026','2025','2023','2022'],mes:[7,10],dia:['2','15'],produtor:['Produtor teste'],tipo_granja:['Integrada'],modelo:['Modelo teste'],tecnico:['Técnico teste'],galpao:['A'],mist_linha:['Pura'],tipo_linhagem:['pura'],periodo_dias:['7']};
           else if(u.pathname.includes('/zootecnico/')){
             const metric={id:'gmd',nome:'GPD',valor:60,unidade:'g/dia',casas_decimais:2};
             body=u.pathname.endsWith('/resumo')?{...meta,anos:[2026],meses:[{numero:10,nome:'outubro'}],indicadores:{gmd:{...metric,por_ano:{2026:Array(12).fill(60)},totais:{2026:60}}}}:{...meta,indicador:metric,ranking_tecnicos:[{nome:'Técnico teste',valor:60}],ranking_produtores:[{nome:'Produtor teste',valor:60}],evolucao:{meses:Array.from({length:12},(_,i)=>({numero:i+1,nome:String(i+1)})),series:[{ano:2026,valores:Array(12).fill(60)}]}};
           }else if(u.pathname.includes('/rxp/')){
             body=u.pathname.endsWith('/resumo')?{...meta,cards:rxpCards,groups:[{unidade:'AVE NOVA',cards:rxpCards}]}:{...meta,cards:rxpCards,pagina:1,total:1,total_paginas:1,dados:[{id:1,fonte:'ave',unidade:'AVE NOVA',produtor:'Produtor teste',tecnico:'Técnico teste',galpao:'A',data:'2026-10-02',lote:'1',programada:100,real:90,difQtdeRxP:-10,difPercent:-10}]};
           }else body={...meta,cards,weekly,groups:[{tipo_granja:'Integrada',produtor:'Produtor teste',linhagem:'COBB',cards,weekly}],galpoes:[{produtor:'Produtor teste',galpao:'A',idade_atual:35,linhagens:['COBB'],cards,weekly}],hierarchy:[{campo:'semana',valor:'40',cards,weekly,children:[{campo:'produtor',valor:'Produtor teste',cards,weekly,children:[]}]}]};
+          if(u.pathname.includes('/rxp/')&&u.pathname.endsWith('/filtros'))body.ano=['2026','2025','2023'];
+          if(u.pathname.includes('/rxp/')&&u.pathname.endsWith('/resumo')){
+            body.etapa=u.searchParams.get('etapa')||'completo';
+            if(body.etapa==='principal')body.groups=[];
+          }
           if(name==='detalhes'&&body.indicador){
             body.ranking_produtores=Array.from({length:25},(_,i)=>({nome:i===0?'Produtor teste':`Produtor ${i}`,valor:60}));
             body.ranking_contexto={metodo:'ratio_sums',visible_rows:20,tecnicos:{grupos:1,lotes:25,sem_identificacao:0,valor_recomposto:60},produtores:{grupos:25,lotes:25,sem_identificacao:0,valor_recomposto:60}};
@@ -122,9 +127,30 @@ async function main(){
         await page.locator('[data-history-node]').first().click();assert((await page.locator('#historyTableBody').innerText()).includes('Produtor teste'));
       }
       if(name==='diferenca-aves-abatidas'){
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        assert.deepEqual(queries.filter(q=>q.path.endsWith('/rxp/resumo')).map(q=>q.params.etapa),['principal','grupos']);
+        for(const [host,values] of [['filtroAno',['2026','2025']],['filtroMes',['7','10']],['filtroDia',['2','15']]]){
+          await page.locator('#'+host+' .checkbox-multiselect-trigger').click();
+          for(const value of values){
+            await page.locator('#'+host+' input[value="'+value+'"]').check();
+            await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+          }
+          assert.equal(await page.locator('#'+host+' .checkbox-multiselect-label').innerText(),'2 selecionados');
+          await page.locator('#'+host+' input[data-all]').check();
+          await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+          await page.locator('#'+host+' input[data-all]').uncheck();
+          await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+          assert.equal(await page.locator('#'+host+' .checkbox-multiselect-label').innerText(),'Todos');
+          await page.locator('#'+host+' input[data-all]').check();
+          await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        }
+        await page.locator('h1').click();
+        await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/rxp-filtros-desktop.png'),fullPage:true});
         assert.equal(await page.locator('#tabelaUnidadesAbateTotal th').count(),7);
         assert.equal(await page.locator('#tabelaUnidadesAbate .abate-diff-pill.is-negative').innerText(),'-10');
         await page.locator('[data-rxp-unit]').first().click();await page.locator('#tabelaProdutoresAbate').getByText('Produtor teste').waitFor();
+        const detailQuery=queries.filter(q=>q.path.endsWith('/rxp/detalhes')).at(-1);
+        assert.deepEqual(detailQuery.lists.ano,['2026','2025','2023']);assert.deepEqual(detailQuery.lists.mes,['7','10']);assert.deepEqual(detailQuery.lists.dia,['2','15']);
         assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label]').count(),12);
         assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label="Produtor"] strong').innerText(),'Produtor teste');
         assert.equal(await page.locator('#tabelaProdutoresAbate td[data-label="Data"]').innerText(),'02/10/2026');

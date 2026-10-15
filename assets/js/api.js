@@ -50,6 +50,20 @@ async function apiGet(endpoint, params = {}, options = {}) {
 
 // Apenas transporte e combinação de respostas: fórmulas e totais permanecem no SQL.
 const ApiProgressive = {
+  async records(endpoint, params, options, onData) {
+    const finish = ApiActivity.begin();
+    try {
+      const main = await apiGet(endpoint, {...params, etapa:'principal'}, options);
+      main.carga_completa = main.etapa !== 'principal';
+      onData(main);
+      if (main.carga_completa) return main;
+      if (options.signal?.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+      const groups = await apiGet(endpoint, {...params, etapa:'grupos'}, options);
+      const result = {...groups, carga_completa:true};
+      onData(result);
+      return result;
+    } finally { finish(); }
+  },
   async summary(endpoint, params, options, onData) {
     const selected = params.mes ? [].concat(params.mes).map(Number) : Array.from({length:12}, (_, i) => i + 1);
     const months = [...new Set(selected)].sort((a,b) => a-b);
