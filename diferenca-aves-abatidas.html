@@ -6,7 +6,7 @@
     <link rel="icon" href="assets/img/favicon-granja.png">
     <title>Diferença de Aves Abatidas - BI Zootécnico</title>
     <script>(()=>{try{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;}catch(_){}})();</script>
-    <link href="assets/css/app.css?v=rxp-20261015-1" rel="stylesheet">
+    <link href="assets/css/app.css?v=rxp-20261015-2" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="diferenca-abate" class="abate-page">
@@ -109,11 +109,15 @@
         <div class="card-heading-row abate-section-heading">
             <div>
                 <div class="card-kicker">Visão consolidada</div>
-                <h2>Comparativo por Unidade / Destino</h2>
-                <p>A diferença exibida é a soma do campo de origem <strong>Dif Qtde RxP</strong>; ela não é recalculada no front-end.</p>
+                <h2 id="tituloComparativoRxp">Comparativo por Unidade / Destino</h2>
+                <p id="descricaoComparativoRxp">A diferença exibida é a soma do campo de origem <strong>Dif Qtde RxP</strong>; ela não é recalculada no front-end.</p>
+            </div>
+            <div class="rxp-view-toggle" role="group" aria-label="Visão do comparativo">
+                <button type="button" id="visaoUnidadeRxp" aria-pressed="true">Unidade</button>
+                <button type="button" id="visaoMensalRxp" aria-pressed="false">Visão por mês</button>
             </div>
         </div>
-        <div class="abate-table-wrap">
+        <div class="abate-table-wrap" id="comparativoUnidadeRxp">
             <table class="abate-table">
                 <thead>
                     <tr>
@@ -128,6 +132,21 @@
                 </thead>
                 <tbody id="tabelaUnidadesAbate"></tbody>
                 <tfoot id="tabelaUnidadesAbateTotal"></tfoot>
+            </table>
+        </div>
+        <div class="abate-table-wrap hidden" id="comparativoMensalRxp">
+            <table class="abate-table abate-monthly-table" aria-label="Comparativo mensal de aves abatidas">
+                <thead><tr>
+                    <th>Mês / Ano</th>
+                    <th class="num">AVE NOVA · Esperado</th>
+                    <th class="num">AVE NOVA · Realizado</th>
+                    <th class="num">REAL ALIMENTOS · Esperado</th>
+                    <th class="num">REAL ALIMENTOS · Realizado</th>
+                    <th class="num">Total · Esperado</th>
+                    <th class="num">Total · Realizado</th>
+                </tr></thead>
+                <tbody id="tabelaMensalRxp"></tbody>
+                <tfoot id="tabelaMensalRxpTotal"></tfoot>
             </table>
         </div>
     </section>
@@ -185,16 +204,16 @@
     </section>
 </div>
 
-<script src="assets/js/theme.js?v=rxp-20261015-1"></script>
-<script src="assets/js/config.js?v=rxp-20261015-1"></script>
-<script src="assets/js/formula-ui.js?v=rxp-20261015-1"></script>
-<script src="assets/js/filters.js?v=rxp-20261015-1"></script>
-<script src="assets/js/rxp-formulas.js?v=rxp-20261015-1"></script>
-<script src="assets/js/api.js?v=rxp-20261015-1"></script>
-<script src="assets/js/api-screen.js?v=rxp-20261015-1"></script>
-<script src="assets/js/unavailable.js?v=rxp-20261015-1"></script>
-<script src="assets/js/rxp.js?v=rxp-20261015-1"></script>
-<script src="assets/js/table-sort.js?v=rxp-20261015-1"></script>
-<script src="assets/js/sidebar.js?v=rxp-20261015-1"></script>
+<script src="assets/js/theme.js?v=rxp-20261015-2"></script>
+<script src="assets/js/config.js?v=rxp-20261015-2"></script>
+<script src="assets/js/formula-ui.js?v=rxp-20261015-2"></script>
+<script src="assets/js/filters.js?v=rxp-20261015-2"></script>
+<script src="assets/js/rxp-formulas.js?v=rxp-20261015-2"></script>
+<script src="assets/js/api.js?v=rxp-20261015-2"></script>
+<script src="assets/js/api-screen.js?v=rxp-20261015-2"></script>
+<script src="assets/js/unavailable.js?v=rxp-20261015-2"></script>
+<script src="assets/js/rxp.js?v=rxp-20261015-2"></script>
+<script src="assets/js/table-sort.js?v=rxp-20261015-2"></script>
+<script src="assets/js/sidebar.js?v=rxp-20261015-2"></script>
 </body>
 </html>

@@ -40,6 +40,32 @@ class Connection:
 def bank(conn): yield conn
 
 class BackendTests(unittest.TestCase):
+    def test_rxp_monthly_separates_years_units_and_reconciles(self):
+        c=BI_REGISTRY['rxp']
+        def row(i,day,planned,actual,diff):
+            return {'id':i,'data':day,'produtor':'A','galpao':'G','lote':str(i),'programada':planned,'real':actual,'difQtdeRxP':diff}
+        conn=Connection({c['sources'][0]['table']:[row(1,'2025-10-15',100,90,-3),row(2,'2026-10-15',200,180,-7),row(3,'2026-09-16',50,60,4)],
+                         c['sources'][1]['table']:[row(1,'2026-10-15',400,390,-2)],'base_dinamica':[]})
+        payload=a.query_payload(c,request([('etapa','mensal')]),lambda:bank(conn),'resumo')
+        months=payload['monthly']['rows']
+        self.assertEqual([r['periodo'] for r in months],['2025-10','2026-09','2026-10'])
+        self.assertEqual(months[0]['real_alimentos']['programada'],0)
+        self.assertEqual(months[-1]['ave_nova']['real'],180)
+        self.assertEqual(months[-1]['real_alimentos']['real'],390)
+        self.assertEqual(months[-1]['total']['programada'],600)
+        self.assertEqual(payload['monthly']['totals']['total'],payload['cards'])
+        for metric in ('programada','real','diferenca','registrosComDiferenca'):
+            self.assertEqual(sum(r['total'][metric] for r in months),payload['cards'][metric])
+            self.assertTrue(all(r['ave_nova'][metric]+r['real_alimentos'][metric]==r['total'][metric] for r in months))
+        self.assertEqual(payload['cards']['diferenca'],-8) # Campo oficial, nunca recalcular.
+        self.assertFalse(any('base_dinamica' in q for q,_ in conn.queries))
+        filtered=a.query_payload(c,request([('etapa','mensal'),('ano','2026'),('mes','10'),('dia','15')]),lambda:bank(conn),'resumo')
+        self.assertEqual(len(filtered['monthly']['rows']),1)
+        self.assertEqual(filtered['monthly']['rows'][0]['total']['real'],570)
+        empty=a.query_payload(c,request([('etapa','mensal'),('ano','2024')]),lambda:bank(conn),'resumo')
+        self.assertEqual(empty['monthly']['rows'],[])
+        self.assertEqual(empty['monthly']['totals']['total']['programada'],0)
+
     def test_rxp_calendar_and_progressive_preserve_official_totals(self):
         c=BI_REGISTRY['rxp']
         raw=[{'id':1,'data':'2026-10-15','produtor':'A','galpao':'1','lote':'1','programada':'100','real':'90','difQtdeRxP':'-3'},

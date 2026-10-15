@@ -10,6 +10,46 @@
     return `<tr class="abate-row ${state(r.difQtdeRxP)}">${fields.map(([label,value],i)=>`<td data-label="${label}"${i>=8?' class="num"':''}>${value}</td>`).join('')}</tr>`;
   }
   let data,context={},unit="",page=1,detailAbort,detailId=0,opener;
+  let monthlyView=false,monthlyData,monthlyAbort,monthlyId=0,monthlyPending=false;
+  const monthNames=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  function monthlyRow(label,record,total=false,period=''){
+    const tag=total?'th':'td';
+    return `<tr><${tag}${period?` data-sort-value="${H(period)}"`:''}><strong>${H(label)}</strong></${tag}>${['ave_nova','real_alimentos','total'].map(key=>['programada','real'].map(metric=>`<${tag} class="num">${N(record[key][metric])}</${tag}>`).join('')).join('')}</tr>`;
+  }
+  function renderMonthly(){
+    E('tabelaMensalRxp').innerHTML=monthlyData.rows.length?monthlyData.rows.map(r=>{
+      const [year,month]=r.periodo.split('-');
+      return monthlyRow(`${monthNames[Number(month)-1]} / ${year}`,r,false,r.periodo);
+    }).join(''):'<tr><td colspan="7">Nenhum registro para os filtros selecionados.</td></tr>';
+    E('tabelaMensalRxpTotal').innerHTML=monthlyRow('Total',monthlyData.totals,true);
+  }
+  async function loadMonthly(){
+    if(monthlyData){renderMonthly();return;}
+    E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Carregando visão por mês…</td></tr>';
+    E('tabelaMensalRxpTotal').innerHTML='';
+    if(!data||data.carga_completa===false||monthlyPending)return;
+    const id=++monthlyId;monthlyAbort=new AbortController();monthlyPending=true;
+    try{
+      const result=await apiGet('/api/bi/rxp/resumo',{...context,etapa:'mensal'},{signal:monthlyAbort.signal});
+      if(id!==monthlyId)return;
+      if(!result.rules_version||!Array.isArray(result.monthly?.rows)||!result.monthly?.totals)throw new Error('Visão mensal indisponível. Atualize o backend da API.');
+      monthlyData=result.monthly;renderMonthly();
+    }catch(error){
+      if(error.name!=='AbortError'&&id===monthlyId)E('tabelaMensalRxp').innerHTML=`<tr><td colspan="7">${H(error.message)} Clique em Visão por mês para tentar novamente.</td></tr>`;
+    }finally{if(id===monthlyId)monthlyPending=false;}
+  }
+  function selectView(monthly){
+    monthlyView=monthly;
+    E('visaoUnidadeRxp').setAttribute('aria-pressed',String(!monthly));
+    E('visaoMensalRxp').setAttribute('aria-pressed',String(monthly));
+    E('comparativoUnidadeRxp').classList.toggle('hidden',monthly);
+    E('comparativoMensalRxp').classList.toggle('hidden',!monthly);
+    E('tituloComparativoRxp').textContent=monthly?'Comparativo por Mês':'Comparativo por Unidade / Destino';
+    E('descricaoComparativoRxp').textContent=monthly?'Esperado: quantidade programada. Realizado: quantidade real. Totais por mês e ano, conforme os filtros selecionados.':'A diferença exibida é a soma do campo de origem Dif Qtde RxP; ela não é recalculada no front-end.';
+    if(monthly)loadMonthly();
+  }
+  E('visaoUnidadeRxp').addEventListener('click',()=>selectView(false));
+  E('visaoMensalRxp').addEventListener('click',()=>selectView(true));
   const pager=document.createElement("div");pager.className="card-actions";
   pager.innerHTML='<button class="mini-button" id="rxpPrevious" type="button">Anterior</button><span id="rxpPage" role="status"></span><button class="mini-button" id="rxpNext" type="button">Próxima</button>';
   E("tabelaProdutoresAbate").closest(".abate-table-wrap").after(pager);
@@ -34,6 +74,7 @@
       E("modalAbateTitulo").textContent=unit?`Produtores · ${unit}`:"Produtores · Todas as unidades";
       E("modalAbate").classList.remove("hidden");E("modalAbateFechar").focus();details();
     }));
+    if(monthlyView)loadMonthly();
   }
   async function details(){
     const id=++detailId;detailAbort?.abort();detailAbort=new AbortController();
@@ -58,6 +99,6 @@
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!E("modalAbate").classList.contains("hidden"))close();});
   A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
     fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
-    clear:()=>{data=null;close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
+    clear:()=>{data=null;monthlyData=null;++monthlyId;monthlyAbort?.abort();monthlyPending=false;E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E('tabelaMensalRxpTotal').innerHTML='';close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
   BIUnavailable.formulas({prefix:"Rxp",catalog:FORMULAS_RXP,attribute:"data-rxp-formula"});
 })();

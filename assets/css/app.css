@@ -2822,6 +2822,40 @@ body.side-nav-open {
   margin-bottom: 12px;
 }
 
+.rxp-view-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--secondary);
+}
+.rxp-view-toggle button {
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.rxp-view-toggle button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: 0 1px 4px #0002;
+}
+.rxp-view-toggle button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.abate-monthly-table th:nth-child(6),
+.abate-monthly-table td:nth-child(6) { border-left: 1px solid var(--border); }
+.abate-monthly-table td:nth-child(n+6) { font-weight: 700; }
+@media (max-width: 780px) {
+  .abate-page .abate-section-heading { flex-direction: column; align-items: stretch; }
+  .rxp-view-toggle { align-self: flex-end; }
+}
+
 .abate-section-heading strong {
   color: var(--primary);
 }

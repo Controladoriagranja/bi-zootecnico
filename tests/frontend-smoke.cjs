@@ -38,6 +38,14 @@ async function main(){
           if(u.pathname.includes('/rxp/')&&u.pathname.endsWith('/resumo')){
             body.etapa=u.searchParams.get('etapa')||'completo';
             if(body.etapa==='principal')body.groups=[];
+            if(body.etapa==='mensal'){
+              const count=(programada,real)=>({programada,real});
+              body.monthly={rows:[
+                {periodo:'2025-10',ave_nova:count(20,15),real_alimentos:count(10,5),total:count(30,20)},
+                {periodo:'2026-10',ave_nova:count(40,40),real_alimentos:count(30,30),total:count(70,70)}
+              ],totals:{ave_nova:count(60,55),real_alimentos:count(40,35),total:count(100,90)}};
+            }
+
           }
           if(name==='detalhes'&&body.indicador){
             body.ranking_produtores=Array.from({length:25},(_,i)=>({nome:i===0?'Produtor teste':`Produtor ${i}`,valor:60}));
@@ -157,12 +165,42 @@ async function main(){
         await page.setViewportSize({width:390,height:844});
         await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/rxp-mobile.png'),fullPage:true});
         await page.setViewportSize({width:1365,height:900});
+        await page.locator('#modalAbateFechar').click();
+        const beforeMonth=queries.filter(q=>q.params.etapa==='mensal').length;
+        await page.locator('#visaoMensalRxp').click();
+        await page.waitForFunction(()=>document.querySelectorAll('#tabelaMensalRxp tr').length===2);
+        assert.equal(await page.locator('#visaoMensalRxp').getAttribute('aria-pressed'),'true');
+        assert.equal(await page.locator('#comparativoUnidadeRxp').isVisible(),false);
+        assert.deepEqual(await page.locator('#tabelaMensalRxp tr').first().locator('td').allTextContents(),['outubro / 2025','20','15','10','5','30','20']);
+        assert.deepEqual(await page.locator('#tabelaMensalRxpTotal th').allTextContents(),['Total','60','55','40','35','100','90']);
+        const monthlyQuery=queries.filter(q=>q.params.etapa==='mensal').at(-1);
+        assert.deepEqual(monthlyQuery.lists.ano,detailQuery.lists.ano);
+        assert.deepEqual(monthlyQuery.lists.mes,detailQuery.lists.mes);
+        assert.deepEqual(monthlyQuery.lists.dia,detailQuery.lists.dia);
+        const sortMonth=page.locator('#comparativoMensalRxp thead th').first().locator('button');
+        await sortMonth.click();await sortMonth.click();
+        assert.equal(await page.locator('#tabelaMensalRxp tr').first().locator('td').first().innerText(),'outubro / 2026');
+        await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/rxp-mensal-desktop.png'),fullPage:true});
+        await page.setViewportSize({width:390,height:844});
+        await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/rxp-mensal-mobile.png'),fullPage:true});
+        await page.setViewportSize({width:1365,height:900});
+        await page.locator('#visaoUnidadeRxp').click();await page.locator('#visaoMensalRxp').click();
+        assert.equal(queries.filter(q=>q.params.etapa==='mensal').length,beforeMonth+1,'Altern?ncia reaproveita os dados do contexto');
+        await page.locator('#filtroDia .checkbox-multiselect-trigger').click();
+        await page.locator('#filtroDia input[value="2"]').uncheck();
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        assert.equal(queries.filter(q=>q.params.etapa==='mensal').length,beforeMonth+2,'New filters invalidate monthly cache');
+        assert.deepEqual(queries.filter(q=>q.params.etapa==='mensal').at(-1).lists.dia,['15']);
+        await page.locator('h1').click();
+
+        await page.locator('#visaoUnidadeRxp').click();
+
       }
       assert.deepEqual(errors,[],name+': '+errors.join('; '));
       assert(requests.some(p=>p.endsWith(name==='detalhes'?'/detalhes':'/resumo')),name);
       const out=path.join(projectRoot,'tests','frontend-previews');await fs.mkdir(out,{recursive:true});await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});
       if(name==='lotes'){await page.locator('#galpaoDrawerFechar').click();await page.locator('#tabProdutores').click();}
-      if(name==='diferenca-aves-abatidas')await page.locator('#modalAbateFechar').click();
+      if(name==='diferenca-aves-abatidas'&&await page.locator('#modalAbateFechar').isVisible())await page.locator('#modalAbateFechar').click();
       const clearId={index:'limparFiltros',detalhes:'limparFiltrosDetalhes',lotes:'limparFiltrosLotes',historico:'limparFiltrosHistorico','diferenca-aves-abatidas':'limparFiltrosAbate'}[name];
       const errorId={index:'mensagemErro',detalhes:'mensagemErro',lotes:'mensagemErroLotes',historico:'mensagemErroHistorico','diferenca-aves-abatidas':'erroRxp'}[name];
       const producerId={index:'produtor',detalhes:'produtor',lotes:'produtor',historico:'history-filter-producer','diferenca-aves-abatidas':'filtroProdutor'}[name];

@@ -9,7 +9,7 @@ SOURCE = Path(r'C:\Users\vchaves\Downloads\Matrizes\api_zootecnico_atualizado.zi
 BACKEND = ROOT.parent / '_backend-zootecnico-referencia' / 'bi_generic'
 OUTPUT = ROOT / 'outputs' / 'rxp-20261015'
 FRONTEND = ['diferenca-aves-abatidas.html', 'assets/css/app.css', 'assets/js/api.js',
-            'assets/js/api-screen.js', 'assets/js/rxp.js']
+            'assets/js/api-screen.js', 'assets/js/rxp.js', 'assets/js/table-sort.js']
 
 
 def pack(path, content):
