@@ -28,8 +28,9 @@ class AcertoFormulaTests(unittest.TestCase):
         return self.db.execute('SELECT '+expression+' FROM acerto '+where).fetchone()[0]
 
     def test_ratio_sums_and_explicit_weights(self):
-        expected = {'mortalidade':200/3000*100,'peso_medio':7950/2800,'idade':(900*40+1900*50)/2800,'gmd':(2250/900+5700/1900)/(40+50)*1000,
-                    'ca':13000/7950,'iep':350,'cac':(1.5*1000+1.7*2000)/3000,'vazio':(6*900+18*1900)/2800,'aves_abatidas':2800}
+        gpd=7950/(900*40+1900*50)*1000
+        expected = {'mortalidade':200/3000*100,'peso_medio':7950/2800,'idade':(900*40+1900*50)/2800,'gmd':gpd,
+                    'ca':13000/7950,'iep':gpd/1000*(100-200/3000*100)/(13000/7950)*100,'cac':(1.5*1000+1.7*2000)/3000,'vazio':(6*900+18*1900)/2800,'aves_abatidas':2800}
         for metric, value in expected.items():
             self.assertAlmostEqual(self.value(metric),value,places=9, msg=metric)
         self.assertEqual(self.value('mortalidade',"WHERE integrado='A'"),10)
@@ -37,10 +38,10 @@ class AcertoFormulaTests(unittest.TestCase):
     def test_zero_and_missing_denominators_return_null(self):
         self.db.execute('DELETE FROM acerto')
         self.db.execute('INSERT INTO acerto(mort,aloj,qt_aves,ida,ps_med,pes_total,consumo_racao) VALUES (10,0,0,0,2,0,30)')
-        for metric in ('mortalidade','peso_medio','idade','gmd','ca'):
+        for metric in ('mortalidade','peso_medio','idade','gmd','ca','iep'):
             self.assertIsNone(self.value(metric),metric)
         self.db.execute('UPDATE acerto SET aloj=NULL, qt_aves=NULL, ida=NULL, pes_total=NULL')
-        for metric in ('mortalidade','peso_medio','idade','gmd','ca'):
+        for metric in ('mortalidade','peso_medio','idade','gmd','ca','iep'):
             self.assertIsNone(self.value(metric),metric)
 
     def test_missing_numerator_does_not_count_as_zero(self):
@@ -74,6 +75,8 @@ class AcertoFormulaTests(unittest.TestCase):
         expected={'iep':321.56613496932516,'ca':1.794148136237481,'cac':1.740098472122556,
                   'gmd':65.7768143980939,'mortalidade':13.16643920340507,
                   'idade':47.127407793344965,'peso_medio':3.107290415982878,'vazio':16.364990369529746}
+        expected['gmd']=sum(row[5] for row in rows)/sum(row[2]*row[3] for row in rows)*1000
+        expected['iep']=expected['gmd']/1000*(100-expected['mortalidade'])/expected['ca']*100
         actual={metric:self.value(metric) for metric in expected}
         for metric,value in expected.items():self.assertAlmostEqual(actual[metric],value,places=9,msg=metric)
         out=Path(__file__).resolve().parents[1]/'outputs/migracao-acerto/conferencia_agosto_2026.json'
@@ -97,6 +100,7 @@ class AcertoFormulaTests(unittest.TestCase):
         results={metric:self.value(metric) for metric in checks}
         for metric,value in checks.items():self.assertAlmostEqual(results[metric],value,places=9)
         out=Path(__file__).resolve().parents[1]/'outputs'/'migracao-acerto'/'exemplo_conferido.json'
+        out.parent.mkdir(parents=True,exist_ok=True)
         out.write_text(json.dumps({'fonte':file.name,'aba':sheet.title,'linha':2,'campos':dict(zip(('mort','aloj','qt_aves','ida','ps_med','pes_total','consumo_racao'),values)),'resultados':results,'ambiente':'DuckDB local; pendente validar PostgreSQL'},ensure_ascii=False,indent=2),encoding='utf-8')
 
 

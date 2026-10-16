@@ -7,6 +7,7 @@
 
     const items = [
         { id: "desempenho", label: "Desempenho Lotes Fechados", href: "index.html" },
+        { id: "gpd-fases", label: "GPD por Fase", href: "gpd-por-fase.html" },
         { id: "lotes", label: "Lotes em Criação", href: "lotes.html" },
         { id: "historico", label: "Histórico de Lotes em Criação", href: "historico.html" },
         { id: "diferenca-abate", label: "Diferença de Aves Abatidas", href: "diferenca-aves-abatidas.html" },

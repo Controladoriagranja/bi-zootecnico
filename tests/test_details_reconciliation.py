@@ -24,6 +24,7 @@ class Database:
               [None if i==24 else f'Produtor {i}',None if i==23 else f'Técnico {i%3}',
                i+10,(i+1)*100,(i+1)*80,40+i/10,(i+1)*240,(i+1)*400,
                300+i,None if i==2 else 1.7+i/100,None if i==4 else 10+i,'1.5','1.8'])
+        self.db.execute('CREATE VIEW zootecnico.vw_desempenho_acerto_portal AS SELECT * FROM zootecnico.vw_desempenho_acerto')
     def execute(self,q,values=None):
         query=q.as_string().replace('::numeric','::DOUBLE').replace('%s','?').replace('BTRIM(', 'TRIM(')
         self.queries.append(query)

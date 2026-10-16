@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 
 ROOT=Path(__file__).resolve().parents[1]
-PAGES=('index.html','detalhes.html','lotes.html','historico.html',
+PAGES=('index.html','detalhes.html','lotes.html','historico.html','gpd-por-fase.html',
        'diferenca-aves-abatidas.html','formulas.html')
 
 

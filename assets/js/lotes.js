@@ -70,7 +70,13 @@
       E('periodoRecepcaoLotes').title='Filtro por data de recepção · '+(period?.coluna||'data_recepcao');
       const weeks=data.weekly, labels=weeks.map(w=>`${w.idade} dias`);
       FORMULAS_LOTES.splice(0,FORMULAS_LOTES.length,...buildLotesFormulas(weeks.map(w=>w.idade),data.pinto==null));
-      A.chart("chartMortalidade",labels,[{name:"M+D (Qtde)",type:"bar",data:weeks.map(w=>w.mortes)},{name:"M+D (%)",yAxisIndex:1,data:weeks.map(w=>w.mortalidade)}]);
+      const mortalitySeries=[{name:"M+D (Qtde)",type:"bar",data:weeks.map(w=>w.mortes)},{name:"M+D (%)",yAxisIndex:1,data:weeks.map(w=>w.mortalidade)}];
+      const target=data.metas?.mortalidade_semanal;
+      if(target?.valor!=null&&target.unidade==='%'&&Number.isFinite(Number(target.valor))&&Number(target.valor)>=0){
+        const value=Number(target.valor),label=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:4}).format(value);
+        mortalitySeries.push({name:`Meta (${label}%)`,yAxisIndex:1,isTarget:true,targetValue:value,data:labels.map(()=>value)});
+      }
+      A.chart("chartMortalidade",labels,mortalitySeries);
       A.chart("chartPesoSemanal",labels,[{name:"Média da Coluna",type:'bar',data:weeks.map(w=>w.peso)}]);
       A.chart("chartCrescimento",data.pinto==null?labels:["0 dias",...labels],[{name:"Peso",data:data.pinto==null?weeks.map(w=>w.peso):[data.pinto,...weeks.map(w=>w.peso)]}]);
     }});

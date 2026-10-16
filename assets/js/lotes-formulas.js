@@ -53,7 +53,7 @@
       { id: "mortalidade_semanal", nome: "Mortalidade Semanal",
         formula_exibicao: weeks.map(week => `${week} dias: Σ([Qtde Mort Sem-${suffix(week)}] + [Qtde Desc Sem-${suffix(week)}]) / Σ([Aves Inicia]) × 100`).join("\n"),
         colunas: [...mortalityColumns, "Aves Inicia", "Data Recepcao"],
-        descricao: "Cada barra mostra a quantidade M + D da semana. Cada ponto da linha mostra o percentual dessa mesma semana.",
+        descricao: "Cada barra mostra a quantidade M + D da semana. Cada ponto da linha mostra o percentual dessa mesma semana. A linha tracejada é a meta vigente retornada pela API a partir de zootecnico.metas, no eixo de porcentagem; ela não altera as contas de mortalidade.",
         passos: ["Aplique todos os filtros ativos da tela.", "Para cada semana, selecione somente lotes que atingiram a idade correspondente.", "Some mortes + descartes da coluna dessa semana para obter a barra.", "Divida pelas aves iniciais desses mesmos lotes e multiplique por 100 para obter a linha. O denominador pode variar de uma semana para outra."] },
       { id: "peso_semanal", nome: "Média da Coluna de Peso por Idade",
         formula_exibicao: weeks.map(week => `${week} dias: Σ([Peso Med.-${suffix(week)}]) / quantidade de valores válidos em [Peso Med.-${suffix(week)}]`).join("\n"),

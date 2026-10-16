@@ -1,6 +1,6 @@
 (() => {
   const A=ApiScreen,E=A.element,H=A.escape,N=A.number;
-  const dimensions=[["type","tipo_granja","Tipo de Granja"],["producer","produtor","Produtor"],["model","modelo","Modelo"],["barn","galpao","Galpão"],["technician","tecnico","Técnico"],["lineage","mist_linha","Mist Linha"]];
+  const dimensions=[["type","tipo_granja","Tipo de Granja"],["producer","produtor","Produtor"],["model","modelo","Modelo"],["barn","galpao","Galpão"],["technician","tecnico","Técnico"],["originalLineage","linhagem","Linhagem"],["lineage","mist_linha","Mist Linha"]];
   E("historyFilters").innerHTML=dimensions.map(([id,,label])=>`<div class="filter-field"><span>${label}</span><div id="history-filter-${id}" class="checkbox-multiselect"></div></div>`).join("");
   const spec=[["lotes","Lotes consultados"],["aves","Aves alojadas"],["mortalidade","Mortalidade acumulada",2,"%"],["peso_atual","Peso médio atual (kg)",3]];
   function cards(values) {
@@ -18,14 +18,14 @@
     const points=new Map(weekly.map(w=>[w.idade,w]));
     const cell=(value,combined=false)=>`<${tag} class="num${combined?' history-col-combined':''}">${value}</${tag}>`;
     const percentage=value=>value==null?'—':N(value,2)+'%';
-    return cell(N(cards.aves))+[7,14,21,28,35].map(age=>{
+    return cell(N(cards.aves))+cell(percentage(cards.mortalidade))+cell(N(cards.peso_pinto,3))+cell(N(cards.peso_abate_final,3))+cell(cards.vezes_maior==null?'—':N(cards.vezes_maior,1)+'×')+[7,14,21,28,35].map(age=>{
       const w=points.get(age);
       return view==="weight"?cell(N(w?.peso,2)):cell(percentage(w?.mortalidade),true)+cell(percentage(w?.mortalidade_sem_descartes))+cell(percentage(w?.descarte_percent));
     }).join("");
   }
   function renderTable() {
-    const count=view==="weight"?8:18;
-    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
+    const count=view==="weight"?12:22;
+    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th><th class="num" title="Soma de mortes e descartes de 7, 14, 21, 28 e 35 dias / aves alojadas do grupo vezes 100">Mortalidade total (%)</th><th class="num" title="Média simples de ps_pinto dos lotes do grupo">Peso do pintinho (g)</th><th class="num" title="Média simples de ps_abate dos lotes com vínculo">Peso de abate (kg)</th><th class="num" title="Média simples de (ps_abate × 1000) / ps_pinto por lote com pesos positivos">Vezes maior</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
     if(!data)return;
     let rows=[],buttons=[]; sequence=0;
     function traverse(nodes,path=[]){nodes.forEach(node=>{
@@ -42,7 +42,7 @@
     document.querySelector(".history-table").dataset.view=view;
   }
   const screen=A.connect({bi:"historico-abertos",errorId:"mensagemErroHistorico",clearId:"limparFiltrosHistorico",fields:dimensions.map(([id,key])=>['history-filter-'+id,key]),context:()=>year?{ano:year}:{},
-    clear:()=>{data=null;cards(null);E("historyTableBody").innerHTML='<tr><td colspan="18">Consultando…</td></tr>';E("historyTableFoot").innerHTML="";},
+    clear:()=>{data=null;cards(null);E("historyTableBody").innerHTML=`<tr><td colspan="${view==='weight'?12:22}">Consultando…</td></tr>`;E("historyTableFoot").innerHTML="";},
     onOptions:options=>{
       const host=document.querySelector(".history-year-filter");
       const years=[...new Set((options.ano||[]).map(String).filter(y=>/^\d{4}$/.test(y)&&Number(y)>=2023&&Number(y)<=new Date().getFullYear()))].sort((a,b)=>Number(b)-Number(a));

@@ -29,7 +29,7 @@ class Cursor:
     def fetchone(self): return self.rows[0] if self.rows else None
 
 class Connection:
-    def __init__(self,tables): self.tables=tables;self.queries=[]
+    def __init__(self,tables): self.tables={'metas':[],**tables};self.queries=[]
     def execute(self,q,values=None):
         query=q.as_string();self.queries.append((query,values))
         for table,rows in self.tables.items():
@@ -99,8 +99,8 @@ class BackendTests(unittest.TestCase):
         for metric in BI_REGISTRY['zootecnico']['metrics'].values():
             if metric['aggregation']=='weighted_avg': self.assertEqual(metric['null_policy'],'valid_pairs')
         self.assertEqual(BI_REGISTRY['zootecnico']['date_column'],'data_abate')
-        self.assertEqual(BI_REGISTRY['zootecnico']['table'],'vw_desempenho_acerto')
-        self.assertTrue(all(m['aggregation'] in {'avg','sum','ratio_sums','weighted_avg'} for m in BI_REGISTRY['zootecnico']['metrics'].values()))
+        self.assertEqual(BI_REGISTRY['zootecnico']['table'],'vw_desempenho_acerto_portal')
+        self.assertTrue(all(m['aggregation'] in {'avg','sum','ratio_sums','weighted_avg','efficiency_index'} for m in BI_REGISTRY['zootecnico']['metrics'].values()))
     def test_numeric_safe(self):
         for v in ('1.234,56','nan','1e2','',None): self.assertIsNone(a.number(v))
         self.assertEqual(a.number(' -12,5 '),Decimal('-12.5'))
@@ -158,9 +158,10 @@ class BackendTests(unittest.TestCase):
         details=a.query_payload(c,request(),lambda:bank(conn),'detalhes')
         self.assertEqual(details['total'],2)
         self.assertEqual(details['cards']['aves'],600)
-    def test_open_history_uses_only_open_table_and_reception_year(self):
+    def test_open_history_uses_open_view_and_reception_year(self):
         c=BI_REGISTRY['historico-abertos']
-        self.assertEqual(c['table'],'mortalidade_peso_abertos')
+        self.assertEqual(c['table'],'vw_historico_lotes_criacao_portal')
+        self.assertEqual(c['columns']['peso_abate_final'],'ps_abate_historico')
         self.assertNotIn('abate',c['columns'])
         self.assertNotIn('peso_abate',c['columns'])
         self.assertNotIn('age_window',c)
@@ -169,14 +170,14 @@ class BackendTests(unittest.TestCase):
               {'id':3,'ano':'2026','recepcao':'invalid','aves':300},
               {'id':4,'ano':'2026','recepcao':'2027-01-01','aves':400},
               {'id':5,'ano':'2090','recepcao':'2026-08-01','aves':500,'mort7':5}]
-        conn=Connection({'mortalidade_peso_abertos':rows})
+        conn=Connection({c['table']:rows})
         prepared=a.prepare_rows(conn,c,date(2026,10,8))
         self.assertEqual([r['ano'] for r in prepared],['2023','2026'])
         result=a.query_payload(c,request([('ano','2023')]),lambda:bank(conn),'resumo')
-        self.assertEqual(result['fontes'],['mortalidade_peso_abertos'])
+        self.assertEqual(result['fontes'],['vw_historico_lotes_criacao_portal'])
         self.assertEqual(result['cards']['aves'],100)
         self.assertEqual(result['cards']['mortes'],1)
-        self.assertFalse(any('data_abate' in q or 'ps_abate' in q or 'mortalidade_peso_fechados' in q for q,_ in conn.queries))
+        self.assertFalse(any('data_abate' in q or 'mortalidade_peso_fechados' in q for q,_ in conn.queries))
         self.assertEqual(BI_REGISTRY['lotes-abertos']['age_window'],[0,45])
     def test_barn_drawer_metadata_from_api(self):
         c=BI_REGISTRY['lotes-abertos']

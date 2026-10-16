@@ -56,6 +56,12 @@ const FIRST_FILTERS = [
         apiKey: "tipo_linhagem",
         search: false,
         multi: true
+    },
+    {
+        id: "linhagem",
+        apiKey: "linhagem",
+        search: true,
+        multi: true
     }
 ];
 
