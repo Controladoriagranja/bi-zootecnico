@@ -4,7 +4,11 @@
   const collator = new Intl.Collator('pt-BR', {numeric:true, sensitivity:'base'});
   function value(row, index) {
     const cell=row.cells[index];
-    if(cell?.dataset.sortValue!==undefined)return cell.dataset.sortValue;
+    if(cell?.dataset.sortValue!==undefined){
+      const raw=cell.dataset.sortValue;
+      if(!cell.classList.contains('num'))return raw;
+      return raw!==''&&Number.isFinite(Number(raw))?Number(raw):null;
+    }
     const text=(cell?.textContent||'').replace(/^[+−]\s*/, '').trim();
     if(!text || text==='—')return null;
     if(cell?.classList.contains('num')) {

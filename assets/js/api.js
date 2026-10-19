@@ -197,7 +197,14 @@ async function requestApi(endpoint, params = {}, options = {}) {
   }
   if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
       && (data.rules_version !== "acerto-iep-mensal-2026-10-16" || data.arquivo !== "zootecnico.vw_desempenho_acerto_portal")) {
-    throw new ApiError("O serviço ainda não está usando a fonte de acerto e as regras atualizadas. Publique a view e o backend antes de consultar estas telas.", 503, "SOURCE_PENDING");
+    const receivedRules = String(data.rules_version || "não informadas").slice(0, 100);
+    const receivedSource = String(data.arquivo || "não informada").slice(0, 120);
+    throw new ApiError(
+      "A API respondeu com regras " + receivedRules + " e fonte " + receivedSource + ". " +
+      "Esta tela exige acerto-iep-mensal-2026-10-16 e zootecnico.vw_desempenho_acerto_portal. " +
+      "Confira os arquivos instalados e reconstrua/recrie o serviço zootecnico no Anderson.",
+      503, "SOURCE_PENDING"
+    );
   }
   return data;
 }

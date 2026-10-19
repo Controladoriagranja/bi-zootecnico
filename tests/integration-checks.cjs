@@ -3,7 +3,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
-const pages = ['index','detalhes','lotes','historico','diferenca-aves-abatidas','formulas'];
+const pages = ['index','detalhes','lotes','historico','diferenca-aves-abatidas','formulas','gpd-por-fase'];
 async function run() {
   const results = [];
   async function check(name, action) { await action(); results.push(name); }
