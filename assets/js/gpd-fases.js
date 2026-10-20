@@ -27,12 +27,12 @@
     },true);
     drawnData=data;
   }
-  function clear(){data=null;chart?.clear();E('phaseHead').innerHTML='';E('phaseBody').innerHTML='';E('phaseCoverage').classList.add('hidden');E('phaseContext').textContent='Consultando…';E('phaseUpdated').textContent='—';}
+  function clear(){data=null;chart?.clear();E('phaseHead').innerHTML='';E('phaseBody').innerHTML='';E('phaseCoverage').classList.add('hidden');E('phaseContext').textContent='Consultando…';exibirAtualizacaoDados(E('phaseUpdated'),null);}
   const screen=A.connect({bi:'gpd-fases',fields:dimensions.map(([key])=>['phase-filter-'+key,key]),errorId:'phaseError',clearId:'phaseClear',context:()=>({agrupamento:unit}),clear,
     render:result=>{
       if(result.rules_version!=='gpd-fases-2026-10-19'||!Array.isArray(result.periodos)||!Array.isArray(result.fases))throw new Error('Atualize o backend para consultar GPD por Fase.');
       data=result;unit=result.agrupamento;
-      E('phaseUpdated').textContent=(result.atualizado_em||'—').replace(/^(\d{4})-(\d{2})-(\d{2})[ T]/,'$3/$2/$1 ');
+      exibirAtualizacaoDados(E('phaseUpdated'),result);
       E('phaseContext').textContent=`${unit==='dia'?'Dia':'Semana'} do abate · ${N(result.cards.lotes)} lotes · ${N(result.cards.com_vinculo)} com pesos vinculados`;
       const incomplete=result.fases.some(f=>result.totais[f.id].lotes<result.cards.lotes);
       if(incomplete)A.message('phaseCoverage','Há lotes sem vínculo ou sem bases válidas em alguma fase. Cada célula mostra a quantidade usada no cálculo.');

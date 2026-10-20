@@ -3114,14 +3114,10 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 
 /* Histórico de lotes — ajustes visuais v4 */
 .history-page {
-  --history-combined-col-bg: color-mix(in srgb, var(--primary) 8%, var(--card));
-  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 12%, var(--card));
   --history-row-odd-bg: color-mix(in srgb, var(--primary) 1.5%, var(--card));
   --history-row-even-bg: color-mix(in srgb, var(--secondary) 6%, var(--card));
 }
 [data-theme="dark"] .history-page {
-  --history-combined-col-bg: color-mix(in srgb, var(--primary) 18%, var(--card));
-  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 24%, var(--card));
   --history-row-odd-bg: color-mix(in srgb, var(--foreground) 3%, var(--card));
   --history-row-even-bg: color-mix(in srgb, var(--foreground) 6%, var(--card));
 }
@@ -3157,11 +3153,8 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 .history-table tbody tr.history-level-1 td { background: color-mix(in srgb, var(--primary) 5%, var(--history-row-even-bg)); font-weight: 700; }
 .history-table tbody tr.history-level-2 td { background: color-mix(in srgb, var(--primary) 3%, var(--history-row-odd-bg)); }
 .history-table tbody tr.history-level-3 td { background: var(--history-row-even-bg); }
-.history-table .history-col-combined { background: var(--history-combined-col-bg) !important; }
 .history-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 6%, var(--card)); }
-.history-table tbody tr:hover td.history-col-combined { background: var(--history-combined-col-hover-bg) !important; }
 .history-table tfoot th { background: color-mix(in srgb, var(--primary) 4%, var(--card)); }
-.history-table tfoot .history-col-combined { background: var(--history-combined-col-bg); }
 .history-expand { gap: 6px; width: 100%; }
 .history-expand span:last-child { overflow: hidden; text-overflow: ellipsis; }
 .history-level-1 td:first-child { padding-left: 24px; }
@@ -3208,45 +3201,18 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 .history-page {
   --history-row-odd-bg: color-mix(in srgb, var(--card) 90%, var(--muted) 10%);
   --history-row-even-bg: color-mix(in srgb, var(--card) 84%, var(--muted) 16%);
-  --history-combined-col-odd-bg: color-mix(in srgb, var(--primary) 9%, var(--history-row-odd-bg));
-  --history-combined-col-even-bg: color-mix(in srgb, var(--primary) 13%, var(--history-row-even-bg));
-  --history-combined-col-head-bg: color-mix(in srgb, var(--primary) 11%, var(--card));
-  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 16%, var(--card));
 }
 [data-theme="dark"] .history-page {
   --history-row-odd-bg: color-mix(in srgb, var(--card) 92%, var(--foreground) 8%);
   --history-row-even-bg: color-mix(in srgb, var(--card) 86%, var(--foreground) 14%);
-  --history-combined-col-odd-bg: color-mix(in srgb, var(--primary) 20%, var(--history-row-odd-bg));
-  --history-combined-col-even-bg: color-mix(in srgb, var(--primary) 24%, var(--history-row-even-bg));
-  --history-combined-col-head-bg: color-mix(in srgb, var(--primary) 22%, var(--card));
-  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 28%, var(--card));
 }
 .history-table tbody tr:nth-child(odd) td { background: var(--history-row-odd-bg); }
 .history-table tbody tr:nth-child(even) td { background: var(--history-row-even-bg); }
-.history-table thead th.history-col-combined,
-.history-table tfoot .history-col-combined {
-  background: var(--history-combined-col-head-bg);
-  color: var(--primary);
-}
-.history-table tbody tr:nth-child(odd) td.history-col-combined {
-  background: var(--history-combined-col-odd-bg) !important;
-  color: var(--primary);
-  font-weight: 700;
-}
-.history-table tbody tr:nth-child(even) td.history-col-combined {
-  background: var(--history-combined-col-even-bg) !important;
-  color: var(--primary);
-  font-weight: 700;
-}
-.history-table tbody tr:hover td.history-col-combined {
-  background: var(--history-combined-col-hover-bg) !important;
-}
-.history-table tbody tr.history-level-0 td.history-col-combined {
-  background: color-mix(in srgb, var(--primary) 18%, var(--history-row-odd-bg)) !important;
-}
-.history-table tbody tr.history-level-1 td.history-col-combined {
-  background: color-mix(in srgb, var(--primary) 15%, var(--history-row-even-bg)) !important;
-}
+
+
+
+
+
 
 /* Tabelas do Histórico e Lotes: padrão visual compacto do portal. */
 .history-page .history-table-wrap { margin: 0 12px 12px; border: 1px solid var(--border); border-radius: 8px; }
@@ -3256,7 +3222,6 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 .history-page .history-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--secondary) 35%, var(--card)); }
 .history-page .history-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
 .history-page .history-table th, .history-page .history-table td { padding-top: 7px; padding-bottom: 7px; border-left: 0; }
-.history-page .history-table :is(thead, tbody, tfoot) tr :is(th, td).history-col-combined { background: color-mix(in srgb, var(--primary) 5%, var(--card)) !important; color: var(--primary); font-weight: 700; }
 .history-page .history-table tfoot th { background: var(--card); }
 .history-page .history-table .history-expand span:first-child { border: 0; background: transparent; border-radius: 0; }
 .lotes-reference-table th, .lotes-reference-table td, .lotes-reference-table tfoot th { font-size: 13px; padding: 10px 11px; }
@@ -3400,3 +3365,10 @@ body.lotes-drawer-open { overflow:hidden; }
   .lotes-galpao-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .lotes-galpao-detail-chart { height:225px; }
 }
+
+.update-meta .update-stale{color:var(--primary);font-weight:650;font-size:10px;margin-top:3px;text-transform:none;letter-spacing:normal}
+
+/* M+D: destaque somente quando o percentual exibido excede 1%. */
+.history-page { --history-md-alert-bg: #faf0df; --history-md-alert-text: #78552d; }
+[data-theme="dark"] .history-page { --history-md-alert-bg: #3b3024; --history-md-alert-text: #e4c295; }
+.history-page .history-table :is(tbody, tfoot) tr :is(td, th).history-md-alert { background: var(--history-md-alert-bg) !important; color: var(--history-md-alert-text); }

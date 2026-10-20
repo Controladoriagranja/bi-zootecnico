@@ -7,7 +7,7 @@ const root = path.resolve(process.env.BI_FRONTEND_ROOT || projectRoot);
 const weekly=[7,14,21,28,35].map(idade=>({idade,mortes:10,mortalidade:1,mortalidade_sem_descartes:0.8,descarte_percent:0.2,peso:100*idade}));
 const cards={lotes:1,aves:1000,mortes:50,mortalidade:5,peso:2100,peso_atual:3,peso_pinto:44.6,peso_abate_final:2.919,vezes_maior:2.919*1000/44.6};
 const rxpCards={programada:100,real:90,diferenca:-10,registrosComDiferenca:1,difPercent:-10};
-const meta={rules_version:'acerto-iep-mensal-2026-10-16',arquivo:'zootecnico.vw_desempenho_acerto_portal',atualizado_em:'2026-10-02T12:00:00',periodo_recepcao:{data_inicio:'2026-08-23',data_fim:'2026-10-07',coluna:'data_recepcao'}};
+const meta={rules_version:'acerto-iep-mensal-2026-10-16',arquivo:'zootecnico.vw_desempenho_acerto_portal',atualizado_em:'2026-10-20T08:05:25.123456-03:00',atualizacao_dados:{fontes:[{tabela:'zootecnico.acerto_lote_resultado_geral',coluna:'carregado_em',carregado_em:'2026-10-20T08:05:25-03:00'}],cache:{carga_base_preservada_em:'2026-10-16T14:09:12-03:00',base_principal_defasada:true}},periodo_recepcao:{data_inicio:'2026-08-23',data_fim:'2026-10-07',coluna:'data_recepcao'}};
 async function main(){
   const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
   const results=[];
@@ -75,6 +75,19 @@ async function main(){
             if(scenario==='targetMissing')body.metas={};
             if(scenario==='targetSingleWeek')body.weekly=[{...weekly[0],mortalidade:0.2}];
           }
+          if(name==='historico'&&scenario==='partialWeeks'&&body.cards){
+            const barn=(value,aves,mort,disc)=>({campo:'galpao',valor:value,cards:{...cards,aves},weekly:[
+              {idade:7,mortalidade:(mort+disc)/aves*100,mortalidade_sem_descartes:mort/aves*100,descarte_percent:disc/aves*100},
+              {idade:14,mortalidade:null,mortalidade_sem_descartes:null,descarte_percent:null},
+              {idade:21,mortalidade:1.004,mortalidade_sem_descartes:1,descarte_percent:.004},
+              {idade:28,mortalidade:1.005,mortalidade_sem_descartes:1,descarte_percent:.005}
+            ],children:[]});
+            const children=[barn('616B',36000,197,191),barn('616A',35000,149,294)];
+            const point={idade:7,mortalidade:831/71000*100,mortalidade_sem_descartes:346/71000*100,descarte_percent:485/71000*100};
+            const producer={campo:'produtor',valor:'Ademir',cards:{...cards,aves:71000},weekly:[point],children};
+            body.hierarchy=[{campo:'semana',valor:'42',cards:producer.cards,weekly:[point],children:[producer]}];
+            body.weekly=[point];body.cards=producer.cards;
+          }
           await route.fulfill({contentType:'application/json',body:JSON.stringify(body)});return;
         }
         const relative=decodeURIComponent(u.pathname).replace(/^\//,'');
@@ -85,6 +98,8 @@ async function main(){
         ? document.querySelector('#historyKpis strong')?.textContent==='1'
         : document.body.innerText.includes('Produtor teste')||document.body.innerText.includes('60,00')||document.body.innerText.includes('AVE NOVA'),name);
       if(name==='index'){
+        assert.equal(await page.locator('#ultimaAtualizacao').innerText(),'20/10/2026 08:05');
+        assert.equal(await page.locator('[data-update-lag]').innerText(),'Cache pendente');
         assert.equal(await page.locator('#linhagem .checkbox-multiselect-trigger').count(),1);
         await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
         const julyLink=page.locator('a.metric-value-link[href*="ano=2026"][href*="mes=7"]').first();
@@ -94,6 +109,8 @@ async function main(){
         assert.equal(target.searchParams.get('indicador'),'gmd');
       }
       if(name==='detalhes'){
+        assert.equal(await page.locator('#ultimaAtualizacao').innerText(),'20/10/2026 08:05');
+        assert.equal(await page.locator('[data-update-lag]').innerText(),'Cache pendente');
         await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
         const initialQueries=queries.filter(q=>q.path.endsWith('/detalhes')||q.path.endsWith('/filtros'));
         assert(initialQueries.length>=3);
@@ -119,24 +136,40 @@ async function main(){
         assert.equal(appearance.growth.label.show,true);
         assert.equal(appearance.weight.type,'bar');assert.equal(appearance.weight.label.show,true);
         assert.equal(appearance.mortality.label.fontWeight,700);
-        const target=await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption().series.find(s=>s.name==='Meta (1%)'));
-        assert(target,'A meta deve vir da resposta da API');
+        const target=await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption().series.find(s=>s.name==='Meta 1%'));
+        assert(target,'A meta fixa deve aparecer independentemente da API');
         assert.equal(target.yAxisIndex,1);
-        assert.equal(target.lineStyle.type,'dashed');
+        assert.equal(target.markLine.lineStyle.type,'dashed');
+        assert.equal(target.markLine.lineStyle.width,1);
+        assert.equal(target.markLine.label.formatter,'Meta 1%');
         assert(target.data.every(value=>value===1));
         assert.equal(target.markLine.data[0].yAxis,1);
         scenario='targetChanged';await page.locator('#limparFiltrosLotes').click();
-        await page.waitForFunction(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption()?.series?.some(s=>s.name==='Meta (2,5%)'));
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption().series[2].targetValue),1);
         scenario='targetMissing';await page.locator('#limparFiltrosLotes').click();
-        await page.waitForFunction(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption()?.series?.length===2);
+        await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));
+        assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption().series.length),3);
         scenario='targetSingleWeek';await page.locator('#limparFiltrosLotes').click();
         await page.waitForFunction(()=>{const s=echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption()?.series;return s?.length===3&&s[2].data.length===1;});
         assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption().series[2].markLine.data[0].yAxis),1);
+        assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getModel().getComponent('yAxis',1).axis.scale.getExtent()[1]),1.5);
         scenario='normal';await page.locator('#limparFiltrosLotes').click();
-        await page.waitForFunction(()=>{const s=echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption()?.series;return s?.length===3&&s[2].data.length===5&&s[2].name==='Meta (1%)';});
+        await page.waitForFunction(()=>{const s=echarts.getInstanceByDom(document.getElementById('chartMortalidade')).getOption()?.series;return s?.length===3&&s[2].data.length===5&&s[2].name==='Meta 1%';});
         assert.equal(await page.locator('#tabelaLotesFoot th').count(),5);
         await fs.mkdir(path.join(projectRoot,'tests/frontend-previews'),{recursive:true});
         await page.screenshot({path:path.join(projectRoot,'tests/frontend-previews/lotes-visual.png'),fullPage:true});
+        for(const theme of ['light','dark']){
+          await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.dispatchEvent(new Event('dashboard:theme-changed'));},theme);
+          assert((await page.locator('#chartMortalidade').textContent()).includes('Meta 1%'));
+          await page.waitForTimeout(450);
+          await page.locator('#chartMortalidade').screenshot({path:path.join(projectRoot,`tests/frontend-previews/meta-${theme}.png`)});
+        }
+        await page.setViewportSize({width:390,height:844});
+        await page.waitForTimeout(450);
+        await page.locator('#chartMortalidade').screenshot({path:path.join(projectRoot,'tests/frontend-previews/meta-mobile.png')});
+        await page.setViewportSize({width:1365,height:900});
+        await page.evaluate(()=>{document.documentElement.dataset.theme='light';document.dispatchEvent(new Event('dashboard:theme-changed'));});
         await page.locator('#tabGalpoes').click();
         const style=await page.evaluate(()=>({color:echarts.getInstanceByDom(document.querySelector('#chartGalpoesRanking')).getOption().series[0].itemStyle.color,primary:getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),bar:echarts.getInstanceByDom(document.querySelector('#chartGalpoesRanking')).getOption().series[0].barMaxWidth}));
         assert.equal(style.color,style.primary);assert.equal(style.bar,24);
@@ -170,6 +203,32 @@ async function main(){
         assert.equal(await page.locator('[data-history-year].active').innerText(),'2026');
         await page.locator('[data-history-node]').first().click();assert((await page.locator('#historyTableBody').innerText()).includes('Produtor teste'));
         assert.equal(await page.locator('#historyTableBody .history-level-1 td').nth(3).innerText(),'5,00%');
+        scenario='partialWeeks';await page.locator('#limparFiltrosHistorico').click();
+        await page.waitForFunction(()=>document.querySelector('#historyTableBody')?.textContent.includes('Semana 42'));
+        await page.locator('[data-history-node]').first().click();
+        await page.locator('.history-level-1 [data-history-node]').click();
+        const rows=page.locator('#historyTableBody tr');
+        for(const [index,expected] of [[0,'1,17%'],[1,'1,17%'],[2,'1,08%'],[3,'1,27%']]){
+          assert.equal(await rows.nth(index).locator('td').nth(7).innerText(),expected);
+          assert(await rows.nth(index).locator('td').nth(7).evaluate(el=>el.classList.contains('history-md-alert')));
+        }
+        const barnCells=rows.nth(2).locator('td');
+        assert.equal(await barnCells.nth(10).innerText(),'—');
+        assert.equal(await barnCells.nth(13).innerText(),'1,00%');
+        assert.equal(await barnCells.nth(16).innerText(),'1,01%');
+        assert.equal(await barnCells.nth(13).evaluate(el=>el.classList.contains('history-md-alert')),false);
+        assert.equal(await barnCells.nth(16).evaluate(el=>el.classList.contains('history-md-alert')),true);
+        assert.equal(await page.locator('#historyTableHead .history-md-alert').count(),0);
+        for(const theme of ['light','dark']){
+          await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+          const colors=await barnCells.nth(7).evaluate(el=>({bg:getComputedStyle(el).backgroundColor,expected:getComputedStyle(document.querySelector('.history-page')).getPropertyValue('--history-md-alert-bg').trim()}));
+          assert.equal(colors.bg,theme==='dark'?'rgb(59, 48, 36)':'rgb(250, 240, 223)');
+          assert.equal(await barnCells.nth(13).evaluate(el=>getComputedStyle(el).color===getComputedStyle(el.parentElement.children[14]).color),true);
+          await fs.mkdir(path.join(projectRoot,'tests/frontend-previews'),{recursive:true});
+          await page.locator('.history-table-wrap').screenshot({path:path.join(projectRoot,`tests/frontend-previews/historico-md-${theme}.png`)});
+        }
+        await page.evaluate(()=>document.documentElement.dataset.theme='light');
+        scenario='normal';
       }
       if(name==='diferenca-aves-abatidas'){
         await page.waitForFunction(()=>document.querySelector('#apiFilterProgress')?.classList.contains('hidden'));

@@ -16,11 +16,16 @@
   const expanded=new Set();
   function values(cards,weekly,tag='td') {
     const points=new Map(weekly.map(w=>[w.idade,w]));
-    const cell=(value,combined=false)=>`<${tag} class="num${combined?' history-col-combined':''}">${value}</${tag}>`;
+    const cell=(value,combined=false,alert=false)=>`<${tag} class="num${combined?' history-col-combined':''}${alert?' history-md-alert':''}">${value}</${tag}>`;
     const percentage=value=>value==null?'—':N(value,2)+'%';
+    const combinedCell=value=>{
+      const displayed=N(value,2);
+      const rounded=Number(displayed.replace(/\./g,'').replace(',','.'));
+      return cell(percentage(value),true,Number.isFinite(rounded)&&rounded>1);
+    };
     return cell(N(cards.aves))+cell(percentage(cards.mortalidade))+cell(N(cards.peso_pinto,3))+cell(N(cards.peso_abate_final,3))+cell(cards.vezes_maior==null?'—':N(cards.vezes_maior,1)+'×')+[7,14,21,28,35].map(age=>{
       const w=points.get(age);
-      return view==="weight"?cell(N(w?.peso,2)):cell(percentage(w?.mortalidade),true)+cell(percentage(w?.mortalidade_sem_descartes))+cell(percentage(w?.descarte_percent));
+      return view==="weight"?cell(N(w?.peso,2)):combinedCell(w?.mortalidade)+cell(percentage(w?.mortalidade_sem_descartes))+cell(percentage(w?.descarte_percent));
     }).join("");
   }
   function renderTable() {

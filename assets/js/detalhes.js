@@ -286,13 +286,7 @@ function render() {
         .textContent =
         "Rankings e evolução dos indicadores zootécnicos.";
 
-    document
-        .getElementById(
-            "ultimaAtualizacao"
-        )
-        .textContent =
-        detalhesData.atualizado_em
-        || "—";
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),detalhesData);
 
     document
         .getElementById(
@@ -348,6 +342,7 @@ async function carregarDetalhes(
     initial = false
 ) {
     const requestId = ++detailRequestId;
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
     document.getElementById("mensagemErro").classList.add("hidden");
     document.getElementById("kpiValor").textContent = "—";
     ['Tecnicos','Produtores'].forEach(suffix=>{
@@ -411,6 +406,7 @@ async function carregarDetalhes(
         }
 
         console.error(error);
+        exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
 
         const el =
             document.getElementById(

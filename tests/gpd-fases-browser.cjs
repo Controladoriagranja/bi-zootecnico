@@ -32,6 +32,7 @@ function payload(unit,empty=false){
   await page.waitForFunction(()=>document.querySelectorAll('#phaseBody tr').length===6);
   assert.equal(await page.locator('#phaseFilters .checkbox-multiselect').count(),10);
   assert.equal(await page.locator('h1').innerText(),'GPD por Fase');
+  assert.equal(await page.locator('#phaseUpdated').innerText(),'19/10/2026 10:00');
   assert((await page.locator('.page-header p').innerText()).includes('Lotes fechados'));
   const getChart=()=>page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#phaseChart')).getOption());
   let chart=await getChart();assert.equal(chart.series.length,6);assert.equal(chart.xAxis[0].data.length,5);

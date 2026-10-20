@@ -136,6 +136,7 @@ const filters = new FilterController({
 
 
 function errorMessage(message) {
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
     const el =
         document.getElementById(
             "mensagemErro"
@@ -642,13 +643,7 @@ function renderDashboard() {
         return;
     }
 
-    document
-        .getElementById(
-            "ultimaAtualizacao"
-        )
-        .textContent =
-        dashboardData.atualizado_em
-        || "—";
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),dashboardData);
 
     const container =
         document.getElementById(
@@ -694,6 +689,7 @@ async function carregarDashboard(
     initial = false
 ) {
     const requestId = ++performanceRequestId;
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
     clearError();
     document.getElementById("indicadores").classList.add("hidden");
     document.getElementById("loadingDashboard").classList.remove("hidden");
