@@ -3369,6 +3369,6 @@ body.lotes-drawer-open { overflow:hidden; }
 .update-meta .update-stale{color:var(--primary);font-weight:650;font-size:10px;margin-top:3px;text-transform:none;letter-spacing:normal}
 
 /* M+D: destaque somente quando o percentual exibido excede 1%. */
-.history-page { --history-md-alert-bg: #faf0df; --history-md-alert-text: #78552d; }
-[data-theme="dark"] .history-page { --history-md-alert-bg: #3b3024; --history-md-alert-text: #e4c295; }
+.history-page { --history-md-alert-bg: #fce7e7; --history-md-alert-text: #9e3f45; }
+[data-theme="dark"] .history-page { --history-md-alert-bg: #48282e; --history-md-alert-text: #f3b4bc; }
 .history-page .history-table :is(tbody, tfoot) tr :is(td, th).history-md-alert { background: var(--history-md-alert-bg) !important; color: var(--history-md-alert-text); }

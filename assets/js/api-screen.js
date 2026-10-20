@@ -75,6 +75,7 @@ window.ApiScreen = (() => {
     async function refresh() {
       const id = ++requestId;
       abort?.abort(); abort = new AbortController();
+      window.exibirAtualizacaoDados(element('ultimaAtualizacao'),null);
       clear(); clearCharts();
       element(errorId).classList.add("hidden");
       try {
@@ -84,6 +85,7 @@ window.ApiScreen = (() => {
         const display = data => {
           if (id !== requestId) return;
           if (!data.rules_version || !data.cards || !Array.isArray(data.groups)) throw new Error("A API retornou um contrato incompatível.");
+          window.exibirAtualizacaoDados(element('ultimaAtualizacao'),data);
           render(data, params);
         };
         if (progressive) await ApiProgressive.records(endpoint("resumo"),params,{signal:abort.signal},display);
@@ -91,7 +93,7 @@ window.ApiScreen = (() => {
         if (id !== requestId) return;
         element(errorId).classList.add("hidden");
       } catch (error) {
-        if (error.name !== "AbortError" && id === requestId) { clear(); message(errorId,error.message,true); }
+        if (error.name !== "AbortError" && id === requestId) { clear(); window.exibirAtualizacaoDados(element('ultimaAtualizacao'),null); message(errorId,error.message,true); }
       }
     }
     element(clearId)?.addEventListener("click",()=>{filters.clear(); refresh();});

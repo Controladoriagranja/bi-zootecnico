@@ -108,6 +108,7 @@ async function main(){
         assert.deepEqual(target.searchParams.getAll('mes'),['7']);
         assert.equal(target.searchParams.get('indicador'),'gmd');
       }
+      assert.equal(await page.locator('#ultimaAtualizacao').innerText(),'20/10/2026 08:05',`Data de carga em ${name}`);
       if(name==='detalhes'){
         assert.equal(await page.locator('#ultimaAtualizacao').innerText(),'20/10/2026 08:05');
         assert.equal(await page.locator('[data-update-lag]').innerText(),'Cache pendente');
@@ -222,7 +223,7 @@ async function main(){
         for(const theme of ['light','dark']){
           await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
           const colors=await barnCells.nth(7).evaluate(el=>({bg:getComputedStyle(el).backgroundColor,expected:getComputedStyle(document.querySelector('.history-page')).getPropertyValue('--history-md-alert-bg').trim()}));
-          assert.equal(colors.bg,theme==='dark'?'rgb(59, 48, 36)':'rgb(250, 240, 223)');
+          assert.equal(colors.bg,theme==='dark'?'rgb(72, 40, 46)':'rgb(252, 231, 231)');
           assert.equal(await barnCells.nth(13).evaluate(el=>getComputedStyle(el).color===getComputedStyle(el.parentElement.children[14]).color),true);
           await fs.mkdir(path.join(projectRoot,'tests/frontend-previews'),{recursive:true});
           await page.locator('.history-table-wrap').screenshot({path:path.join(projectRoot,`tests/frontend-previews/historico-md-${theme}.png`)});
@@ -297,6 +298,10 @@ async function main(){
       const out=path.join(projectRoot,'tests','frontend-previews');await fs.mkdir(out,{recursive:true});await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});
       if(name==='lotes'){await page.locator('#galpaoDrawerFechar').click();await page.locator('#tabProdutores').click();}
       if(name==='diferenca-aves-abatidas'&&await page.locator('#modalAbateFechar').isVisible())await page.locator('#modalAbateFechar').click();
+      await page.setViewportSize({width:390,height:844});
+      const updateBox=await page.locator('#ultimaAtualizacao').boundingBox();
+      assert(updateBox&&updateBox.x>=0&&updateBox.x+updateBox.width<=390,`Cabeçalho visível no celular: ${name}`);
+      await page.setViewportSize({width:1365,height:900});
       const clearId={index:'limparFiltros',detalhes:'limparFiltrosDetalhes',lotes:'limparFiltrosLotes',historico:'limparFiltrosHistorico','diferenca-aves-abatidas':'limparFiltrosAbate'}[name];
       const errorId={index:'mensagemErro',detalhes:'mensagemErro',lotes:'mensagemErroLotes',historico:'mensagemErroHistorico','diferenca-aves-abatidas':'erroRxp'}[name];
       const producerId={index:'produtor',detalhes:'produtor',lotes:'produtor',historico:'history-filter-producer','diferenca-aves-abatidas':'filtroProdutor'}[name];
