@@ -3187,7 +3187,7 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 .history-table .history-expand[aria-expanded="true"] { font-weight: 800; }
 .history-table .history-expand:focus-visible, .history-table .history-sort:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .history-table tbody tr.history-level-0 td { border-top: 2px solid var(--border); }
-.history-page .history-table[data-view="mortality"] .history-col-combined { border-left: 1px solid var(--border); }
+.history-page .history-table .history-period-start { border-left: 1px solid var(--border); }
 @media (max-width: 768px) {
   .history-table th:first-child, .history-table td:first-child { width: 160px; min-width: 160px; max-width: 160px; }
   .history-table th, .history-table td { padding-top: 8px; padding-bottom: 8px; }
