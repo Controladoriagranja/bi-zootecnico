@@ -30,7 +30,7 @@
   }
   function renderTable() {
     const count=view==="weight"?12:22;
-    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th><th class="num" title="Soma de mortes e descartes de 7, 14, 21, 28 e 35 dias / aves alojadas do grupo vezes 100">Mortalidade total (%)</th><th class="num" title="Média simples de ps_pinto dos lotes do grupo">Peso do pintinho (g)</th><th class="num" title="Média simples de ps_abate dos lotes com vínculo">Peso de abate (kg)</th><th class="num" title="Média simples de (ps_abate × 1000) / ps_pinto por lote com pesos positivos">Vezes maior</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
+    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th><th class="num" title="Soma de mortes e descartes de 7, 14, 21, 28 e 35 dias / aves alojadas do grupo vezes 100">Mortalidade total (%)</th><th class="num" title="Média simples de ps_pinto dos lotes do grupo">Peso do pintinho (g)</th><th class="num" title="Média simples de ps_abate dos lotes com vínculo">Peso de abate (kg)</th><th class="num" title="Média simples de peso_med_07 / ps_pinto por lote com pesos positivos">PS Pintinho x<br>7 dias</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
     if(!data)return;
     let rows=[],buttons=[]; sequence=0;
     function traverse(nodes,path=[]){nodes.forEach(node=>{

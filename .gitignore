@@ -11,3 +11,5 @@ tests/frontend-previews/
 _site/
 _outputs/
 outputs/
+_backup_antes_restaurar/
+tools/

@@ -73,22 +73,22 @@ window.FORMULAS_HISTORICO = [
   },
   {
     "id": "pesos_lote",
-    "nome": "Peso do pintinho, peso de abate e vezes maior",
-    "formula_exibicao": "Por lote: Vezes maior = (ps_abate × 1000) / ps_pinto\nPor grupo/total: média simples dos valores individuais válidos",
-    "descricao": "ps_pinto vem de mortalidade_peso_abertos em gramas; ps_abate vem de mortalidade_peso_fechados em kg. A conversão para gramas mantém a razão na mesma unidade.",
-    "colunas": ["codigo_granja", "galp", "num_lote", "data_recepcao", "ps_pinto", "ps_abate"],
+    "nome": "Peso do pintinho, peso de abate e PS Pintinho x 7 dias",
+    "formula_exibicao": "Por lote: PS Pintinho x 7 dias = peso_med_07 / ps_pinto\nPor grupo/total: média simples das razões individuais válidas",
+    "descricao": "ps_pinto e peso_med_07 vêm de zootecnico.mortalidade_peso_abertos, ambos em gramas, pela view vw_historico_lotes_criacao_portal. O peso de abate permanece uma coluna independente, ligado a mortalidade_peso_fechados.",
+    "colunas": ["codigo_granja", "galp", "num_lote", "data_recepcao", "ps_pinto", "ps_abate", "peso_med_07"],
     "passos": [
       "Vincular pelo código da granja, galpão, número do lote e dia da recepção. Usar o último snapshot fechado por periodo_fim e id; sem correspondência, manter o lote aberto e o peso de abate ausente.",
-      "Calcular (ps_abate × 1000) / ps_pinto somente quando os dois pesos forem positivos. Não substituir o abate por um peso semanal.",
-      "Em semana, produtor, galpão e total, calcular a média simples de cada campo sobre seus valores válidos. Para Vezes maior, usar a média das razões individuais; não dividir as médias dos pesos.",
-      "Peso do pintinho: três casas em g. Peso de abate: três casas em kg. Vezes maior: uma casa decimal. Ausências não entram na média e aparecem como —. Arredondar somente na exibição."
+      "Calcular peso_med_07 / ps_pinto somente quando os dois pesos forem positivos. Não multiplicar por 1000, pois ambos estão em gramas.",
+      "Em semana, produtor, galpão e total, calcular a média simples de cada campo sobre seus valores válidos. Para PS Pintinho x 7 dias, usar a média das razões individuais; não dividir as médias dos pesos.",
+      "Peso do pintinho: três casas em g. Peso de abate: três casas em kg. PS Pintinho x 7 dias: uma casa decimal. Ausências não entram na média e aparecem como —. Arredondar somente na exibição."
     ]
   },
   {
     "id": "tabela_mortalidade",
     "nome": "Tabela — Mortalidade por semana",
     "formula_exibicao": "%M+D = Σ([Qtde Mort Sem-N] + [Qtde Desc Sem-N]) / Σ([Aves Inicia]) × 100\n%M = Σ([Qtde Mort Sem-N]) / Σ([Aves Inicia]) × 100\n%D = Σ([Qtde Desc Sem-N]) / Σ([Aves Inicia]) × 100",
-    "descricao": "N = 07, 14, 21, 28 ou 35. Cada coluna semanal usa somente sua semana, sem acumular as anteriores. A coluna inicial Mortalidade total (%) soma mortes e descartes das cinco idades e divide pelas aves alojadas do grupo uma única vez, multiplicando por 100; não soma percentuais arredondados nem calcula média dos percentuais dos grupos. As colunas iniciais de peso usam média simples; Vezes maior é a média das razões individuais (ps_abate × 1000) / ps_pinto com pesos positivos.",
+    "descricao": "N = 07, 14, 21, 28 ou 35. Cada coluna semanal usa somente sua semana, sem acumular as anteriores. A coluna inicial Mortalidade total (%) soma mortes e descartes das cinco idades e divide pelas aves alojadas do grupo uma única vez, multiplicando por 100; não soma percentuais arredondados nem calcula média dos percentuais dos grupos. As colunas iniciais de peso usam média simples; PS Pintinho x 7 dias é a média das razões individuais peso_med_07 / ps_pinto com pesos positivos.",
     "colunas": [
       "Qtde Mort Sem-07",
       "Qtde Desc Sem-07",
@@ -113,7 +113,7 @@ window.FORMULAS_HISTORICO = [
     "id": "tabela_peso",
     "nome": "Tabela — Peso por idade",
     "formula_exibicao": "Σ([Peso Med.-N] válido) / quantidade de valores válidos em [Peso Med.-N]",
-    "descricao": "Média simples da coluna de cada idade (7, 14, 21, 28 e 35 dias), na unidade original da base, sem conversão para kg. A coluna Mortalidade total (%) usa o mesmo acumulado da aba Mortalidade. As três colunas de peso mostram peso do pintinho (g), peso de abate (kg) e média das razões individuais (ps_abate × 1000) / ps_pinto.",
+    "descricao": "Média simples da coluna de cada idade (7, 14, 21, 28 e 35 dias), na unidade original da base, sem conversão para kg. A coluna Mortalidade total (%) usa o mesmo acumulado da aba Mortalidade. As três colunas de peso mostram peso do pintinho (g), peso de abate (kg) e média das razões individuais peso_med_07 / ps_pinto.",
     "colunas": [
       "Peso Med.-07",
       "Peso Med.-14",
