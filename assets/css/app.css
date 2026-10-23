@@ -1631,6 +1631,8 @@ body {
   font-size: 12px;
 }
 
+.checkbox-option[hidden] { display: none; }
+
 .checkbox-option:hover {
   background: var(--muted);
 }

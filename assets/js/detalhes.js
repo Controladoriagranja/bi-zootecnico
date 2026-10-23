@@ -29,6 +29,18 @@ const DETAIL_FILTERS = [
         multi: true
     },
     {
+        id: "tipoGranja",
+        apiKey: "tipo_granja",
+        search: true,
+        multi: true
+    },
+    {
+        id: "modelo",
+        apiKey: "modelo",
+        search: true,
+        multi: true
+    },
+    {
         id: "produtor",
         apiKey: "produtor",
         search: true,
@@ -51,8 +63,6 @@ const DETAIL_FILTERS = [
 
 const inheritedKeys = [
     "status_acerto",
-    "tipo_granja",
-    "modelo",
     "tipo_linhagem",
     "linhagem",
     "data_inicio",

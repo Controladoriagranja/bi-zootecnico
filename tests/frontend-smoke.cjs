@@ -180,19 +180,18 @@ async function main(){
       }
       if(name==='historico'){
         assert.equal(await page.locator('#history-filter-originalLineage .checkbox-multiselect-trigger').count(),1);
-        const weightHeaders=['Peso do pintinho (g)','Peso de abate (kg)','Vezes maior'];
-        assert.deepEqual((await page.locator('#historyTableHead th').allTextContents()).slice(4,7).map(v=>v.replace(/[↕↑↓]/g,'').trim()),weightHeaders);
-        assert.equal(await page.locator('#historyTableHead th').count(),22);
+        const weightHeaders=['Peso do pintinho (g)','PS Pintinho x 7 dias'];
+        assert.deepEqual((await page.locator('#historyTableHead th').allTextContents()).slice(4,6).map(v=>v.replace(/[↕↑↓]/g,'').trim()),weightHeaders);
+        assert.equal(await page.locator('#historyTableHead th').count(),21);
         const newCells=page.locator('#historyTableBody tr').first().locator('td');
         assert.equal(await newCells.nth(3).innerText(),'5,00%');
         assert.equal(await page.locator('#historyTableFoot tr th').nth(2).innerText(),'5,00%');
         assert.equal(await newCells.nth(4).innerText(),'44,600');
-        assert.equal(await newCells.nth(5).innerText(),'2,919');
-        assert.equal(await newCells.nth(6).innerText(),'65,4×');
-        assert.equal(await page.locator('#historyTableFoot tr th').nth(5).innerText(),'65,4×');
+        assert.equal(await newCells.nth(5).innerText(),'65,4×');
+        assert.equal(await page.locator('#historyTableFoot tr th').nth(4).innerText(),'65,4×');
         await page.locator('[data-history-view="weight"]').click();
-        assert.equal(await page.locator('#historyTableHead th').count(),12);
-        assert.equal(await page.locator('#historyTableBody tr').first().locator('td').nth(6).innerText(),'65,4×');
+        assert.equal(await page.locator('#historyTableHead th').count(),11);
+        assert.equal(await page.locator('#historyTableBody tr').first().locator('td').nth(5).innerText(),'65,4×');
         await page.locator('[data-history-view="mortality"]').click();
         assert.equal(await page.locator('h1').innerText(),'Histórico de Lotes em Criação');
         assert(requests.some(p=>p.includes('/historico-abertos/')));
@@ -210,21 +209,21 @@ async function main(){
         await page.locator('.history-level-1 [data-history-node]').click();
         const rows=page.locator('#historyTableBody tr');
         for(const [index,expected] of [[0,'1,17%'],[1,'1,17%'],[2,'1,08%'],[3,'1,27%']]){
-          assert.equal(await rows.nth(index).locator('td').nth(7).innerText(),expected);
-          assert(await rows.nth(index).locator('td').nth(7).evaluate(el=>el.classList.contains('history-md-alert')));
+          assert.equal(await rows.nth(index).locator('td').nth(6).innerText(),expected);
+          assert(await rows.nth(index).locator('td').nth(6).evaluate(el=>el.classList.contains('history-md-alert')));
         }
         const barnCells=rows.nth(2).locator('td');
-        assert.equal(await barnCells.nth(10).innerText(),'—');
-        assert.equal(await barnCells.nth(13).innerText(),'1,00%');
-        assert.equal(await barnCells.nth(16).innerText(),'1,01%');
-        assert.equal(await barnCells.nth(13).evaluate(el=>el.classList.contains('history-md-alert')),false);
-        assert.equal(await barnCells.nth(16).evaluate(el=>el.classList.contains('history-md-alert')),true);
+        assert.equal(await barnCells.nth(9).innerText(),'—');
+        assert.equal(await barnCells.nth(12).innerText(),'1,00%');
+        assert.equal(await barnCells.nth(15).innerText(),'1,01%');
+        assert.equal(await barnCells.nth(12).evaluate(el=>el.classList.contains('history-md-alert')),false);
+        assert.equal(await barnCells.nth(15).evaluate(el=>el.classList.contains('history-md-alert')),true);
         assert.equal(await page.locator('#historyTableHead .history-md-alert').count(),0);
         for(const theme of ['light','dark']){
           await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
-          const colors=await barnCells.nth(7).evaluate(el=>({bg:getComputedStyle(el).backgroundColor,expected:getComputedStyle(document.querySelector('.history-page')).getPropertyValue('--history-md-alert-bg').trim()}));
+          const colors=await barnCells.nth(6).evaluate(el=>({bg:getComputedStyle(el).backgroundColor,expected:getComputedStyle(document.querySelector('.history-page')).getPropertyValue('--history-md-alert-bg').trim()}));
           assert.equal(colors.bg,theme==='dark'?'rgb(72, 40, 46)':'rgb(252, 231, 231)');
-          assert.equal(await barnCells.nth(13).evaluate(el=>getComputedStyle(el).color===getComputedStyle(el.parentElement.children[14]).color),true);
+          assert.equal(await barnCells.nth(12).evaluate(el=>getComputedStyle(el).color===getComputedStyle(el.parentElement.children[13]).color),true);
           await fs.mkdir(path.join(projectRoot,'tests/frontend-previews'),{recursive:true});
           await page.locator('.history-table-wrap').screenshot({path:path.join(projectRoot,`tests/frontend-previews/historico-md-${theme}.png`)});
         }

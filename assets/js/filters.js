@@ -148,6 +148,18 @@ class FilterController {
         });
     }
 
+    applySearch(field) {
+        const state = this.getState(field);
+        const normalize = value => String(value || "").normalize("NFD")
+            .replace(/\p{M}/gu, "").toLocaleLowerCase("pt-BR").trim();
+        const query = normalize(state.search?.value);
+        state.list?.querySelectorAll("[data-filter-option]").forEach(row => {
+            // Selecionar tudo continua abrangendo todas as opcoes do contexto.
+            row.hidden = !row.querySelector("[data-all]")
+                && !normalize(row.dataset.filterLabel).includes(query);
+        });
+    }
+
     buildMulti(field) {
         const host = document.getElementById(field.id);
 
@@ -213,22 +225,8 @@ class FilterController {
         });
 
         if (state.search) {
-            state.search.addEventListener("input", () => {
-                const query = state.search.value
-                    .trim()
-                    .toLocaleLowerCase("pt-BR");
-
-                state.list
-                    .querySelectorAll("[data-filter-option]")
-                    .forEach(row => {
-                        const label = row.dataset.filterLabel
-                            .toLocaleLowerCase("pt-BR");
-
-                        row.hidden =
-                            Boolean(query)
-                            && !label.includes(query);
-                    });
-            });
+            state.search.addEventListener("input", () => this.applySearch(field));
+            state.search.addEventListener("search", () => this.applySearch(field));
         }
 
         return state;
@@ -485,6 +483,7 @@ normalizeOptions(field, raw) {
         });
 
         syncSelectAll();
+        this.applySearch(field);
         this.updateButton(field);
     }
 
