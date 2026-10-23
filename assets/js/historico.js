@@ -23,14 +23,14 @@
       const rounded=Number(displayed.replace(/\./g,'').replace(',','.'));
       return cell(percentage(value),true,Number.isFinite(rounded)&&rounded>1);
     };
-    return cell(N(cards.aves))+cell(percentage(cards.mortalidade))+cell(N(cards.peso_pinto,3))+cell(N(cards.peso_abate_final,3))+cell(cards.vezes_maior==null?'—':N(cards.vezes_maior,1)+'×')+[7,14,21,28,35].map(age=>{
+    return cell(N(cards.aves))+cell(percentage(cards.mortalidade))+cell(N(cards.peso_pinto,3))+cell(cards.vezes_maior==null?'—':N(cards.vezes_maior,1)+'×')+[7,14,21,28,35].map(age=>{
       const w=points.get(age);
       return view==="weight"?cell(N(w?.peso,2),false,false,true):combinedCell(w?.mortalidade)+cell(percentage(w?.mortalidade_sem_descartes))+cell(percentage(w?.descarte_percent));
     }).join("");
   }
   function renderTable() {
-    const count=view==="weight"?12:22;
-    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th><th class="num" title="Soma de mortes e descartes de 7, 14, 21, 28 e 35 dias / aves alojadas do grupo vezes 100">Mortalidade total (%)</th><th class="num" title="Média simples de ps_pinto dos lotes do grupo">Peso do pintinho (g)</th><th class="num" title="Média simples de ps_abate dos lotes com vínculo">Peso de abate (kg)</th><th class="num" title="Média simples de peso_med_07 / ps_pinto por lote com pesos positivos">PS Pintinho x 7 dias</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num history-period-start">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined history-period-start">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
+    const count=view==="weight"?11:21;
+    E("historyTableHead").innerHTML='<tr><th>Semana / Produtor</th><th>Galpão</th><th class="num">Aves Alojadas</th><th class="num" title="Soma de mortes e descartes de 7, 14, 21, 28 e 35 dias / aves alojadas do grupo vezes 100">Mortalidade total (%)</th><th class="num" title="Média simples de ps_pinto dos lotes do grupo">Peso do pintinho (g)</th><th class="num" title="Média simples de peso_med_07 / ps_pinto por lote com pesos positivos">PS Pintinho x 7 dias</th>'+[7,14,21,28,35].map(age=>view==="weight"?`<th class="num history-period-start">Peso Med. ${age} dias</th>`:`<th class="num history-col-combined history-period-start">%M+D${age}</th><th class="num">%M${age}</th><th class="num">%D${age}</th>`).join("")+'</tr>';
     if(!data)return;
     let rows=[],buttons=[]; sequence=0;
     function traverse(nodes,path=[]){nodes.forEach(node=>{
@@ -47,7 +47,7 @@
     document.querySelector(".history-table").dataset.view=view;
   }
   const screen=A.connect({bi:"historico-abertos",errorId:"mensagemErroHistorico",clearId:"limparFiltrosHistorico",fields:dimensions.map(([id,key])=>['history-filter-'+id,key]),context:()=>year?{ano:year}:{},
-    clear:()=>{data=null;cards(null);E("historyTableBody").innerHTML=`<tr><td colspan="${view==='weight'?12:22}">Consultando…</td></tr>`;E("historyTableFoot").innerHTML="";},
+    clear:()=>{data=null;cards(null);E("historyTableBody").innerHTML=`<tr><td colspan="${view==='weight'?11:21}">Consultando…</td></tr>`;E("historyTableFoot").innerHTML="";},
     onOptions:options=>{
       const host=document.querySelector(".history-year-filter");
       const years=[...new Set((options.ano||[]).map(String).filter(y=>/^\d{4}$/.test(y)&&Number(y)>=2023&&Number(y)<=new Date().getFullYear()))].sort((a,b)=>Number(b)-Number(a));
