@@ -1,58 +1,118 @@
+// Nova modificação de 23/10/2026: base dinâmica e média simples.
 (() => {
+
   const A=ApiScreen,E=A.element,H=A.escape,N=A.number;
+
   const dimensions=[['ano','Ano'],['mes','Mês'],['status_acerto','Status Acerto'],['tipo_granja','Tipo de Granja'],['modelo','Modelo'],['produtor','Produtor'],['galpao','Galpão'],['tecnico','Técnico'],['tipo_linhagem','Tipo de Linhagem'],['linhagem','Linhagem']];
+
   E('phaseFilters').innerHTML=dimensions.map(([key,label])=>`<div class="filter-field"><span>${label}</span><div class="checkbox-multiselect" id="phase-filter-${key}"></div></div>`).join('');
+
   let unit='semana',data=null,chart=null,drawnData=null;
+
   const label=p=>unit==='dia'?p.inicio.split('-').reverse().join('/'):`Sem. ${p.semana}/${p.ano_semana} · ${p.inicio.split('-').reverse().join('/')}`;
+
   function draw(){
+
     if(!data||!chart)return;
+
     const css=getComputedStyle(document.documentElement),c=name=>css.getPropertyValue(name).trim();
+
     const colors=Array.from({length:6},(_,i)=>c('--phase-'+i));
+
     const previous=drawnData===data?chart.getOption():{};
+
     const zoom=previous.dataZoom?.[0];
+
     const count=data.periodos.length,narrow=E('phaseChart').clientWidth<600;
+
     chart.setOption({animationDuration:250,color:colors,textStyle:{fontFamily:getComputedStyle(document.body).fontFamily},
+
       tooltip:{trigger:'axis',confine:true,renderMode:'richText',backgroundColor:c('--card'),borderColor:c('--border'),textStyle:{color:c('--foreground')}},
+
       legend:{type:'scroll',top:0,selected:previous.legend?.[0]?.selected||{},textStyle:{color:c('--foreground'),fontSize:11}},
-      grid:{left:52,right:22,top:48,bottom:count>16?102:70},
-      xAxis:{type:'category',data:data.periodos.map(label),boundaryGap:false,axisLine:{lineStyle:{color:c('--border')}},axisLabel:{color:c('--muted-foreground'),fontSize:10,rotate:narrow?35:0,hideOverlap:true}},
+
+      grid:{left:62,right:28,top:48,bottom:count>16?102:70},
+
+      xAxis:{type:'category',data:data.periodos.map(p=>unit==='dia'?label(p):`S${p.semana} · ${p.inicio.slice(8,10)}/${p.inicio.slice(5,7)}`),boundaryGap:false,axisLine:{lineStyle:{color:c('--border')}},axisLabel:{color:c('--muted-foreground'),fontSize:10,rotate:narrow?35:0,hideOverlap:true}},
+
       yAxis:{type:'value',name:'g/dia',nameTextStyle:{color:c('--muted-foreground')},axisLabel:{color:c('--muted-foreground')},splitLine:{lineStyle:{color:c('--border'),opacity:.6}}},
+
       dataZoom:count>16?[{type:'inside',startValue:zoom?.startValue??Math.max(0,count-20),endValue:zoom?.endValue??count-1},{type:'slider',height:18,bottom:12,startValue:zoom?.startValue??Math.max(0,count-20),endValue:zoom?.endValue??count-1,textStyle:{color:c('--muted-foreground')}}]:[],
-      series:data.fases.map((phase,i)=>({id:phase.id,name:phase.nome,type:'line',connectNulls:false,smooth:false,symbol:'circle',symbolSize:7,
+
+      series:data.fases.map((phase,i)=>({id:phase.id,name:phase.nome,type:'line',connectNulls:false,smooth:false,symbol:['circle','rect','triangle','diamond','roundRect','pin'][i],symbolSize:9,
+
         lineStyle:{width:3,color:colors[i]},itemStyle:{color:colors[i]},
+
         data:data.periodos.map(p=>p.fases[phase.id].valor),
+
         tooltip:{valueFormatter:value=>value==null?'Sem dados':N(value,2)+' g/dia'},
-        label:{show:count<=24&&!narrow,position:'top',fontSize:10,color:c('--foreground'),formatter:p=>p.value==null?'':N(p.value,1)},labelLayout:{hideOverlap:true}})),
+
+        label:{show:count<=24&&!narrow,position:'top',fontSize:10,color:c('--foreground'),formatter:p=>p.value==null?'':N(p.value,2)},labelLayout:{hideOverlap:true}})),
+
       graphic:count?[]:[{type:'text',left:'center',top:'middle',style:{text:'Nenhum lote para os filtros selecionados.',fill:c('--muted-foreground'),fontSize:13}}]
+
     },true);
+
     drawnData=data;
+
   }
+
   function clear(){data=null;chart?.clear();E('phaseHead').innerHTML='';E('phaseBody').innerHTML='';E('phaseCoverage').classList.add('hidden');E('phaseContext').textContent='Consultando…';exibirAtualizacaoDados(E('phaseUpdated'),null);}
+
   const screen=A.connect({bi:'gpd-fases',fields:dimensions.map(([key])=>['phase-filter-'+key,key]),errorId:'phaseError',clearId:'phaseClear',context:()=>({agrupamento:unit}),clear,
+
     render:result=>{
-      if(result.rules_version!=='gpd-fases-2026-10-19'||!Array.isArray(result.periodos)||!Array.isArray(result.fases))throw new Error('Atualize o backend para consultar GPD por Fase.');
+
+      if(result.rules_version!=='gpd-dinamica-2026-10-23-v1'||!Array.isArray(result.periodos)||!Array.isArray(result.fases))throw new Error('Atualize o backend para consultar GPD por Fase.');
+
       data=result;unit=result.agrupamento;
+
       exibirAtualizacaoDados(E('phaseUpdated'),result);
-      E('phaseContext').textContent=`${unit==='dia'?'Dia':'Semana'} do abate · ${N(result.cards.lotes)} lotes · ${N(result.cards.com_vinculo)} com pesos vinculados`;
+
+      E('phaseContext').textContent=`${unit==='dia'?'Dia':'Semana'} do abate · ${N(result.cards.lotes)} lotes · Base dinâmica · Média simples`;
+
       const incomplete=result.fases.some(f=>result.totais[f.id].lotes<result.cards.lotes);
-      if(incomplete)A.message('phaseCoverage','Há lotes sem vínculo ou sem bases válidas em alguma fase. Cada célula mostra a quantidade usada no cálculo.');
-      E('phaseHead').innerHTML='<tr><th>Fase / GPD (g/dia)</th>'+result.periodos.map(p=>`<th class="num">${H(label(p))}</th>`).join('')+'<th class="num">Total consolidado</th></tr>';
-      const cell=(v,total)=>`<td class="num" data-sort-value="${v.valor??''}" title="${v.lotes} de ${total} lotes com bases válidas">${N(v.valor,2)}<small>${N(v.lotes)} de ${N(total)} lotes</small></td>`;
+
+      if(incomplete)A.message('phaseCoverage','Há registros sem bases válidas em alguma série. Cada célula informa quantos entraram na média; passe o cursor para ver as exclusões.');
+
+      E('phaseHead').innerHTML='<tr><th>Indicador (g/dia)</th>'+result.periodos.map(p=>`<th class="num">${H(label(p))}</th>`).join('')+'<th class="num">Total consolidado</th></tr>';
+
+      const cell=(v,total)=>`<td class="num" data-sort-value="${v.valor??''}" title="${H(`${v.lotes} de ${total} lotes válidos; ${v.excluidos??0} excluídos. ${Object.entries(v.motivos_exclusao||{}).map(([key,count])=>`${key.replaceAll('_',' ')}: ${count}`).join('; ')}`)}">${N(v.valor,2)}<small>${N(v.lotes)} de ${N(total)} lotes</small></td>`;
+
       E('phaseBody').innerHTML=result.fases.map((f,i)=>`<tr><th><span class="phase-swatch" style="background:var(--phase-${i})"></span>${H(f.nome)}</th>${result.periodos.map(p=>cell(p.fases[f.id],p.lotes)).join('')}${cell(result.totais[f.id],result.cards.lotes)}</tr>`).join('');
+
+      E('phaseCoverage').classList.toggle('hidden',!incomplete);
       if(!chart)chart=echarts.init(E('phaseChart'),null,{renderer:'svg'});
+
       draw();
+
     }});
+
   document.querySelectorAll('[data-phase-unit]').forEach(button=>button.addEventListener('click',()=>{
+
     if(unit===button.dataset.phaseUnit)return;
+
     unit=button.dataset.phaseUnit;
+
     document.querySelectorAll('[data-phase-unit]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-checked',String(b===button));});screen.refresh();
+
   }));
+
   new ResizeObserver(()=>{chart?.resize();draw();}).observe(E('phaseChart'));
+
   document.addEventListener('dashboard:theme-changed',draw);
+
   const modal=E('phaseFormula'),open=E('phaseFormulaOpen'),close=E('phaseFormulaClose');
+
   let previousOverflow='';
+
   const hide=()=>{modal.classList.add('hidden');document.body.style.overflow=previousOverflow;open.focus();};
+
   open.addEventListener('click',()=>{previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';modal.classList.remove('hidden');close.focus();});
+
   close.addEventListener('click',hide);E('phaseFormulaBackdrop').addEventListener('click',hide);
+
   modal.addEventListener('keydown',event=>{if(event.key==='Escape')hide();if(event.key==='Tab'){event.preventDefault();close.focus();}});
+
 })();
+

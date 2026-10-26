@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPD por Fase — BI Zootécnico</title>
+  <link rel="icon" href="assets/img/favicon-granja.png">
+  <script>(()=>{try{const theme=localStorage.getItem('bi-zootecnico-theme');if(theme)document.documentElement.dataset.theme=theme;}catch(_){}})();</script>
+  <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet">
+  <link href="assets/css/gpd-fases.css?v=fases-20261019-1" rel="stylesheet">
+  <link href="assets/vendor/geist/index.css" rel="stylesheet">
+</head>
+<body data-page="gpd-fases">
+<main class="app-shell">
+  <header class="page-header">
+    <div><div class="eyebrow">Dashboard Zootécnico</div><h1>GPD por Fase</h1><p>Lotes fechados · Evolução do ganho de peso diário por fase de criação.</p></div>
+    <div class="header-toolbar">
+      <div class="update-meta"><span>Última atualização</span><strong id="phaseUpdated">—</strong></div>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Alternar tema"><span data-theme-icon>☾</span></button>
+    </div>
+  </header>
+  <section class="card filter-card">
+    <div class="filter-card-top"><div><h2>Filtros</h2><p>Mesmo contexto do Desempenho Lotes Fechados. Ano e mês da data do abate.</p></div><button class="button button-ghost-danger" id="phaseClear" type="button">Limpar filtros</button></div>
+    <div class="filters-grid first-page-filters" id="phaseFilters"></div>
+  </section>
+  <div class="alert alert-error hidden" id="phaseError"></div>
+  <div class="alert alert-warning hidden" id="phaseCoverage" role="status"></div>
+  <section class="card phase-card">
+    <div class="phase-heading">
+      <div><h2>GPD por fase <span class="phase-unit">(g/dia)</span></h2><p id="phaseContext">Semana do abate · consultando…</p></div>
+      <div class="phase-actions">
+        <button type="button" class="mini-button" id="phaseFormulaOpen" title="Fórmula e tabelas de origem" aria-label="Ver fórmula e tabelas de origem do GPD por fase"><span class="formula-fx">ƒx</span></button>
+        <div class="history-view-filter" role="radiogroup" aria-label="Agrupamento por data do abate">
+          <button class="history-view-button" type="button" data-phase-unit="dia" role="radio" aria-checked="false">Dia</button>
+          <button class="history-view-button active" type="button" data-phase-unit="semana" role="radio" aria-checked="true">Semana</button>
+        </div>
+      </div>
+    </div>
+    <div id="phaseChart" class="phase-chart" role="img" aria-label="GPD por fase ao longo da data do abate; valores disponíveis na tabela abaixo"></div>
+    <p class="phase-note">Clique na legenda para exibir ou ocultar uma fase. Sem os pesos necessários, o ponto fica sem valor. Semana de segunda a domingo.</p>
+    <div class="phase-table-wrap"><table class="phase-table" aria-label="GPD por fase, períodos e total consolidado"><thead id="phaseHead"></thead><tbody id="phaseBody"></tbody></table></div>
+  </section>
+</main>
+<div class="dialog-layer hidden" id="phaseFormula">
+  <div class="dialog-backdrop" id="phaseFormulaBackdrop"></div>
+  <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="phaseFormulaTitle" tabindex="-1">
+    <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="phaseFormulaTitle">GPD por Fase</h2></div><button class="icon-button" id="phaseFormulaClose" type="button" aria-label="Fechar fórmula">×</button></header>
+    <div class="dialog-body">
+      <div class="info-block"><span>Fórmula consolidada</span><div class="code-inline">Σ(ganho de peso na fase em gramas × aves abatidas) / Σ(dias da fase × aves abatidas)</div></div>
+      <div class="info-block"><span>Como calcular</span><p>0–7 dias: peso aos 7 dias / 7, sem descontar o peso do pintinho. Nas fases de 7 dias seguintes: diferença entre os pesos das duas idades / 7. De 35 dias ao abate: (peso final em gramas − peso aos 35 dias) / (idade final − 35).</p></div>
+      <div class="info-block"><span>Tabelas e colunas de origem</span><p><strong>zootecnico.mortalidade_peso_fechados</strong>: peso_med_07, peso_med_14, peso_med_21, peso_med_28 e peso_med_35, em gramas. Usar o último registro por periodo_fim e id para cada lote.</p><p><strong>zootecnico.vw_desempenho_acerto_portal</strong>: fonte atual do Desempenho Lotes Fechados, baseada em acerto_lote_resultado_geral e nos vínculos cadastrais existentes. Peso final = pes_total / qt_aves, em kg; idade final = ida; aves abatidas = qt_aves; data do gráfico = data_abate. Converter o peso final para gramas antes de calcular o ganho.</p></div>
+      <div class="info-block"><span>Junção entre as fontes</span><p>codigo_granja ↔ codigo; galp ↔ gal; num_lote ↔ lote; dia de data_recepcao ↔ dia de dt_aloj. Não vincular por nome de produtor. Sem chave completa ou correspondência, manter o lote na contagem e exibir a fase sem valor.</p></div>
+      <div class="info-block"><span>Consolidação e ausências</span><p>Somar as bases dos lotes válidos em cada dia, semana ou total; não calcular média dos GPDs nem média das semanas. Sem vínculo, pesos positivos, aves abatidas positivas ou duração positiva, a fase fica sem valor. Ganhos negativos não entram na fase. A cobertura de cada célula informa quantos lotes entraram no cálculo.</p></div>
+    </div>
+  </section>
+</div>
+<script src="assets/js/theme.js?v=ajustes-20261008-1"></script>
+<script src="assets/js/config.js?v=ajustes-20261008-1"></script>
+<script src="assets/js/api.js?v=publicacao-sem-fases-20261016-1"></script>
+<script src="assets/js/filters.js?v=busca-filtros-20261023-1"></script>
+<script src="assets/vendor/echarts/echarts.min.js"></script>
+<script src="assets/js/api-screen.js?v=atualizacao-20261020-2"></script>
+<script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
+<script src="assets/js/gpd-fases.js?v=atualizacao-20261020-1"></script>
+<script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
+<script src="assets/js/sidebar.js?v=fases-20261019-1"></script>
+</body>
+</html>

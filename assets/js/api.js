@@ -195,7 +195,37 @@ async function requestApi(endpoint, params = {}, options = {}) {
     if (error?.name === "AbortError") throw error;
     throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON");
   }
-  if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
+  // Nova modificação de 26/10/2026: contrato exclusivo da evolução de mortalidade.
+  // As demais respostas continuam com a validação oficial do Desempenho abaixo.
+  const isMortalityEvolution = normalizedEndpoint === APP_CONFIG.endpoints.detalhes
+    && url.searchParams.getAll('indicador').length === 1
+    && url.searchParams.get('indicador') === 'mortalidade'
+    && url.searchParams.getAll('etapa').length === 1
+    && url.searchParams.get('etapa') === 'evolucao'
+    && url.searchParams.getAll('agrupamento').length === 1
+    && ['mensal', 'semanal'].includes(url.searchParams.get('agrupamento'))
+    && url.searchParams.getAll('ano').length === 1;
+  if (isMortalityEvolution) {
+    const ids = ['1','2','3','4','5','35_abate'];
+    const validNumber = value => value === null || (typeof value === 'number' && Number.isFinite(value));
+    const validValues = item => item && item.faixas
+      && ids.every(id => Object.hasOwn(item.faixas,id) && validNumber(item.faixas[id]))
+      && validNumber(item.total);
+    const compatible = data && data.rules_version === 'mortalidade-faixas-2026-10-26-v1'
+      && data.unidade === '%'
+      && data.ano === Number(url.searchParams.get('ano'))
+      && data.agrupamento === url.searchParams.get('agrupamento')
+      && data.fonte_total === 'mesma configuração, expressão mort/aloj e filtros do Desempenho'
+      && data.fonte_faixas === 'zootecnico.base_dinamica; percentuais ponderados por aves_alojadas'
+      && typeof data.valido === 'boolean'
+      && Array.isArray(data.faixas) && data.faixas.length === ids.length
+      && data.faixas.every((item,index) => item && item.id === ids[index])
+      && Array.isArray(data.periodos) && data.periodos.every(validValues)
+      && (data.consolidado === null || validValues(data.consolidado));
+    if (!compatible) {
+      throw new ApiError('A API retornou um contrato incompatível com as faixas de mortalidade. Confira a versão, as fontes, o ano e o agrupamento.',503,'MORTALITY_CONTRACT_PENDING');
+    }
+  } else if ([APP_CONFIG.endpoints.desempenho, APP_CONFIG.endpoints.detalhes].includes(endpoint)
       && (data.rules_version !== "acerto-iep-mensal-2026-10-16" || data.arquivo !== "zootecnico.vw_desempenho_acerto_portal")) {
     const receivedRules = String(data.rules_version || "não informadas").slice(0, 100);
     const receivedSource = String(data.arquivo || "não informada").slice(0, 120);

@@ -15,8 +15,11 @@ let metricId =
 // Nova modificação de 26/10/2026: comportamento restrito à mortalidade.
 const mortalityMode = metricId === 'mortalidade';
 let mortalityGrouping = 'mensal', mortalityPayload = null;
-document.getElementById('ano').classList.toggle('hidden',mortalityMode);
-document.getElementById('anoMortalidade').classList.toggle('hidden',!mortalityMode);
+// Um único controle de ano no DOM: substituir somente na mortalidade.
+if(mortalityMode) {
+    const select=document.createElement('select');select.id='anoMortalidade';select.ariaLabel='Ano da mortalidade';
+    document.getElementById('ano').replaceWith(select);
+}
 let metricCatalog = [];
 
 
@@ -401,6 +404,24 @@ async function carregarDetalhes(
         .remove("hidden");
 
     try {
+        if(mortalityMode) {
+            // Somente duas consultas, em paralelo. A evolução antiga não é usada.
+            detalhesData=null;
+            const snapshot=allFilters(), options={signal:requestController.signal};
+            const principal=apiGet(APP_CONFIG.endpoints.detalhes,
+                {...snapshot,indicador:'mortalidade',etapa:'principal'},options).then(response=>{
+                    if(requestId !== detailRequestId)return response;
+                    if(!response.ranking_contexto)throw new Error('Atualize o backend para os rankings completos.');
+                    detalhesData=response;render();return response;
+                });
+            const evolution=apiGet(APP_CONFIG.endpoints.detalhes,
+                {...snapshot,indicador:'mortalidade',etapa:'evolucao',agrupamento:mortalityGrouping},options).then(payload=>{
+                    if(requestId !== detailRequestId)return payload;
+                    mortalityPayload=payload;if(detalhesData)render();return payload;
+                });
+            await Promise.all([principal,evolution]);
+            return;
+        }
         const response =
             await ApiProgressive.details(
                 APP_CONFIG
@@ -428,12 +449,6 @@ async function carregarDetalhes(
         if(!response.ranking_contexto)throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
         detalhesData = response;
         render();
-        if(mortalityMode) {
-            const payload=await apiGet(APP_CONFIG.endpoints.detalhes,
-                {...allFilters(),indicador:'mortalidade',etapa:'evolucao',agrupamento:mortalityGrouping},{signal:requestController.signal});
-            if(requestId !== detailRequestId)return;
-            mortalityPayload=payload;render();
-        }
     }
     catch (error) {
         if (requestId !== detailRequestId) return;
