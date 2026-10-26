@@ -12,3 +12,5 @@
 .mortality-audit-scroll th,.mortality-audit-scroll td{padding:10px;border:1px solid var(--border);text-align:right}.mortality-audit-scroll th:first-child{text-align:left}
 #mortalityAudit>p{color:var(--foreground);padding:12px 0}
 @media(max-width:600px){.mortality-evolution #evolucaoChart{height:410px}.mortality-evolution .history-view-filter{margin-left:auto}}
+
+.mortality-record-details{margin-top:18px}.mortality-record-details summary{cursor:pointer;font-weight:650;color:var(--foreground);padding:10px 0}.mortality-record-details td:last-child{white-space:normal;min-width:230px}

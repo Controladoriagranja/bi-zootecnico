@@ -1,6 +1,7 @@
 /* Nova modificação de 26/10/2026. Exclusivo do gráfico inferior de mortalidade. */
 window.MortalityChart = (() => {
-  const format = value => value == null ? '—' : Number(value).toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
+  // Somente apresentação: diferenças menores que meia casa não devem aparecer como -0,00.
+  const format = value => value == null ? '—' : (Math.abs(Number(value)) < 0.005 ? 0 : Number(value)).toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
   const esc = value => String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
   const monthNames = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   const fallback = ['#1E3A8A','#2563EB','#0EA5E9','#14B8A6','#84CC16','#F59E0B'];
@@ -8,10 +9,39 @@ window.MortalityChart = (() => {
   const element = id => document.getElementById(id);
   function audit(payload) {
     const container = element('mortalityAudit');
+    const labels = {
+      percentual_fora_de_0_a_100:'Lote com percentual fora de 0% a 100%',
+      faixa_negativa:'Faixa consolidada negativa',
+      sem_vinculo_base_dinamica:'Lote sem vínculo na base dinâmica',
+      base_ausente_invalida_ou_aloj_nao_positivo:'Campo ausente/inválido ou alojamento não positivo',
+      aloj_divergente:'Aves alojadas diferentes entre as fontes',
+      total_divergente_ou_ausente:'Total divergente ou ausente'
+    };
     const rows = [...payload.periodos.filter(p=>p.lotes), ...(payload.consolidado?[{...payload.consolidado,inicio:'Total do contexto'}]:[])];
-    container.innerHTML='<p>Conferência interrompida. Há faixa negativa, base ausente ou diferença em relação ao Desempenho. Os valores não foram ajustados.</p><div class="mortality-audit-scroll"><table><thead><tr><th>Período</th>'+payload.faixas.map(f=>`<th>${esc(f.nome)}</th>`).join('')+'<th>Soma</th><th>Desempenho</th><th>Diferença (p.p.)</th><th>Ocorrências</th></tr></thead><tbody>'+rows.map(p=>'<tr><th>'+esc(p.inicio)+'</th>'+payload.faixas.map(f=>`<td>${format(p.faixas[f.id])}</td>`).join('')+`<td>${format(p.soma_faixas)}</td><td>${format(p.total)}</td><td>${format(p.diferenca)}</td><td>${esc([...new Set((p.problemas||[]).map(v=>v.motivo))].join('; '))}</td></tr>`).join('')+'</tbody></table></div>';
+    const tolerance=Number(payload.tolerancia_pp ?? 0.01);
+    const totalsMatch=rows.length>0 && rows.every(p=>p.diferenca!=null && Math.abs(Number(p.diferenca))<=tolerance);
+    const reasons=[...new Set(rows.flatMap(p=>(p.problemas||[]).map(v=>v.motivo)))];
+    const message=(totalsMatch?'As somas conferem com o Desempenho dentro da tolerância. ':'A soma das faixas ainda não foi conciliada com o Desempenho. ')
+      +'Gráfico interrompido: '+reasons.map(r=>labels[r]||r).join('; ')+'. Os valores não foram ajustados.';
+    container.innerHTML='<p>'+esc(message)+'</p><div class="mortality-audit-scroll"><table><thead><tr><th>Período</th>'+payload.faixas.map(f=>`<th>${esc(f.nome)}</th>`).join('')+'<th>Soma</th><th>Desempenho</th><th>Diferença (p.p.)</th><th>Ocorrências</th></tr></thead><tbody>'+rows.map(p=>'<tr><th>'+esc(p.inicio)+'</th>'+payload.faixas.map(f=>`<td>${format(p.faixas[f.id])}</td>`).join('')+`<td>${format(p.soma_faixas)}</td><td>${format(p.total)}</td><td>${format(p.diferenca)}</td><td>${esc([...new Set((p.problemas||[]).map(v=>labels[v.motivo]||v.motivo))].join('; '))}</td></tr>`).join('')+'</tbody></table></div>';
+    // Não duplicar cada problema na linha consolidada se ele já está listado no período.
+    let details=payload.periodos.flatMap(p=>(p.problemas||[]).map(issue=>({period:p.inicio,issue})));
+    if(!details.length)details=(payload.consolidado?.problemas||[]).map(issue=>({period:'Total do contexto',issue}));
+    if(details.length) {
+      const detailedRows=details.flatMap(({period,issue})=>{
+        const identity=issue.identificacao||{},fields=issue.campos?.length?issue.campos:[null];
+        return fields.map(field=>{
+          const components=field?Object.entries(field.componentes||{}).map(([key,value])=>`${key} = ${value??'ausente'}`).join('; '):'';
+          const origin=identity.origem_arquivo||'';
+          const help=field?'Conferir estes valores na origem e na linha do banco. Não substituir por zero sem confirmar.':'A API atual informa a chave do lote. Atualize o diagnóstico do backend para obter campo, valor e ID da linha.';
+          return '<tr><td>'+esc(period)+'</td><td>'+esc(identity.codigo_produtor||'—')+'</td><td>'+esc(identity.galpao||'—')+'</td><td>'+esc(identity.numero_lote||'—')+'</td><td>'+esc(identity.alojamento||'—')+'</td><td>'+esc(identity.abate||'—')+'</td><td>'+esc(identity.base_dinamica_id??'—')+'</td><td>'+esc(field?.campo||labels[issue.motivo]||issue.motivo)+'</td><td>'+esc(field?format(field.valor)+'%':'Campo/valor não fornecidos nesta versão da API')+'</td><td>'+esc(components)+'</td><td>'+esc(issue.lote||'—')+'</td><td>'+esc(origin)+'</td><td>'+esc(help)+'</td></tr>';
+        });
+      }).join('');
+      container.innerHTML+='<details class="mortality-record-details"><summary>Ver registros que precisam de conferência ('+details.length+' ocorrências por período)</summary><div class="mortality-audit-scroll"><table><thead><tr><th>Período</th><th>Código produtor</th><th>Galpão</th><th>Lote</th><th>Alojamento</th><th>Abate</th><th>ID base dinâmica</th><th>Campo</th><th>Valor</th><th>Componentes originais</th><th>Chave do Desempenho</th><th>Arquivo de origem</th><th>Como conferir</th></tr></thead><tbody>'+detailedRows+'</tbody></table></div></details>';
+    }
     container.classList.remove('hidden');
   }
+
   function draw(instance,payload) {
     chart=instance;current=payload;
     if(payload.rules_version!=='mortalidade-faixas-2026-10-26-v1')throw new Error('Atualize o backend para as faixas de mortalidade.');
