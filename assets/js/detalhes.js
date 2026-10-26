@@ -36,6 +36,13 @@ const DETAIL_FILTERS = [
         search: false,
         multi: true
     },
+    // Nova modificação de 26/10/2026: semanas de abate disponíveis no contexto.
+    {
+        id: "semana",
+        apiKey: "semana",
+        search: false,
+        multi: true
+    },
     {
         id: "tipoGranja",
         apiKey: "tipo_granja",
