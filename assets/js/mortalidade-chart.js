@@ -5,8 +5,39 @@ window.MortalityChart = (() => {
   const esc = value => String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
   const monthNames = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   const fallback = ['#1E3A8A','#2563EB','#0EA5E9','#14B8A6','#84CC16','#F59E0B'];
-  let current=null, chart=null;
+  let current=null, chart=null, weekStart=0, weekEnd=0;
   const element = id => document.getElementById(id);
+  // Nova modificação de 26/10/2026: janela semanal e rolagem sem nova consulta.
+  function weekCount(width) {return Math.max(3,Math.min(10,Math.floor((width-90)/85)));}
+  function weekControls() {
+    const weekly=current?.agrupamento==='semanal' && current.valido;
+    element('mortalityWeekNav')?.classList.toggle('hidden',!weekly);
+    if(!weekly)return;
+    const periods=current.periodos;
+    element('mortalityWeeksRange').textContent=periods.length
+      ? `Sem. ${periods[weekStart].semana} a ${periods[weekEnd].semana} · ${weekEnd-weekStart+1} de ${periods.length}` : 'Sem semanas disponíveis';
+    element('mortalityWeeksPrevious').disabled=weekStart===0;
+    element('mortalityWeeksNext').disabled=weekEnd>=periods.length-1;
+    element('mortalityWeeksLatest').disabled=weekEnd>=periods.length-1;
+    element('mortalityWeeksPrevious').onclick=()=>moveWeeks(-1);
+    element('mortalityWeeksNext').onclick=()=>moveWeeks(1);
+    element('mortalityWeeksLatest').onclick=()=>moveWeeks(0,true);
+  }
+  function moveWeeks(direction,latest=false) {
+    if(!current||!chart||current.agrupamento!=='semanal')return;
+    const count=weekEnd-weekStart+1, maximum=Math.max(0,current.periodos.length-count);
+    weekStart=latest?maximum:Math.max(0,Math.min(maximum,weekStart+direction*count));
+    weekEnd=Math.min(current.periodos.length-1,weekStart+count-1);
+    chart.dispatchAction({type:'dataZoom',dataZoomIndex:0,startValue:weekStart,endValue:weekEnd});
+    weekControls();
+  }
+  function zoomed(event) {
+    if(current?.agrupamento!=='semanal')return;
+    const zoom=event.batch?.[0]||event, last=current.periodos.length-1;
+    if(Number.isFinite(zoom.start))weekStart=Math.max(0,Math.min(last,Math.round(last*zoom.start/100)));
+    if(Number.isFinite(zoom.end))weekEnd=Math.max(weekStart,Math.min(last,Math.round(last*zoom.end/100)));
+    weekControls();
+  }
   function audit(payload) {
     const container = element('mortalityAudit');
     const labels = {
@@ -43,17 +74,26 @@ window.MortalityChart = (() => {
   }
 
   function draw(instance,payload) {
+    const changed=current!==payload;
+    if(chart)chart.off('datazoom',zoomed);
     chart=instance;current=payload;
     if(payload.rules_version!=='mortalidade-faixas-2026-10-26-v1')throw new Error('Atualize o backend para as faixas de mortalidade.');
     element('mortalityAudit').classList.add('hidden');
     element('mortalityLegend').innerHTML='';
-    if(!payload.valido){chart.clear();audit(payload);return;}
+    if(!payload.valido){weekControls();chart.clear();audit(payload);return;}
     const host=element('evolucaoChart'),css=getComputedStyle(host);
     const c=(name,other)=>css.getPropertyValue(name).trim()||other;
     const colors=fallback.map((color,i)=>c('--mortality-band-'+i,color));
     const strong=c('--foreground','#211b1d'),muted=c('--muted-foreground','#766d70');
-    const width=Math.max(host.parentElement.clientWidth,payload.periodos.length*86+110);
-    if(host.style.width!==width+'px'){host.style.width=width+'px';chart.resize();}
+    const weekly=payload.agrupamento==='semanal';
+    const width=Math.max(280,host.parentElement.clientWidth);
+    host.style.width='100%';chart.resize();
+    if(weekly) {
+      const count=Math.min(payload.periodos.length,weekCount(width));
+      weekEnd=changed?payload.periodos.length-1:Math.min(weekEnd,payload.periodos.length-1);
+      weekStart=Math.max(0,weekEnd-count+1);
+    }
+    weekControls();
     const names=payload.faixas.map(f=>f.nome);
     element('mortalityLegend').innerHTML=names.map((name,i)=>`<span><i style="background:${colors[i]}"></i>${esc(name)}</span>`).join('')+`<span><i class="mortality-line-key" style="background:${strong}"></i>% Mort. Total</span>`;
     const series=payload.faixas.map((f,i)=>({name:f.nome,type:'bar',stack:'mortalidade',barMaxWidth:56,
@@ -66,13 +106,20 @@ window.MortalityChart = (() => {
       labelLayout:{hideOverlap:true}});
     chart.setOption({animationDuration:200,textStyle:{fontFamily:getComputedStyle(document.body).fontFamily},legend:{show:false},
       tooltip:{trigger:'axis',confine:true,renderMode:'richText',backgroundColor:c('--card','#fff'),borderColor:c('--border','#ddd'),textStyle:{color:strong},valueFormatter:v=>format(v)+'%'},
-      grid:{left:60,right:32,top:48,bottom:44},
+      grid:{left:60,right:32,top:48,bottom:weekly?96:44},
+      dataZoom:weekly?[{type:'slider',xAxisIndex:0,startValue:weekStart,endValue:weekEnd,
+        bottom:12,height:24,left:60,right:32,filterMode:'filter',zoomLock:true,brushSelect:false,
+        showDetail:false,showDataShadow:false,throttle:50,borderColor:c('--border','#ddd'),
+        fillerColor:'rgba(37,99,235,0.18)',handleStyle:{color:colors[1]},moveHandleStyle:{color:colors[1]}},
+        {type:'inside',xAxisIndex:0,startValue:weekStart,endValue:weekEnd,filterMode:'filter',
+        zoomLock:true,zoomOnMouseWheel:false,moveOnMouseWheel:true,moveOnMouseMove:true}]:[],
       xAxis:{type:'category',data:payload.periodos.map(p=>payload.agrupamento==='mensal'?monthNames[p.mes-1]:`Sem. ${p.semana}`),
         axisLabel:{interval:0,color:muted},axisLine:{lineStyle:{color:c('--border','#ddd')}}},
-      yAxis:{type:'value',min:0,max:r=>Math.max(1,r.max*1.18),name:'%',axisLabel:{color:muted,formatter:v=>Number(v).toLocaleString('pt-BR')+'%'},splitLine:{lineStyle:{color:c('--border','#ddd')}}},
+      yAxis:{type:'value',min:0,max:r=>Math.max(1,Math.ceil(r.max*1.18)),name:'%',axisLabel:{color:muted,formatter:v=>Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%'},splitLine:{lineStyle:{color:c('--border','#ddd')}}},
       series},true);
+    chart.on('datazoom',zoomed);
   }
-  function clear(){current=null;element('mortalityAudit')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
+  function clear(){if(chart)chart.off('datazoom',zoomed);current=null;weekControls();element('mortalityAudit')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
   const resize = ()=>{if(current&&chart)draw(chart,current);};
   window.addEventListener('resize',resize);
   return {draw,clear,format};
