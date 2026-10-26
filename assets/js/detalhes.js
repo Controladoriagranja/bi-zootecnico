@@ -508,6 +508,9 @@ const evolucaoChart =
         )
     );
 
+// Nova modificação de 26/10/2026: consulta de lotes somente após clicar numa barra.
+if(mortalityMode)MortalityChart.setLotOpener(selection=>MortalityLots.open({...selection,filters:allFilters()}));
+
 
 async function atualizarFiltrosDetalhes(preserve) {
     ++detailRequestId;
