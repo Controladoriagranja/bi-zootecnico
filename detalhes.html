@@ -21,6 +21,7 @@
     </script>
 <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet"/>
 <link href="assets/vendor/geist/index.css" rel="stylesheet"/>
+<link href="assets/css/mortalidade-chart.css?v=20261026-1" rel="stylesheet"/>
 </head>
 <body data-page="desempenho">
 <div class="app-shell">
@@ -65,6 +66,7 @@
 <div class="filters-grid details-filters details-filters-with-indicator"><div class="filter-field">
 <span>Ano</span>
 <div class="checkbox-multiselect" id="ano"></div>
+<select id="anoMortalidade" class="hidden" aria-label="Ano da mortalidade"></select>
 </div><div class="filter-field">
 <span>Mês</span>
 <div class="checkbox-multiselect" id="mes"></div>
@@ -148,7 +150,7 @@
 <p class="ranking-reconciliation" id="conferenciaRankingProdutores"></p>
 </article>
 </section>
-<article class="card chart-card evolution-card">
+<article class="card chart-card evolution-card" id="mortalityEvolutionCard">
 <div class="card-heading-row">
 <div>
 <div class="card-kicker">
@@ -163,7 +165,13 @@
                 </p>
 </div>
 </div>
-<div class="chart chart-evolution" id="evolucaoChart"></div>
+<div class="history-view-filter hidden" id="mortalityGrouping" role="radiogroup" aria-label="Período da mortalidade">
+<button class="history-view-button active" type="button" data-mortality-unit="mensal" role="radio" aria-checked="true">Mensal</button>
+<button class="history-view-button" type="button" data-mortality-unit="semanal" role="radio" aria-checked="false">Semanal</button>
+</div>
+<div class="mortality-chart-scroll"><div class="chart chart-evolution" id="evolucaoChart"></div></div>
+<div class="mortality-legend hidden" id="mortalityLegend"></div>
+<div class="hidden" id="mortalityAudit" role="status"></div>
 </article>
 </div>
 <div class="updating-pill hidden" id="dashboardAtualizando">
@@ -179,7 +187,8 @@
 <script src="assets/js/filters.js?v=busca-filtros-20261023-1"></script>
 <script src="assets/js/charts.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
-<script src="assets/js/detalhes.js?v=busca-filtros-20261023-1"></script>
+<script src="assets/js/mortalidade-chart.js?v=20261026-1"></script>
+<script src="assets/js/detalhes.js?v=mortalidade-20261026-1"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=fases-20261019-1"></script>
 </body>

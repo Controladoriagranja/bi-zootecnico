@@ -12,15 +12,20 @@ let metricId =
     params.get("indicador")
     || "gmd";
 
+// Nova modificação de 26/10/2026: comportamento restrito à mortalidade.
+const mortalityMode = metricId === 'mortalidade';
+let mortalityGrouping = 'mensal', mortalityPayload = null;
+document.getElementById('ano').classList.toggle('hidden',mortalityMode);
+document.getElementById('anoMortalidade').classList.toggle('hidden',!mortalityMode);
 let metricCatalog = [];
 
 
 const DETAIL_FILTERS = [
     {
-        id: "ano",
+        id: mortalityMode ? "anoMortalidade" : "ano",
         apiKey: "ano",
         search: false,
-        multi: true
+        multi: !mortalityMode
     },
     {
         id: "mes",
@@ -179,6 +184,9 @@ function registrarIndicador() {
                         .value;
 
                 atualizarUrl();
+                if ((metricId === 'mortalidade') !== mortalityMode) {
+                    window.location.reload(); return;
+                }
                 carregarDetalhes(false);
             }
         );
@@ -338,19 +346,34 @@ function render() {
         metric.casas_decimais ?? 2
     );
 
-    ZooCharts.evolution(
-        evolucaoChart,
-        detalhesData.evolucao,
-        metric.nome,
-        metric.casas_decimais ?? 2,
-        metric.unidade
-    );
+    document.getElementById('mortalityEvolutionCard').classList.toggle('mortality-evolution',mortalityMode);
+    document.getElementById('mortalityGrouping').classList.toggle('hidden',!mortalityMode);
+    document.getElementById('mortalityLegend').classList.toggle('hidden',!mortalityMode);
+    if (mortalityMode) {
+        document.getElementById('tituloEvolucao').textContent = `Mortalidade ${mortalityGrouping === 'mensal' ? 'mensal' : 'semanal'} · ${allFilters().ano}`;
+        if(mortalityPayload) MortalityChart.draw(evolucaoChart,mortalityPayload);
+    } else {
+        ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
+    }
 }
 
 
 async function carregarDetalhes(
     initial = false
 ) {
+    if(mortalityMode) {
+        const yearSelect=document.getElementById('anoMortalidade');
+        const allOption=yearSelect.querySelector('option[value=""]');
+        allOption?.remove();
+        if(!yearSelect.value) yearSelect.value=[...yearSelect.options].map(o=>o.value).filter(Boolean).sort((a,b)=>Number(b)-Number(a))[0]||'';
+        if(!yearSelect.value) {
+            ++detailRequestId;requestController?.abort();mortalityPayload=null;MortalityChart.clear();evolucaoChart.clear();
+            document.getElementById('kpiValor').textContent='\u2014';
+            const error=document.getElementById('mensagemErro');error.textContent='Sem ano disponivel para os filtros selecionados.';error.classList.remove('hidden');
+            document.getElementById('dashboardAtualizando').classList.add('hidden');return;
+        }
+        mortalityPayload=null;MortalityChart.clear();atualizarUrl();
+    }
     const requestId = ++detailRequestId;
     exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
     document.getElementById("mensagemErro").classList.add("hidden");
@@ -405,6 +428,12 @@ async function carregarDetalhes(
         if(!response.ranking_contexto)throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
         detalhesData = response;
         render();
+        if(mortalityMode) {
+            const payload=await apiGet(APP_CONFIG.endpoints.detalhes,
+                {...allFilters(),indicador:'mortalidade',etapa:'evolucao',agrupamento:mortalityGrouping},{signal:requestController.signal});
+            if(requestId !== detailRequestId)return;
+            mortalityPayload=payload;render();
+        }
     }
     catch (error) {
         if (requestId !== detailRequestId) return;
@@ -542,11 +571,16 @@ async function aplicarParametrosUrl() {
                 .filter(Boolean);
 
         if (values.length) {
+            if(mortalityMode && field.apiKey === 'ano') {
+                const chosen=[...values].sort((a,b)=>Number(b)-Number(a))[0];
+                const option=document.createElement('option');option.value=chosen;option.textContent=chosen;
+                document.getElementById('anoMortalidade').appendChild(option);
+            }
             filters.set(
                 field.apiKey,
                 field.multi
                     ? values
-                    : values[0]
+                    : (field.apiKey === "ano" && mortalityMode ? [...values].sort((a,b)=>Number(b)-Number(a))[0] : values[0])
             );
         }
     });
@@ -571,6 +605,14 @@ async function iniciar() {
 }
 
 
+document.querySelectorAll('[data-mortality-unit]').forEach(button=>button.addEventListener('click',()=>{
+    if(!mortalityMode || mortalityGrouping===button.dataset.mortalityUnit)return;
+    mortalityGrouping=button.dataset.mortalityUnit;
+    document.querySelectorAll('[data-mortality-unit]').forEach(item=>{
+        item.classList.toggle('active',item===button);item.setAttribute('aria-checked',String(item===button));
+    });
+    carregarDetalhes(false);
+}));
 iniciar().catch(error => {
   const el = document.getElementById("mensagemErro");
   el.textContent = error.message || "Não foi possível iniciar o detalhamento.";

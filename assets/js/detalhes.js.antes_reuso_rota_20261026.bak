@@ -1,0 +1,616 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Exibe valor, rankings e evolução recebidos de detalhes; não recalcula médias.
+ */
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+let metricId =
+    params.get("indicador")
+    || "gmd";
+
+// Nova modificação de 26/10/2026: comportamento restrito à mortalidade.
+const mortalityMode = metricId === 'mortalidade';
+let mortalityGrouping = 'mensal', mortalityPayload = null;
+document.getElementById('ano').classList.toggle('hidden',mortalityMode);
+document.getElementById('anoMortalidade').classList.toggle('hidden',!mortalityMode);
+let metricCatalog = [];
+
+
+const DETAIL_FILTERS = [
+    {
+        id: mortalityMode ? "anoMortalidade" : "ano",
+        apiKey: "ano",
+        search: false,
+        multi: !mortalityMode
+    },
+    {
+        id: "mes",
+        apiKey: "mes",
+        search: false,
+        multi: true
+    },
+    {
+        id: "tipoGranja",
+        apiKey: "tipo_granja",
+        search: true,
+        multi: true
+    },
+    {
+        id: "modelo",
+        apiKey: "modelo",
+        search: true,
+        multi: true
+    },
+    {
+        id: "produtor",
+        apiKey: "produtor",
+        search: true,
+        multi: true
+    },
+    {
+        id: "tecnico",
+        apiKey: "tecnico",
+        search: true,
+        multi: true
+    },
+    {
+        id: "galpao",
+        apiKey: "galpao",
+        search: true,
+        multi: true
+    }
+];
+
+
+const inheritedKeys = [
+    "status_acerto",
+    "tipo_linhagem",
+    "linhagem",
+    "data_inicio",
+    "data_fim"
+];
+
+
+let detalhesData = null;
+let requestController = null;
+let detailRequestId = 0;
+
+
+function semAno2022(series) {
+    return (series || []).filter(
+        item => Number(item.ano) >= 2023
+    );
+}
+
+
+const filters = new FilterController({
+    fields: DETAIL_FILTERS,
+
+    onChange: () => {
+        atualizarUrl();
+        carregarDetalhes(false);
+    },
+
+    includeDependentRefresh: true,
+
+    contextProvider: () => ({
+        ...inheritedFilters()
+    })
+});
+
+
+function inheritedFilters() {
+    const result = {};
+
+    inheritedKeys.forEach(key => {
+        const values =
+            params
+                .getAll(key)
+                .filter(Boolean);
+
+        if (values.length > 1) {
+            result[key] = values;
+        }
+        else if (values.length === 1) {
+            result[key] = values[0];
+        }
+    });
+
+    return result;
+}
+
+
+function allFilters() {
+    return {
+        ...inheritedFilters(),
+        ...filters.values()
+    };
+}
+
+
+async function carregarIndicadores() {
+    const response = { metricas: BI_METRIC_ORDER.map(id => METRICAS[id]) };
+
+    metricCatalog =
+        Array.isArray(response.metricas)
+            ? response.metricas
+            : [];
+
+    metricCatalog = metricCatalog.filter(metric => metric.id !== "cac_ref" && BI_METRIC_ORDER.includes(metric.id));
+    if (!metricCatalog.some(metric => metric.id === metricId)) metricId = "gmd";
+
+    const select =
+        document.getElementById(
+            "indicador"
+        );
+
+    select.innerHTML = "";
+
+    metricCatalog.forEach(metric => {
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = metric.id;
+        option.textContent = metric.nome;
+        option.selected =
+            metric.id === metricId;
+
+        select.appendChild(option);
+    });
+
+    select.value = metricId;
+}
+
+
+function registrarIndicador() {
+    document
+        .getElementById(
+            "indicador"
+        )
+        .addEventListener(
+            "change",
+            () => {
+                metricId =
+                    document
+                        .getElementById(
+                            "indicador"
+                        )
+                        .value;
+
+                atualizarUrl();
+                if ((metricId === 'mortalidade') !== mortalityMode) {
+                    window.location.reload(); return;
+                }
+                carregarDetalhes(false);
+            }
+        );
+}
+
+
+function atualizarUrl() {
+    const next =
+        new URLSearchParams();
+
+    next.set(
+        "indicador",
+        metricId
+    );
+
+    Object.entries(
+        allFilters()
+    ).forEach(
+        ([key, value]) => {
+            if (Array.isArray(value)) {
+                value.forEach(item => {
+                    next.append(key, item);
+                });
+                return;
+            }
+
+            if (value) {
+                next.set(key, value);
+            }
+        }
+    );
+
+    history.replaceState(
+        null,
+        "",
+        `${location.pathname}?${next.toString()}`
+    );
+}
+
+
+function formatMetric(
+    value,
+    metric
+) {
+    if (
+        value === null
+        || value === undefined
+    ) {
+        return "—";
+    }
+
+    const number = Number(value);
+
+    if (Number.isNaN(number)) {
+        return "—";
+    }
+
+    if (metric.unidade === "aves") {
+        return number.toLocaleString(
+            "pt-BR",
+            {
+                maximumFractionDigits: 0
+            }
+        );
+    }
+
+    const digits =
+        Number.isInteger(
+            metric.casas_decimais
+        )
+            ? metric.casas_decimais
+            : 2;
+
+    return number.toLocaleString(
+        "pt-BR",
+        {
+            minimumFractionDigits: digits,
+            maximumFractionDigits: digits
+        }
+    );
+}
+
+
+function render() {
+    if (!detalhesData) {
+        return;
+    }
+
+    const metric =
+        detalhesData.indicador;
+
+    const audit=detalhesData.ranking_contexto;
+    const descriptions={sum:'Soma de todos os grupos.',avg:'Média dos lotes válidos. A média simples dos grupos não reproduz o total quando eles têm quantidades diferentes de lotes.',
+        ratio_sums:'Total calculado pela divisão das somas dos componentes. Somar ou fazer média simples das barras não reproduz esse total.',
+        weighted_avg:metric.id==='vazio'?'Média dos grupos ponderada por aves abatidas, sem limite de 14.':'Média dos grupos ponderada por aves alojadas.'};
+    ['tecnicos','produtores'].forEach(kind=>{
+        const suffix=kind==='tecnicos'?'Tecnicos':'Produtores',rows=detalhesData['ranking_'+kind]||[],context=audit?.[kind];
+        document.getElementById('contextoRanking'+suffix).textContent=`${rows.length} ${kind==='tecnicos'?'técnicos':'produtores'} · ${Math.min(20,rows.length)} visíveis${rows.length>20?' · Role para ver todos':''}${context?.sem_identificacao?' · Inclui registros sem identificação':''}`;
+        document.getElementById('conferenciaRanking'+suffix).textContent=context?`${descriptions[audit.metodo]||''} Total recomposto: ${formatMetric(context.valor_recomposto,metric)}. ${(METRICAS[metric.id]?.descricao||'')}`:'Atualize o backend para conferir a recomposição completa deste ranking.';
+    });
+
+    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metric.id]], "formula-detalhe");
+
+    document
+        .getElementById(
+            "tituloDetalhes"
+        )
+        .textContent =
+        `Detalhamento • ${metric.nome}`;
+
+    document
+        .getElementById(
+            "subtituloDetalhes"
+        )
+        .textContent =
+        "Rankings e evolução dos indicadores zootécnicos.";
+
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),detalhesData);
+
+    document
+        .getElementById(
+            "kpiNome"
+        )
+        .textContent =
+        metric.nome;
+
+    document
+        .getElementById(
+            "kpiValor"
+        )
+        .textContent =
+        formatMetric(
+            metric.valor,
+            metric
+        );
+
+    document
+        .getElementById(
+            "tituloEvolucao"
+        )
+        .textContent =
+        `Evolução de ${metric.nome}`;
+
+    ZooCharts.ranking(
+        rankingTecnicosChart,
+        detalhesData.ranking_tecnicos,
+        metric.nome,
+        metric.unidade,
+        metric.casas_decimais ?? 2
+    );
+
+    ZooCharts.ranking(
+        rankingProdutoresChart,
+        detalhesData.ranking_produtores,
+        metric.nome,
+        metric.unidade,
+        metric.casas_decimais ?? 2
+    );
+
+    document.getElementById('mortalityEvolutionCard').classList.toggle('mortality-evolution',mortalityMode);
+    document.getElementById('mortalityGrouping').classList.toggle('hidden',!mortalityMode);
+    document.getElementById('mortalityLegend').classList.toggle('hidden',!mortalityMode);
+    if (mortalityMode) {
+        document.getElementById('tituloEvolucao').textContent = `Mortalidade ${mortalityGrouping === 'mensal' ? 'mensal' : 'semanal'} · ${allFilters().ano}`;
+        if(mortalityPayload) MortalityChart.draw(evolucaoChart,mortalityPayload);
+    } else {
+        ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
+    }
+}
+
+
+async function carregarDetalhes(
+    initial = false
+) {
+    if(mortalityMode) {
+        const yearSelect=document.getElementById('anoMortalidade');
+        const allOption=yearSelect.querySelector('option[value=""]');
+        allOption?.remove();
+        if(!yearSelect.value) yearSelect.value=[...yearSelect.options].map(o=>o.value).filter(Boolean).sort((a,b)=>Number(b)-Number(a))[0]||'';
+        if(!yearSelect.value) throw new Error('Não há ano disponível para a mortalidade.');
+        mortalityPayload=null;MortalityChart.clear();atualizarUrl();
+    }
+    const requestId = ++detailRequestId;
+    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
+    document.getElementById("mensagemErro").classList.add("hidden");
+    document.getElementById("kpiValor").textContent = "—";
+    ['Tecnicos','Produtores'].forEach(suffix=>{
+        document.getElementById('contextoRanking'+suffix).textContent='';
+        document.getElementById('conferenciaRanking'+suffix).textContent='';
+    });
+    document.getElementById("kpiNome").textContent = METRICAS[metricId]?.nome || "Indicador";
+    document.getElementById("tituloDetalhes").textContent = "Detalhamento • " + (METRICAS[metricId]?.nome || "Indicador");
+    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metricId]].filter(Boolean), "formula-detalhe");
+    rankingTecnicosChart?.clear(); rankingProdutoresChart?.clear(); evolucaoChart?.clear();
+    if (requestController) {
+        requestController.abort();
+    }
+
+    requestController =
+        new AbortController();
+
+    document
+        .getElementById(
+            "dashboardAtualizando"
+        )
+        .classList
+        .remove("hidden");
+
+    try {
+        const response =
+            await ApiProgressive.details(
+                APP_CONFIG
+                    .endpoints
+                    .detalhes,
+                {
+                    indicador: metricId,
+                    ...allFilters()
+                },
+                {
+                    signal:
+                        requestController
+                            .signal
+                },
+                response => {
+                    if (requestId !== detailRequestId) return;
+                    if (!response.ranking_contexto) throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
+                    detalhesData = response;
+                    render();
+                    if (!response.carga_completa) document.getElementById('tituloEvolucao').textContent += ' · Carregando…';
+                }
+            );
+
+        if (requestId !== detailRequestId) return;
+        if(!response.ranking_contexto)throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
+        detalhesData = response;
+        render();
+        if(mortalityMode) {
+            const payload=await apiGet('/api/bi/zootecnico/mortalidade-evolucao',
+                {...allFilters(),agrupamento:mortalityGrouping},{signal:requestController.signal});
+            if(requestId !== detailRequestId)return;
+            mortalityPayload=payload;render();
+        }
+    }
+    catch (error) {
+        if (requestId !== detailRequestId) return;
+        if (
+            error.name
+            === "AbortError"
+        ) {
+            return;
+        }
+
+        console.error(error);
+        exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
+
+        const el =
+            document.getElementById(
+                "mensagemErro"
+            );
+
+        el.textContent =
+            error.message
+            || "Falha ao carregar detalhamento.";
+
+        el.classList.remove("hidden");
+    }
+    finally {
+        if (requestId !== detailRequestId) return;
+        document
+            .getElementById(
+                "dashboardAtualizando"
+            )
+            .classList
+            .add("hidden");
+    }
+}
+
+
+const rankingTecnicosChart =
+    ZooCharts.init(
+        document.getElementById(
+            "rankingTecnicos"
+        )
+    );
+
+
+const rankingProdutoresChart =
+    ZooCharts.init(
+        document.getElementById(
+            "rankingProdutores"
+        )
+    );
+
+
+const evolucaoChart =
+    ZooCharts.init(
+        document.getElementById(
+            "evolucaoChart"
+        )
+    );
+
+
+async function atualizarFiltrosDetalhes(preserve) {
+    ++detailRequestId;
+    requestController?.abort();
+    detalhesData=null;
+    document.getElementById("kpiValor").textContent="—";
+    rankingTecnicosChart.clear();rankingProdutoresChart.clear();evolucaoChart.clear();
+    document.getElementById("dashboardAtualizando").classList.remove("hidden");
+    document.getElementById("mensagemErro").classList.add("hidden");
+    try {
+        if(await filters.loadOptions({preserve}) === false)return;
+        atualizarUrl();
+        await carregarDetalhes(false);
+    }catch(error){
+        if(error.name === "AbortError")return;
+        const el=document.getElementById("mensagemErro");el.textContent=error.message;el.classList.remove("hidden");
+        document.getElementById("dashboardAtualizando").classList.add("hidden");
+    }
+}
+
+rankingTecnicosChart.on(
+    "click",
+    async paramsChart => {
+        if(detalhesData?.ranking_tecnicos?.[paramsChart.dataIndex]?.sem_identificacao)return;
+        filters.set(
+            "tecnico",
+            paramsChart.name
+        );
+
+        await atualizarFiltrosDetalhes(true);
+    }
+);
+
+
+rankingProdutoresChart.on(
+    "click",
+    async paramsChart => {
+        if(detalhesData?.ranking_produtores?.[paramsChart.dataIndex]?.sem_identificacao)return;
+        filters.set(
+            "produtor",
+            paramsChart.name
+        );
+
+        await atualizarFiltrosDetalhes(true);
+    }
+);
+
+
+document.addEventListener(
+    "charts:theme-refresh",
+    () => {
+        render();
+    }
+);
+
+
+document
+    .getElementById(
+        "limparFiltrosDetalhes"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+            filters.clear();
+
+            await atualizarFiltrosDetalhes(false);
+        }
+    );
+
+
+async function aplicarParametrosUrl() {
+    DETAIL_FILTERS.forEach(field => {
+        const values =
+            params
+                .getAll(field.apiKey)
+                .filter(Boolean);
+
+        if (values.length) {
+            if(mortalityMode && field.apiKey === 'ano') {
+                const chosen=[...values].sort((a,b)=>Number(b)-Number(a))[0];
+                const option=document.createElement('option');option.value=chosen;option.textContent=chosen;
+                document.getElementById('anoMortalidade').appendChild(option);
+            }
+            filters.set(
+                field.apiKey,
+                field.multi
+                    ? values
+                    : (field.apiKey === "ano" && mortalityMode ? [...values].sort((a,b)=>Number(b)-Number(a))[0] : values[0])
+            );
+        }
+    });
+
+
+}
+
+
+async function iniciar() {
+    await carregarIndicadores();
+    registrarIndicador();
+    filters.register();
+
+    await aplicarParametrosUrl();
+
+    if(await filters.loadOptions({
+        preserve: true
+    }) === false)return;
+
+    atualizarUrl();
+    await carregarDetalhes(true);
+}
+
+
+document.querySelectorAll('[data-mortality-unit]').forEach(button=>button.addEventListener('click',()=>{
+    if(!mortalityMode || mortalityGrouping===button.dataset.mortalityUnit)return;
+    mortalityGrouping=button.dataset.mortalityUnit;
+    document.querySelectorAll('[data-mortality-unit]').forEach(item=>{
+        item.classList.toggle('active',item===button);item.setAttribute('aria-checked',String(item===button));
+    });
+    carregarDetalhes(false);
+}));
+iniciar().catch(error => {
+  const el = document.getElementById("mensagemErro");
+  el.textContent = error.message || "Não foi possível iniciar o detalhamento.";
+  el.classList.remove("hidden");
+  document.getElementById("dashboardAtualizando").classList.add("hidden");
+});
