@@ -14,11 +14,12 @@ let metricId =
 
 // Nova modificação de 26/10/2026: comportamento restrito à mortalidade.
 const mortalityMode = metricId === 'mortalidade';
-let mortalityGrouping = 'mensal', mortalityPayload = null;
+let mortalityGrouping = 'semanal', mortalityPayload = null;
 // Um único controle de ano no DOM: substituir somente na mortalidade.
 if(mortalityMode) {
     const select=document.createElement('select');select.id='anoMortalidade';select.ariaLabel='Ano da mortalidade';
     document.getElementById('ano').replaceWith(select);
+    document.getElementById('tituloEvolucao').textContent='Mortalidade semanal';
 }
 let metricCatalog = [];
 
@@ -383,6 +384,7 @@ async function carregarDetalhes(
             document.getElementById('dashboardAtualizando').classList.add('hidden');return;
         }
         mortalityPayload=null;MortalityChart.clear();atualizarUrl();
+        document.getElementById('tituloEvolucao').textContent=`Mortalidade ${mortalityGrouping==='semanal'?'semanal':'mensal'} · ${yearSelect.value}`;
     }
     const requestId = ++detailRequestId;
     exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
