@@ -6,7 +6,7 @@ import shutil
 
 ROOT=Path(__file__).resolve().parents[1]
 PAGES=('index.html','detalhes.html','lotes.html','historico.html','gpd-por-fase.html',
-       'diferenca-aves-abatidas.html','formulas.html')
+       'diferenca-aves-abatidas.html','formulas.html','teste-lotes-em-criacao.html')
 
 
 def frontend_files():
