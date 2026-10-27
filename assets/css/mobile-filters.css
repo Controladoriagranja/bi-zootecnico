@@ -1,0 +1,104 @@
+/* Nova modificação de 27/10/2026: filtros móveis e cabeçalho; desktop preservado. */
+.mobile-bi-page .test-title-dot { color:var(--accent); }
+.mobile-bi-page .test-caption { margin:6px 0 0; font-size:12px; color:var(--muted-foreground); }
+.test-caption span { display:inline-block; margin-left:6px; padding:3px 8px; border:1px solid var(--border); border-radius:20px; background:var(--card); }
+.mobile-filter-handle { display:none; }
+.mobile-filter-shell { display:none; }
+.mobile-bi-page .mobile-filter-shell { display:none; }
+.mobile-filter-scroll h2 { margin:4px 0 20px; font-size:20px; letter-spacing:-.025em; }
+.mobile-filter-footer { margin-top:16px; }
+.mobile-filter-actions { display:flex; justify-content:flex-end; gap:10px; }
+.mobile-filter-footer > p,.mobile-filter-apply { display:none; }
+.mobile-filter-toggle,.mobile-filter-expand { font:inherit; cursor:pointer; }
+@media (max-width:767px) {
+  .mobile-bi-page .mobile-filters-relocated { display:none; }
+  .mobile-bi-page { padding-bottom:calc(88px + env(safe-area-inset-bottom,0px)); }
+  .mobile-bi-page .lotes-compact-header h1 { font-size:clamp(22px,6vw,30px); }
+  .mobile-bi-page .mobile-filter-shell {
+    display:block;
+    --mobile-max:600px; --mobile-visible:56px;
+    position:fixed; z-index:1100; left:50%; bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    width:152px; height:var(--mobile-max); margin:0; padding:0;
+    transform:translate3d(-50%,calc(var(--mobile-max) - var(--mobile-visible)),0);
+    border:0; border-radius:28px; overflow:visible; pointer-events:none;
+    color:var(--foreground); background:transparent; box-shadow:none;
+    contain:layout style;
+    transition:transform 260ms cubic-bezier(.22,.7,.25,1),width 260ms cubic-bezier(.22,.7,.25,1),border-radius 260ms ease,box-shadow 260ms ease;
+  }
+  .mobile-bi-page .mobile-filter-shell.is-open { width:calc(100% - 24px); max-width:none; border-radius:24px; }
+  .mobile-filter-surface { height:var(--mobile-visible); overflow:hidden; border:1px solid var(--border); border-radius:28px; pointer-events:auto; background:var(--card); box-shadow:0 5px 22px #0002; transition:height 260ms cubic-bezier(.22,.7,.25,1),border-radius 260ms ease,box-shadow 260ms ease; }
+  .is-open .mobile-filter-surface { border-radius:24px; box-shadow:0 12px 48px #0003; }
+  .mobile-bi-page .mobile-filter-shell.is-dragging { transition:none; will-change:transform; }
+  .mobile-filter-handle { display:flex; position:relative; align-items:center; height:56px; padding:0 8px; touch-action:none; user-select:none; }
+  .is-open .mobile-filter-handle::before { content:""; position:absolute; width:30px; height:3px; top:6px; left:calc(50% - 15px); border-radius:8px; background:var(--border); }
+  .mobile-filter-toggle { display:flex; flex:1; align-items:center; justify-content:center; gap:9px; min-height:48px; min-width:0; border:0; border-radius:24px; background:transparent; color:var(--foreground); font-size:14px; font-weight:750; touch-action:none; }
+  .mobile-filter-toggle svg { width:20px; height:20px; flex-shrink:0; color:var(--primary); }
+  .mobile-filter-count { display:inline-grid; place-items:center; min-width:21px; height:21px; padding:0 5px; border-radius:20px; background:var(--primary); color:var(--primary-foreground); font-size:11px; }
+  .mobile-filter-count[hidden] { display:none; }
+  .mobile-filter-chevron { font-size:17px; transition:transform 260ms ease; }
+  .is-open .mobile-filter-chevron { transform:rotate(180deg); }
+  .mobile-filter-expand { display:none; width:44px; height:44px; border:1px solid var(--border); border-radius:50%; background:var(--card); color:var(--primary); font-size:20px; touch-action:none; }
+  .is-open .mobile-filter-expand { display:block; }
+  .mobile-filter-content { opacity:0; visibility:hidden; transition:opacity 160ms ease,visibility 260ms; }
+  .is-open .mobile-filter-content { opacity:1; visibility:visible; }
+  .mobile-filter-scroll { height:calc(var(--mobile-visible) - 156px); min-height:0; overflow-y:auto; overscroll-behavior-y:contain; scrollbar-gutter:stable; padding:6px 18px 16px; -webkit-overflow-scrolling:touch; transition:height 260ms cubic-bezier(.22,.7,.25,1); }
+  .is-dragging .mobile-filter-surface,.is-dragging .mobile-filter-scroll { transition:none; }
+  .mobile-filter-intro { margin-bottom:16px; }
+  .mobile-filter-intro p { font-size:12px; line-height:1.5; }
+  .mobile-bi-page .mobile-filter-shell :is(.filters-grid,.history-filters) { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; }
+  .mobile-bi-page .mobile-filter-shell .filter-field { min-width:0; grid-column:auto; }
+  .mobile-bi-page .mobile-filter-shell .filter-field > span { font-size:12px; }
+  .mobile-filter-shell .checkbox-multiselect-trigger { min-height:48px; border-radius:12px; font-size:14px; }
+  .mobile-filter-shell .checkbox-multiselect-panel { position:static; width:100%; min-width:0; max-width:none; margin-top:7px; box-shadow:none; border-radius:12px; }
+  .mobile-filter-shell .checkbox-multiselect-list { max-height:200px; overscroll-behavior:contain; }
+  .mobile-filter-shell .checkbox-option { min-height:44px; font-size:14px; }
+  .mobile-filter-shell .checkbox-option input { width:18px; height:18px; }
+  .mobile-filter-footer { height:98px; margin:0; padding:8px 16px 12px; border-top:1px solid var(--border); background:var(--card); }
+  .mobile-filter-footer > p { display:block; margin:0 0 8px; min-height:14px; font-size:11px; color:var(--muted-foreground); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mobile-filter-actions { gap:8px; }
+  .mobile-filter-footer .button { min-height:44px; padding:0 12px; border-radius:12px; font-size:12px; }
+  .mobile-filter-footer .mobile-filter-apply { display:flex; flex:1; justify-content:center; align-items:center; gap:8px; background:var(--primary); color:var(--primary-foreground); border:1px solid var(--primary); }
+  .mobile-filter-shell :focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+  .mobile-bi-page .api-filter-progress { bottom:calc(84px + env(safe-area-inset-bottom,0px)); max-width:calc(100% - 32px); }
+  .mobile-bi-page:has(.lotes-galpao-drawer:not(.hidden)) .mobile-filter-shell,
+  .mobile-bi-page:has(.side-nav-root.open) .mobile-filter-shell,
+  .mobile-bi-page:has(#formulaModalLotes:not(.hidden)) .mobile-filter-shell { visibility:hidden; pointer-events:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mobile-bi-page .mobile-filter-shell,.mobile-filter-surface,.mobile-filter-scroll,.mobile-filter-content,.mobile-filter-chevron { transition:none !important; }
+}
+
+/* Cabeçalho móvel: título ocupa a largura útil; atualização e período ficam na linha abaixo. */
+@media (max-width:767px) {
+  .mobile-bi-page .app-shell > :is(.page-header,.lotes-compact-header) {
+    display:grid; grid-template-columns:minmax(0,1fr); gap:14px;
+    padding:0 !important; margin-bottom:20px; min-width:0;
+  }
+  .mobile-bi-page .app-shell > :is(.page-header,.lotes-compact-header) > div:first-child {
+    min-width:0; width:auto; margin-left:52px; padding-right:48px;
+  }
+  .mobile-bi-page .app-shell > :is(.page-header,.lotes-compact-header) h1 {
+    font-size:clamp(23px,6.5vw,30px); line-height:1.12; overflow-wrap:anywhere; margin:6px 0;
+  }
+  .mobile-bi-page .app-shell > :is(.page-header,.lotes-compact-header) .eyebrow { font-size:10px; line-height:1.4; }
+  .mobile-bi-page .app-shell > :is(.page-header,.lotes-compact-header) > :is(.header-toolbar,.card-actions) {
+    display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
+    gap:10px 16px; width:100%; min-width:0; margin:0; padding:10px 0 0;
+    border-top:1px solid var(--border);
+  }
+  .mobile-bi-page :is(.page-header,.lotes-compact-header) .update-meta {
+    min-width:0; max-width:100%; margin:0; padding:0; border:0; text-align:left; flex:1 1 125px;
+  }
+  .mobile-bi-page :is(.page-header,.lotes-compact-header) .update-meta span { font-size:10px; line-height:1.4; }
+  .mobile-bi-page :is(.page-header,.lotes-compact-header) .update-meta strong { font-size:12px; overflow-wrap:anywhere; white-space:normal; }
+  .mobile-bi-page :is(.page-header,.lotes-compact-header) .lotes-period-badge { min-width:0; max-width:100%; white-space:normal; font-size:10px; flex:0 1 auto; }
+  .mobile-bi-page .lotes-period-badge small { white-space:normal; max-width:165px; font-size:10px; overflow-wrap:anywhere; }
+  .mobile-bi-page :is(.page-header,.lotes-compact-header) [data-theme-toggle] {
+    position:absolute; top:0; right:0; width:40px; min-width:40px; height:40px; margin:0;
+  }
+  .mobile-bi-page .test-caption { font-size:12px; line-height:1.45; }
+  .mobile-bi-page .test-caption span { margin:5px 0 0; }
+  .mobile-bi-page .api-filter-progress { left:16px; right:auto; bottom:calc(88px + env(safe-area-inset-bottom,0px)); padding:9px 12px; font-size:12px; z-index:1000; }
+  .mobile-bi-page:has(.mobile-filter-shell.is-open) .api-filter-progress { visibility:hidden; }
+  .mobile-bi-page:has(.dialog-layer:not(.hidden),dialog[open],.mortality-lots-dialog[open]) .mobile-filter-shell { visibility:hidden; pointer-events:none; }
+}

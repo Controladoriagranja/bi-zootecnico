@@ -8,7 +8,7 @@
     <script>(()=>{try{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;}catch(_){}})();</script>
     <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
-    <link href="assets/css/teste-lotes-filtros.css?v=20261027-1" rel="stylesheet">
+<link href="assets/css/mobile-filters.css?v=mobile-todas-20261027-1" rel="stylesheet">
 </head>
 <body data-page="teste-lotes" class="lotes-reference-page lotes-test-page">
 <div class="app-shell lotes-shell">
@@ -47,28 +47,7 @@
             <div class="filter-field"><span>Mist Linha</span><div class="checkbox-multiselect" id="mistLinha"></div></div>
         </div>
     </section>
-    <section class="card filter-card lotes-filter-card test-filter-shell" id="testFilterShell" aria-label="Filtros de lotes">
-        <div class="test-filter-surface">
-        <header class="test-filter-handle" id="testFilterHandle">
-            <button type="button" id="testFilterToggle" class="test-filter-toggle" aria-controls="testFilterContent" aria-expanded="false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--card)"/><circle cx="15" cy="17" r="3" fill="var(--card)"/></svg>
-                <span>Filtros</span><span class="test-filter-count" id="testFilterCount" hidden>0</span>
-                <span class="test-filter-chevron" aria-hidden="true">⌃</span>
-            </button>
-            <button type="button" class="test-filter-expand" id="testFilterExpand" aria-label="Expandir filtros ao máximo" title="Expandir filtros ao máximo">↕</button>
-        </header>
-        <div id="testFilterContent" class="test-filter-content">
-            <div class="test-filter-scroll" id="testFilterScroll">
-                <div class="filter-card-top test-filter-intro"><div><h2>Refine sua análise</h2><p>Selecione uma ou mais semanas. Os critérios de avaliação são os mesmos da tela original.</p></div></div>
-                <div id="testFilterMount"></div>
-            </div>
-            <footer class="test-filter-footer">
-                <p id="testFilterStatus" role="status" aria-live="polite">Selecione e aplique os filtros.</p>
-                <div id="testFilterActions"><button class="button test-filter-apply" id="testFilterApply" type="button">Aplicar filtros <span aria-hidden="true">→</span></button></div>
-            </footer>
-        </div>
-        </div>
-    </section>
+
 
     <div class="alert alert-error hidden" id="mensagemErroLotes"></div>
 
@@ -165,13 +144,13 @@
 <script src="assets/js/metrics.js?v=consolidado-20261016-1"></script>
 <script src="assets/js/formula-ui.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/lotes-formulas.js?v=mortalidade-20261020-1"></script>
-<script src="assets/js/filters.js?v=busca-filtros-20261023-1"></script>
+<script src="assets/js/mobile-filters.js?v=mobile-todas-20261027-1"></script>
+<script src="assets/js/filters.js?v=mobile-todas-20261027-1"></script>
 <script src="assets/js/config.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/api.js?v=publicacao-sem-fases-20261016-1"></script>
 <script src="assets/js/api-screen.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/unavailable.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/teste-lotes-filtros.js?v=20261027-1"></script>
 <script src="assets/js/lotes.js?v=mortalidade-20261020-1"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=aba-teste-lotes-20261027-1"></script>

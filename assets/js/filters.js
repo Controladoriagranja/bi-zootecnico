@@ -36,6 +36,7 @@ class FilterController {
                 this.closeAll();
             }
         });
+        window.MobileFilterPanel?.attach(this);
     }
 
     normalizeArray(value) {
