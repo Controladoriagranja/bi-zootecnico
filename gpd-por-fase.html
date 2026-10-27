@@ -11,10 +11,10 @@
   <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="gpd-fases">
-<!-- Nova modificação de 23/10/2026: base dinâmica, pesos/7 e Abate. -->
+<!-- Nova modificação de 27/10/2026: GPD incremental; layout preservado. -->
 <main class="app-shell">
   <header class="page-header">
-    <div><div class="eyebrow">Dashboard Zootécnico</div><h1>GPD por Fase</h1><p>Pesos semanais ÷ 7 · Abate: ganho diário desde os 35 dias · g/dia.</p></div>
+    <div><div class="eyebrow">Dashboard Zootécnico</div><h1>GPD por Fase</h1><p>Ganho entre pesagens semanais · Abate: ganho diário desde os 35 dias · g/dia.</p></div>
     <div class="header-toolbar">
       <div class="update-meta"><span>Última atualização</span><strong id="phaseUpdated">—</strong></div>
       <button class="icon-button" type="button" data-theme-toggle aria-label="Alternar tema"><span data-theme-icon>☾</span></button>
@@ -47,11 +47,11 @@
   <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="phaseFormulaTitle" tabindex="-1">
     <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="phaseFormulaTitle">GPD por Fase</h2></div><button class="icon-button" id="phaseFormulaClose" type="button" aria-label="Fechar fórmula">×</button></header>
     <div class="dialog-body">
-      <div class="info-block"><span>Nova modificação de 23/10/2026</span><p>Fonte exclusiva: <strong>zootecnico.base_dinamica</strong>. Pesos em kg convertidos para g/dia.</p></div>
-      <div class="info-block"><span>Pesos semanais</span><div class="code-inline">Peso 7 dias = peso_7_dias × 1000 / 7<br>Peso 14 dias = peso_14_dias × 1000 / 7<br>Peso 21 dias = peso_21_dias × 1000 / 7<br>Peso 28 dias = peso_28_dias × 1000 / 7<br>Peso 35 dias = peso_35_dias × 1000 / 7</div><p>Regra solicitada: peso na idade dividido por 7, sem descontar o peso anterior ou o peso do pintinho.</p></div>
+      <div class="info-block"><span>Nova modificação de 27/10/2026</span><p>Fonte exclusiva: <strong>zootecnico.base_dinamica</strong>. Pesos em kg convertidos para g/dia.</p></div>
+      <div class="info-block"><span>Pesos semanais</span><div class="code-inline">Peso 7 dias = peso_7_dias × 1000 / 7<br>Peso 14 dias = (peso_14_dias − peso_7_dias) × 1000 / 7<br>Peso 21 dias = (peso_21_dias − peso_14_dias) × 1000 / 7<br>Peso 28 dias = (peso_28_dias − peso_21_dias) × 1000 / 7<br>Peso 35 dias = (peso_35_dias − peso_28_dias) × 1000 / 7</div><p>Fases de 14 a 35 dias: diferença entre os pesos consecutivos de cada lote, em kg, convertida para g/dia. Peso 7 dias permanece temporariamente como peso_7_dias × 1000 / 7: o peso inicial ainda precisa de confirmação de unidade e qualidade.</p></div>
       <div class="info-block"><span>Abate</span><div class="code-inline">(peso_medio − peso_35_dias) × 1000 / (idade − 35)</div><p>Usar a idade exata da própria linha, inclusive casas decimais. Ganho zero é válido; ganho negativo e idade menor ou igual a 35 ficam fora dessa média.</p></div>
       <div class="info-block"><span>Consolidação</span><p>Calcular cada resultado por linha e tirar a média simples dos registros válidos em cada dia, semana ou total, sem ponderação por aves. O total usa todos os lotes válidos, sem média das médias dos períodos. Calendário: data_de_abate.</p></div>
-      <div class="info-block"><span>Versões e ausências</span><p>Uma versão por cod_prod, galpao, lote e dia de data_de_alojamento: maior periodo_fim, carregado_em e id. Chaves incompletas são preservadas por id. Pesos ausentes, inválidos ou não positivos ficam sem valor apenas na série correspondente. A cobertura informa a quantidade usada e as exclusões.</p></div>
+      <div class="info-block"><span>Versões e ausências</span><p>Uma versão por cod_prod, galpao, lote e dia de data_de_alojamento: maior periodo_fim, carregado_em e id. Chaves incompletas são preservadas por id. Sem peso atual ou anterior válido, a fase fica sem valor; pesos ausentes, inválidos ou não positivos não são substituídos por zero. A cobertura informa a quantidade usada e as exclusões.</p></div>
     </div>
   </section>
 </div>
