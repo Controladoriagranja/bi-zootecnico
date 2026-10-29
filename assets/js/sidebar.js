@@ -9,7 +9,6 @@
         { id: "desempenho", label: "Desempenho Lotes Fechados", href: "index.html" },
         { id: "gpd-fases", label: "GPD por Fase", href: "gpd-por-fase.html" },
         { id: "lotes", label: "Lotes em Criação", href: "lotes.html" },
-        { id: "teste-lotes", label: "Teste • Lotes em Criação", href: "teste-lotes-em-criacao.html" },
         { id: "historico", label: "Histórico de Lotes em Criação", href: "historico.html" },
         { id: "diferenca-abate", label: "Diferença de Aves Abatidas", href: "diferenca-aves-abatidas.html" },
         { id: "formulas", label: "Fórmulas", href: "formulas.html" }

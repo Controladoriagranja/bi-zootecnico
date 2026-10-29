@@ -1,7 +1,4 @@
 /* Nova modificação de 27/10/2026: filtros móveis e cabeçalho; desktop preservado. */
-.mobile-bi-page .test-title-dot { color:var(--accent); }
-.mobile-bi-page .test-caption { margin:6px 0 0; font-size:12px; color:var(--muted-foreground); }
-.test-caption span { display:inline-block; margin-left:6px; padding:3px 8px; border:1px solid var(--border); border-radius:20px; background:var(--card); }
 .mobile-filter-handle { display:none; }
 .mobile-filter-shell { display:none; }
 .mobile-bi-page .mobile-filter-shell { display:none; }
@@ -96,8 +93,6 @@
   .mobile-bi-page :is(.page-header,.lotes-compact-header) [data-theme-toggle] {
     position:absolute; top:0; right:0; width:40px; min-width:40px; height:40px; margin:0;
   }
-  .mobile-bi-page .test-caption { font-size:12px; line-height:1.45; }
-  .mobile-bi-page .test-caption span { margin:5px 0 0; }
   .mobile-bi-page .api-filter-progress { left:16px; right:auto; bottom:calc(88px + env(safe-area-inset-bottom,0px)); padding:9px 12px; font-size:12px; z-index:1000; }
   .mobile-bi-page:has(.mobile-filter-shell.is-open) .api-filter-progress { visibility:hidden; }
   .mobile-bi-page:has(.dialog-layer:not(.hidden),dialog[open],.mortality-lots-dialog[open]) .mobile-filter-shell { visibility:hidden; pointer-events:none; }
