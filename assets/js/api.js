@@ -158,7 +158,8 @@ async function requestApi(endpoint, params = {}, options = {}) {
     response = await fetch(url.toString(), {
       method: "GET",
       signal: options.signal,
-      cache: options.cache || "no-store",
+      cache: "no-store",
+      credentials: "omit",
       headers: {
         ...(options.headers || {}),
         Accept: "application/json",
@@ -176,11 +177,16 @@ async function requestApi(endpoint, params = {}, options = {}) {
     );
   }
 
+  // Uma resposta iniciada na sessão anterior jamais pode alimentar a nova tela.
+  if (getPortalToken() !== token) {
+    throw new ApiError("A sessão foi alterada. Abra o relatório novamente pela CENTRAL.", 401, "SESSION_CHANGED");
+  }
+
   if (!response.ok) {
     const messages = {
       400: "Consulta inválida. Confira o indicador e os filtros.",
       401: "Sessão inválida ou expirada. Entre novamente pela CENTRAL.",
-      403: "Acesso não autorizado para esta sessão ou origem.",
+      403: "Sem permissão para estes dados. Confira o acesso à Integração e o vínculo do técnico com o administrador.",
       404: "Consulta indisponível no serviço de dados.",
       422: "Filtros inválidos. Confira as datas e seleções.",
       500: "Não foi possível concluir a consulta. Tente novamente.",
@@ -194,6 +200,9 @@ async function requestApi(endpoint, params = {}, options = {}) {
   catch (error) {
     if (error?.name === "AbortError") throw error;
     throw new ApiError("O serviço retornou uma resposta inválida.", response.status, "INVALID_JSON");
+  }
+  if (getPortalToken() !== token) {
+    throw new ApiError("A sessão foi alterada. Abra o relatório novamente pela CENTRAL.", 401, "SESSION_CHANGED");
   }
   // Nova modificação de 26/10/2026: contrato exclusivo da evolução de mortalidade.
   // As demais respostas continuam com a validação oficial do Desempenho abaixo.
