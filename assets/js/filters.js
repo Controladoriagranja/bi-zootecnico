@@ -30,6 +30,7 @@ class FilterController {
         this.refreshId = 0;
         this.changeId = 0;
         this.multiState = new Map();
+        this.fixedFilters = {};
 
         document.addEventListener("click", event => {
             if (!event.target.closest(".checkbox-multiselect")) {
@@ -74,7 +75,7 @@ class FilterController {
             }
         });
 
-        return data;
+        return {...data, ...this.fixedFilters};
     }
 
     getState(field) {
@@ -350,12 +351,23 @@ normalizeOptions(field, raw) {
         }));
 }
     renderMultiOptions(field, options, selected) {
+        const fixed = this.fixedFilters[field.apiKey];
+        if (fixed) {
+            options = fixed.map(value => ({value, label: value}));
+            selected = fixed;
+        }
         const state = this.buildMulti(field);
 
         if (!state) {
             return;
         }
 
+        state.button.disabled = Boolean(fixed);
+        state.button.title = fixed ? 'Filtro definido pelo seu acesso: Não Manual' : '';
+        if (fixed) {
+            state.host.classList.remove('open');
+            state.button.setAttribute('aria-expanded', 'false');
+        }
         // API options are availability, never the source of selected values.
         state.options = options;
         if (selected !== undefined) {
@@ -522,6 +534,9 @@ normalizeOptions(field, raw) {
         if (requestId !== this.refreshId) {
             return false;
         }
+        this.fixedFilters = response.filtros_fixos?.status_acerto?.length === 1
+            && response.filtros_fixos.status_acerto[0] === 'Não Manual'
+            ? {status_acerto: ['Não Manual']} : {};
         this.optionsObserver?.(response);
 
         // Read live selections after await; never restore a stale snapshot.
@@ -601,6 +616,7 @@ normalizeOptions(field, raw) {
             return;
         }
 
+        value = this.fixedFilters[apiKey] || value;
         this.invalidateRefresh();
         if (field.multi) {
             const state = this.getState(field);
