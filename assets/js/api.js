@@ -44,8 +44,23 @@ const ApiActivity = (() => {
 
 async function apiGet(endpoint, params = {}, options = {}) {
   const finish = ApiActivity.begin();
-  try { return await requestApi(endpoint, params, options); }
-  finally { finish(); }
+  try {
+    for (let attempt = 0; ; attempt++) {
+      try { return await requestApi(endpoint, params, options); }
+      catch (error) {
+        if (error?.name === "AbortError" || options.signal?.aborted) throw error;
+        const temporary = error instanceof ApiError && error.code === "HTTP_ERROR" && [0, 502, 503, 504].includes(error.status);
+        if (!temporary || attempt >= 2) throw error;
+        await new Promise((resolve, reject) => {
+          const signal = options.signal;
+          const abort = () => { clearTimeout(timer); signal?.removeEventListener("abort", abort); reject(new DOMException("Consulta cancelada", "AbortError")); };
+          const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, 600 * (attempt + 1));
+          signal?.addEventListener("abort", abort, {once:true});
+          if (signal?.aborted) abort();
+        });
+      }
+    }
+  } finally { finish(); }
 }
 
 // Apenas transporte e combinação de respostas: fórmulas e totais permanecem no SQL.
