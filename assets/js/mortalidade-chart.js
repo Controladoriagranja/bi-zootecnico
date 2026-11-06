@@ -104,6 +104,8 @@ window.MortalityChart = (() => {
     const partial=displayed.filter(p=>p.partial).length;
     const unavailable=payload.periodos.filter((p,i)=>p.lotes&&!displayed[i].show).length;
     const notice=element('mortalityPartialNotice');
+    const review=element('mortalityReview');
+    if(review){review.classList.toggle('hidden',payload.valido===true);if(changed||payload.valido===true)review.open=false;}
     if(notice){
       notice.textContent=`Resultado parcial: ${partial} período(s) com faixas calculadas apenas sobre os lotes vinculados e válidos${unavailable?`; ${unavailable} período(s) sem faixas conferidas`:''}. Nos períodos parciais, a linha também usa o total desses lotes. KPI e rankings mantêm a base completa e suas exclusões atuais. Consulte as ocorrências abaixo.`;
       notice.classList.toggle('hidden',payload.valido===true);
@@ -157,7 +159,7 @@ window.MortalityChart = (() => {
     chart.on('datazoom',zoomed);
     chart.on('click',clicked);
   }
-  function clear(){if(chart){chart.off('datazoom',zoomed);chart.off('click',clicked);}current=null;weekControls();window.MortalityLots?.close();element('mortalityAudit')?.classList.add('hidden');element('mortalityPartialNotice')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
+  function clear(){if(chart){chart.off('datazoom',zoomed);chart.off('click',clicked);}current=null;weekControls();window.MortalityLots?.close();const review=element('mortalityReview');if(review){review.open=false;review.classList.add('hidden');}element('mortalityAudit')?.classList.add('hidden');element('mortalityPartialNotice')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
   const resize = ()=>{if(current&&chart)draw(chart,current);};
   window.addEventListener('resize',resize);
   return {draw,clear,format,setLotOpener:callback=>{lotOpener=callback;}};
