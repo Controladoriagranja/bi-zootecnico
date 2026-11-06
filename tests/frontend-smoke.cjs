@@ -95,7 +95,7 @@ async function main(){
       });
       await page.goto(`http://bi.test/${name}.html${name==='detalhes'?'?indicador=gmd&ano=2026&mes=7&produtor=Produtor+teste':''}`);
       await page.waitForFunction(name=>name==='historico'
-        ? document.querySelector('#historyKpis strong')?.textContent==='1'
+        ? !!document.querySelector('#historyTableFoot tr')
         : document.body.innerText.includes('Produtor teste')||document.body.innerText.includes('60,00')||document.body.innerText.includes('AVE NOVA'),name);
       if(name==='index'){
         assert.equal(await page.locator('#ultimaAtualizacao').innerText(),'20/10/2026 08:05');
@@ -197,7 +197,7 @@ async function main(){
         assert(requests.some(p=>p.includes('/historico-abertos/')));
         assert(!requests.some(p=>p.includes('/historico-fechados/')));
         assert.equal(await page.locator('#historyTableHead .history-col-combined').count(),5);
-        assert.equal(await page.locator('#historyKpis [data-historico-formula]').count(),4);
+        assert.equal(await page.locator('#historyKpis').count(),0);assert.equal(await page.locator('.history-table-heading .if-button').count(),1);
         assert.equal(await page.locator('#historyTableBody .history-level-0').count(),1);
         assert.deepEqual(await page.locator('[data-history-year]').allTextContents(),['2026','2025','2023']);
         assert.equal(await page.locator('[data-history-year].active').innerText(),'2026');
@@ -338,7 +338,7 @@ async function main(){
       if(name==='index')assert(!(await page.locator('#indicadores').isVisible()));
       if(name==='detalhes')assert.equal(await page.locator('#kpiValor').innerText(),'—');
       if(name==='lotes')assert.equal(await page.locator('#cardsLotes .lotes-reference-value').first().innerText(),'—');
-      if(name==='historico')assert.equal(await page.locator('#historyKpis strong').first().innerText(),'—');
+      if(name==='historico')assert.equal(await page.locator('#historyTableFoot').innerText(),'');
       if(name==='diferenca-aves-abatidas')assert.equal(await page.locator('#kpiProgramada').innerText(),'—');
       scenario='optionsFailure';await page.locator('#'+clearId).click();
       await page.locator('#apiFilterProgress').waitFor({state:'hidden'});

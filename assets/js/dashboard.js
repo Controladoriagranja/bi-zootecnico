@@ -574,14 +574,7 @@ function metricCard(
             </div>
 
             <div class="card-actions">
-                <button
-                    class="mini-button"
-                    type="button"
-                    data-info-metric="${metricId}"
-                    title="Ver fórmula"
-                >
-                    <span class="formula-fx">ƒx</span>
-                </button>
+                <span data-formula-mount="desempenho.${metricId}"></span>
 
                 <a
                     class="details-button"
@@ -742,112 +735,6 @@ async function carregarDashboard(
 }
 
 
-function abrirFormula(metricId) {
-    const metric =
-        formulasCatalogo[
-            metricId
-        ];
-
-    if (!metric) {
-        return;
-    }
-
-    document.getElementById("formulaModalExplicacao").innerHTML = FormulaUI.explanation(metric);
-
-    document
-        .getElementById(
-            "formulaModalTitulo"
-        )
-        .textContent =
-        metric.nome;
-
-    document
-        .getElementById(
-            "formulaModalFormula"
-        )
-        .textContent =
-        metric.formula_exibicao
-        || "Não informada";
-
-    document
-        .getElementById(
-            "formulaModalDescricao"
-        )
-        .textContent =
-        metric.descricao
-        || "";
-
-    document
-        .getElementById(
-            "formulaModalDax"
-        )
-        .textContent =
-        metric.formula_dax
-        || "";
-
-    const ponderacao =
-        document.getElementById(
-            "formulaModalPonderacaoContainer"
-        );
-
-    if (metric.ponderador) {
-        ponderacao
-            .classList
-            .remove("hidden");
-
-        document
-            .getElementById(
-                "formulaModalPonderacao"
-            )
-            .textContent =
-            metric.ponderador;
-    }
-    else {
-        ponderacao
-            .classList
-            .add("hidden");
-    }
-
-    const regra =
-        document.getElementById(
-            "formulaModalRegraContainer"
-        );
-
-    if (metric.regra_adicional) {
-        regra.classList.remove("hidden");
-
-        document
-            .getElementById(
-                "formulaModalRegra"
-            )
-            .textContent =
-            metric
-                .regra_adicional
-                .descricao || "";
-    }
-    else {
-        regra.classList.add("hidden");
-    }
-
-    document
-        .getElementById(
-            "formulaModal"
-        )
-        .classList
-        .remove("hidden");
-}
-
-
-function fecharFormula() {
-    document
-        .getElementById(
-            "formulaModal"
-        )
-        .classList
-        .add("hidden");
-}
-
-
 document
     .getElementById(
         "limparFiltros"
@@ -887,38 +774,8 @@ document.addEventListener(
             return;
         }
 
-        const info =
-            event.target.closest(
-                "[data-info-metric]"
-            );
-
-        if (info) {
-            abrirFormula(
-                info.dataset.infoMetric
-            );
-        }
     }
 );
-
-
-document
-    .getElementById(
-        "formulaModalFechar"
-    )
-    .addEventListener(
-        "click",
-        fecharFormula
-    );
-
-
-document
-    .getElementById(
-        "formulaModalBackdrop"
-    )
-    .addEventListener(
-        "click",
-        fecharFormula
-    );
 
 
 async function applyPeriod() {

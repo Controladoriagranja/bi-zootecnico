@@ -11,7 +11,7 @@ async function run() {
   const api = await fs.readFile(path.join(root,'assets/js/api.js'),'utf8');
   function client({token='synthetic-test-token', fetchImpl} = {}) {
     const calls = [];
-    const sandbox = {URL, sessionStorage:{getItem:key => { assert.equal(key,'granjabi_auth_token'); return token; }}, fetch: async (...args) => { calls.push(args); return fetchImpl ? fetchImpl(...args) : {ok:true,status:200,json:async()=>({ok:true})}; }};
+    const sandbox = {URL, setTimeout:(fn)=>setTimeout(fn,0),clearTimeout, sessionStorage:{getItem:key => { assert.equal(key,'granjabi_auth_token'); return token; }}, fetch: async (...args) => { calls.push(args); return fetchImpl ? fetchImpl(...args) : {ok:true,status:200,json:async()=>({ok:true})}; }};
     vm.createContext(sandbox); vm.runInContext(config+'\n'+api+'\nthis.apiGet=apiGet;',sandbox);
     return {get:sandbox.apiGet,calls};
   }

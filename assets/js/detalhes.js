@@ -302,7 +302,7 @@ function render() {
         document.getElementById('conferenciaRanking'+suffix).textContent=context?`${descriptions[audit.metodo]||''} Total recomposto: ${formatMetric(context.valor_recomposto,metric)}. ${(METRICAS[metric.id]?.descricao||'')}`:'Atualize o backend para conferir a recomposição completa deste ranking.';
     });
 
-    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metric.id]], "formula-detalhe");
+    IndicatorFormulaUI.scan();
 
     document
         .getElementById(
@@ -405,7 +405,7 @@ async function carregarDetalhes(
     });
     document.getElementById("kpiNome").textContent = METRICAS[metricId]?.nome || "Indicador";
     document.getElementById("tituloDetalhes").textContent = "Detalhamento • " + (METRICAS[metricId]?.nome || "Indicador");
-    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metricId]].filter(Boolean), "formula-detalhe");
+    IndicatorFormulaUI.scan();
     rankingTecnicosChart?.clear(); rankingProdutoresChart?.clear(); evolucaoChart?.clear();
     if (requestController) {
         requestController.abort();

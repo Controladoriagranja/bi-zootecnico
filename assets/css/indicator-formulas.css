@@ -1,0 +1,36 @@
+/* Forma do componente BI-PCP; cores e fonte pertencem ao dashboard local. */
+.if-button{display:inline-flex;align-items:center;justify-content:center;width:36px;min-width:36px;height:36px;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted-foreground);font-family:inherit;font-style:italic;font-weight:600;font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;vertical-align:middle}
+.if-button:hover{background:var(--secondary);color:var(--primary)}
+.if-button:focus-visible,.if-close:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+[data-formula-mount]{display:inline-flex;align-items:center;flex-shrink:0}
+.if-formula-header{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.if-formula-header>.if-button{margin-left:auto}
+.if-formula-header>div:first-child{min-width:0}
+.if-dialog{width:min(660px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100dvh - 40px);box-sizing:border-box;margin:auto;padding:0;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--foreground);box-shadow:0 24px 70px #0003;font:14px/1.6 var(--font-sans,"Geist Variable",system-ui,sans-serif);overflow:hidden}
+.if-dialog[open]{display:flex;flex-direction:column}
+.if-dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
+.if-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 20px 14px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.if-dialog .if-eyebrow{margin:0;font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--primary)}
+.if-dialog h2{margin:1px 0 0;font-size:24px;line-height:1.25;color:inherit}
+.if-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:40px;height:40px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:inherit;font-size:22px;cursor:pointer}
+.if-dialog-content{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 20px 20px;scrollbar-gutter:stable}
+.if-metric{padding:18px 0;border-bottom:1px solid var(--border);scroll-margin-top:10px}
+.if-metric:last-child{border-bottom:0}
+.if-metric.if-selected{background:color-mix(in srgb,var(--primary) 5%,transparent);box-shadow:inset 3px 0 var(--primary);padding-left:12px;padding-right:8px;border-radius:8px}
+.if-dialog h3{font-size:17px;margin:0 0 8px}.if-dialog h4{font-size:14px;margin:15px 0 7px}
+.if-dialog .if-label{font-size:10px;font-weight:700;color:var(--muted-foreground);margin:12px 0 4px}
+.if-expression{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--secondary);border:1px solid var(--border);border-radius:8px;padding:12px;margin:0;font:12px/1.6 ui-monospace,Consolas,monospace}
+.if-dialog p{margin:5px 0}.if-columns{display:flex;flex-wrap:wrap;gap:5px}
+.if-columns code{background:var(--secondary);padding:3px 5px;border-radius:4px;font:11px/1.6 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+.if-dialog ol,.if-dialog ul{margin:7px 0;padding-left:22px}.if-dialog li{padding:3px 0}
+.if-reference{margin-top:12px}.if-reference summary{color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;min-height:36px;padding-top:8px}
+.if-reference pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:330px;overflow:auto;overscroll-behavior:contain;background:var(--secondary);border-radius:8px;padding:12px;font:11px/1.6 ui-monospace,Consolas,monospace}
+.if-rules{border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:8px;padding:8px 12px;margin-top:12px;background:color-mix(in srgb,var(--primary) 5%,var(--card))}.if-rules h4{margin:0;color:var(--primary)}
+.if-pending{font-size:12px;color:var(--muted-foreground)}
+.if-catalog-card{padding:16px}.if-catalog-card h3{font-size:15px;margin:0}
+.lotes-reference-kpi>[data-formula-mount]{position:absolute;top:12px;right:12px}
+.abate-kpi-label{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.abate-modal-summary>div>span.if-formula-header,#galpaoDrawerResumo>div>small.if-formula-header{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.rxp-ranking-heading>.rxp-ranking-controls{min-width:0;flex-wrap:wrap}
+@media(max-width:767px){.if-button{width:44px;min-width:44px;height:44px}.if-dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);max-height:calc(100dvh - 24px)}.if-dialog-header{padding:16px;gap:10px}.if-dialog-content{padding:0 16px 16px}.if-dialog h2{font-size:21px}.if-close{width:44px;height:44px}.if-formula-header{flex-wrap:wrap}.if-reference summary{min-height:44px}.if-dialog li{padding:4px 0}}
+@media(prefers-reduced-motion:reduce){.if-dialog *{scroll-behavior:auto!important}}

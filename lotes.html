@@ -9,6 +9,7 @@
     <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 <link href="assets/css/mobile-filters.css?v=mobile-telas-20261029-1" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/indicator-formulas.css?v=20261106-fx">
 </head>
 <body data-page="lotes" class="lotes-reference-page">
 <div class="app-shell lotes-shell">
@@ -54,15 +55,15 @@
 
     <section class="lotes-charts-grid">
         <article class="card lotes-chart-card">
-            <header><div><h2>Mortalidade Semanal</h2><p class="chart-subtitle">Mortalidade considera M + D: mortes + descartes em cada idade.</p><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="mortalidade_semanal" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></div><div class="chart-legend"><span><i class="dot dot-primary"></i>M+D (Qtde)</span><span><i class="dot dot-accent"></i>M+D (%)</span></div></header>
+            <header><div><h2>Mortalidade Semanal</h2><p class="chart-subtitle">Mortalidade considera M + D: mortes + descartes em cada idade.</p><span data-formula-mount="lotes.mortalidade_semanal"></span></div><div class="chart-legend"><span><i class="dot dot-primary"></i>M+D (Qtde)</span><span><i class="dot dot-accent"></i>M+D (%)</span></div></header>
             <div class="lotes-chart" id="chartMortalidade"></div>
         </article>
         <article class="card lotes-chart-card">
-            <header><h2>Média da Coluna de Peso por Idade</h2><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="peso_semanal" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></header>
+            <header><h2>Média da Coluna de Peso por Idade</h2><span data-formula-mount="lotes.peso_semanal"></span></header>
             <div class="lotes-chart" id="chartPesoSemanal"></div>
         </article>
         <article class="card lotes-chart-card">
-            <header><h2>Curva de Crescimento de Peso</h2><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="crescimento" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></header>
+            <header><h2>Curva de Crescimento de Peso</h2><span data-formula-mount="lotes.crescimento"></span></header>
             <div class="lotes-chart" id="chartCrescimento"></div>
         </article>
     </section>
@@ -130,27 +131,23 @@
     </aside>
 </div>
 
-<div class="dialog-layer hidden" id="formulaModalLotes">
-    <div class="dialog-backdrop" id="formulaBackdropLotes"></div>
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="formulaTituloLotes" tabindex="-1">
-        <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="formulaTituloLotes"></h2></div><button class="icon-button" id="formulaFecharLotes" type="button" aria-label="Fechar fórmula">×</button></header>
-        <div class="dialog-body"><div class="info-block"><span>Fórmula</span><div class="code-inline" id="formulaExpressaoLotes"></div></div><div class="info-block"><span>Descrição</span><p id="formulaDescricaoLotes"></p></div><div id="formulaExplicacaoLotes"></div></div>
-    </section>
-</div>
+
 
 <script src="assets/vendor/echarts/echarts.min.js"></script>
+<script src="assets/js/formulas-registry.js?v=20261106-fx"></script>
+<script src="assets/js/indicator-formulas.js?v=20261106-fx"></script>
 <script src="assets/js/theme.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/metrics.js?v=vazio-lote-20261030-1"></script>
-<script src="assets/js/formula-ui.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/lotes-formulas.js?v=mortalidade-20261020-1"></script>
+<script src="assets/js/metrics.js?v=20261106-fx"></script>
+<script src="assets/js/formula-ui.js?v=20261106-fx"></script>
+<script src="assets/js/lotes-formulas.js?v=20261106-fx"></script>
 <script src="assets/js/mobile-filters.js?v=mobile-todas-20261027-1"></script>
 <script src="assets/js/filters.js?v=status-acerto-proprio-20261104-1"></script>
 <script src="assets/js/config.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/api.js?v=retomada-meses-20261105-1"></script>
 <script src="assets/js/api-screen.js?v=atualizacao-20261020-2"></script>
-<script src="assets/js/unavailable.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/lotes.js?v=mortalidade-20261020-1"></script>
+<script src="assets/js/unavailable.js?v=20261106-fx"></script>
+<script src="assets/js/lotes.js?v=20261106-fx"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=menu-20261029-1"></script>
 </body>

@@ -103,5 +103,4 @@
     fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroSemana","data"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
     clear:()=>{RxpBarnRanking.clear();data=null;monthlyData=null;++monthlyId;monthlyAbort?.abort();monthlyPending=false;E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E('tabelaMensalRxpTotal').innerHTML='';close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
   RxpWeekFilter.attach(screen.filters);
-  BIUnavailable.formulas({prefix:"Rxp",catalog:FORMULAS_RXP,attribute:"data-rxp-formula"});
 })();

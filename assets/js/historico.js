@@ -49,5 +49,4 @@
   document.querySelectorAll("[data-history-view]").forEach(b=>b.addEventListener("click",()=>{view=b.dataset.historyView;document.querySelectorAll("[data-history-view]").forEach(x=>{x.classList.toggle("active",x===b);x.setAttribute("aria-checked",String(x===b));});renderTable();}));
   document.querySelector(".history-year-filter").innerHTML="";
   renderTable();
-  BIUnavailable.formulas({prefix:"Historico",catalog:FORMULAS_HISTORICO,attribute:"data-historico-formula"});
 })();

@@ -10,7 +10,7 @@
   ];
   const formulas = ["lotes_criacao","aves_alojadas","mortalidade_qtde","mortalidade","peso_medio"];
   function cards(values) {
-    E("cardsLotes").innerHTML = spec.map(([key,label,decimals=0],i)=>`<article class="card lotes-reference-kpi"><span class="lotes-kpi-topline"></span><div class="lotes-reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[i]}</svg></div><div><div class="lotes-reference-label">${H(label)}</div><div class="lotes-reference-value">${N(values?.[key],decimals)}${key==="mortalidade"&&values?.[key]!=null?"%":""}</div></div><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="${formulas[i]}" title="Ver fórmula"><span class="formula-fx">ƒx</span></button></article>`).join("");
+    E("cardsLotes").innerHTML = spec.map(([key,label,decimals=0],i)=>`<article class="card lotes-reference-kpi"><span class="lotes-kpi-topline"></span><div class="lotes-reference-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[i]}</svg></div><div><div class="lotes-reference-label">${H(label)}</div><div class="lotes-reference-value">${N(values?.[key],decimals)}${key==="mortalidade"&&values?.[key]!=null?"%":""}</div></div><span data-formula-mount="lotes.${formulas[i]}"></span></article>`).join("");
   }
   let data, sort = "aves", descending = true;
   const cells = (c,tag='td') => [N(c.aves),N(c.mortes),c.mortalidade==null?'—':N(c.mortalidade,2)+'%',N(c.peso,2)].map(v=>`<${tag} class="num">${v}</${tag}>`).join("");
@@ -76,5 +76,4 @@
       A.chart("chartPesoSemanal",labels,[{name:"Média da Coluna",type:'bar',data:weeks.map(w=>w.peso)}]);
       A.chart("chartCrescimento",data.pinto==null?labels:["0 dias",...labels],[{name:"Peso",data:data.pinto==null?weeks.map(w=>w.peso):[data.pinto,...weeks.map(w=>w.peso)]}]);
     }});
-  BIUnavailable.formulas({prefix:"Lotes",catalog:FORMULAS_LOTES,attribute:"data-lotes-formula"});
 })();

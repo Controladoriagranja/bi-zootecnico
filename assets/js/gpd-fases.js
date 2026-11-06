@@ -102,17 +102,4 @@
 
   document.addEventListener('dashboard:theme-changed',draw);
 
-  const modal=E('phaseFormula'),open=E('phaseFormulaOpen'),close=E('phaseFormulaClose');
-
-  let previousOverflow='';
-
-  const hide=()=>{modal.classList.add('hidden');document.body.style.overflow=previousOverflow;open.focus();};
-
-  open.addEventListener('click',()=>{previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';modal.classList.remove('hidden');close.focus();});
-
-  close.addEventListener('click',hide);E('phaseFormulaBackdrop').addEventListener('click',hide);
-
-  modal.addEventListener('keydown',event=>{if(event.key==='Escape')hide();if(event.key==='Tab'){event.preventDefault();close.focus();}});
-
 })();
-

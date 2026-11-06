@@ -1,0 +1,992 @@
+[
+  {
+    "screen": "Desempenho",
+    "title": "IEP",
+    "ids": [
+      "desempenho.iep"
+    ],
+    "selector": "[data-info-metric=\"iep\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "CA",
+    "ids": [
+      "desempenho.ca"
+    ],
+    "selector": "[data-info-metric=\"ca\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "CAC",
+    "ids": [
+      "desempenho.cac"
+    ],
+    "selector": "[data-info-metric=\"cac\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "GPD",
+    "ids": [
+      "desempenho.gmd"
+    ],
+    "selector": "[data-info-metric=\"gmd\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "% Mortalidade",
+    "ids": [
+      "desempenho.mortalidade"
+    ],
+    "selector": "[data-info-metric=\"mortalidade\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "Idade Média",
+    "ids": [
+      "desempenho.idade"
+    ],
+    "selector": "[data-info-metric=\"idade\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "Peso Médio",
+    "ids": [
+      "desempenho.peso_medio"
+    ],
+    "selector": "[data-info-metric=\"peso_medio\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "Vazio",
+    "ids": [
+      "desempenho.vazio"
+    ],
+    "selector": "[data-info-metric=\"vazio\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "% Morte no Transporte",
+    "ids": [
+      "desempenho.morte_transporte"
+    ],
+    "selector": "[data-info-metric=\"morte_transporte\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Desempenho",
+    "title": "Aves Abatidas",
+    "ids": [
+      "desempenho.aves_abatidas"
+    ],
+    "selector": "[data-info-metric=\"aves_abatidas\"]",
+    "before": "sim: mini-button ƒx, modal próprio",
+    "source": "dashboard.metricCard → API zootecnico/resumo; registry.metrics + sql_utils.metrica_expr",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento",
+    "title": "Indicador selecionado",
+    "ids": [
+      "desempenho.{indicador}"
+    ],
+    "selector": ".metric-summary-head",
+    "before": "link Fórmula e bloco embutido",
+    "source": "detalhes.render → API zootecnico/detalhes; mesmo indicador do Desempenho",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento",
+    "title": "Ranking Técnicos",
+    "ids": [
+      "desempenho.{indicador}"
+    ],
+    "selector": "#rankingTecnicos",
+    "before": "não",
+    "source": "detalhes.render → API zootecnico/detalhes; mesmo indicador do Desempenho",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento",
+    "title": "Ranking Produtores",
+    "ids": [
+      "desempenho.{indicador}"
+    ],
+    "selector": "#rankingProdutores",
+    "before": "não",
+    "source": "detalhes.render → API zootecnico/detalhes; mesmo indicador do Desempenho",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento",
+    "title": "Evolução",
+    "ids": [
+      "desempenho.{indicador}"
+    ],
+    "selector": "#mortalityEvolutionCard",
+    "before": "não",
+    "source": "detalhes.render → API zootecnico/detalhes; mesmo indicador do Desempenho",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento / modal de lotes",
+    "title": "Tabela e métricas por faixa de mortalidade",
+    "ids": [
+      "desempenho.mortalidade-faixas"
+    ],
+    "selector": "#mortalityLotsTitle",
+    "before": "não",
+    "source": "mortalidade-lotes.render; API detalhes etapa=lotes; mortality_details.py",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Lotes em Criação",
+    "ids": [
+      "lotes.lotes_criacao"
+    ],
+    "selector": "[data-lotes-formula=\"lotes_criacao\"]",
+    "before": "sim: botão fora do título, modal Lotes",
+    "source": "lotes.cards → analytics.cohort_cards/cohort_points; API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Aves Alojadas",
+    "ids": [
+      "lotes.aves_alojadas"
+    ],
+    "selector": "[data-lotes-formula=\"aves_alojadas\"]",
+    "before": "sim: botão fora do título, modal Lotes",
+    "source": "lotes.cards → analytics.cohort_cards/cohort_points; API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Mortalidade no Período",
+    "ids": [
+      "lotes.mortalidade_qtde"
+    ],
+    "selector": "[data-lotes-formula=\"mortalidade_qtde\"]",
+    "before": "sim: botão fora do título, modal Lotes",
+    "source": "lotes.cards → analytics.cohort_cards/cohort_points; API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Mortalidade (%)",
+    "ids": [
+      "lotes.mortalidade"
+    ],
+    "selector": "[data-lotes-formula=\"mortalidade\"]",
+    "before": "sim: botão fora do título, modal Lotes",
+    "source": "lotes.cards → analytics.cohort_cards/cohort_points; API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Peso Médio Geral",
+    "ids": [
+      "lotes.peso_medio"
+    ],
+    "selector": "[data-lotes-formula=\"peso_medio\"]",
+    "before": "sim: botão fora do título, modal Lotes",
+    "source": "lotes.cards → analytics.cohort_cards/cohort_points; API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Mortalidade Semanal",
+    "ids": [
+      "lotes.mortalidade_semanal"
+    ],
+    "selector": "[data-lotes-formula=\"mortalidade_semanal\"]",
+    "before": "sim: formatos diferentes no cabeçalho",
+    "source": "lotes.js / analytics.cohort_points, API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Média da Coluna de Peso por Idade",
+    "ids": [
+      "lotes.peso_semanal"
+    ],
+    "selector": "[data-lotes-formula=\"peso_semanal\"]",
+    "before": "sim: formatos diferentes no cabeçalho",
+    "source": "lotes.js / analytics.cohort_points, API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação",
+    "title": "Curva de Crescimento de Peso",
+    "ids": [
+      "lotes.crescimento"
+    ],
+    "selector": "[data-lotes-formula=\"crescimento\"]",
+    "before": "sim: formatos diferentes no cabeçalho",
+    "source": "lotes.js / analytics.cohort_points, API lotes-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação / Galpões",
+    "title": "Resumo por Produtor",
+    "ids": [
+      "lotes.aves_alojadas",
+      "lotes.mortalidade_qtde",
+      "lotes.mortalidade",
+      "lotes.peso_medio"
+    ],
+    "selector": ".lotes-analysis-head",
+    "before": "não",
+    "source": "lotes.table/barns/drawer; mesmos dados do resumo API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação / Galpões",
+    "title": "Top 10 Galpões",
+    "ids": [
+      "lotes.mortalidade"
+    ],
+    "selector": "#galpaoRankingTitulo",
+    "before": "não",
+    "source": "lotes.table/barns/drawer; mesmos dados do resumo API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação / Galpões",
+    "title": "Ranking de Galpões",
+    "ids": [
+      "lotes.mortalidade"
+    ],
+    "selector": ".lotes-galpao-list-card h3",
+    "before": "não",
+    "source": "lotes.table/barns/drawer; mesmos dados do resumo API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação / Galpões",
+    "title": "Desempenho por Idade / tabela do galpão",
+    "ids": [
+      "lotes.peso_semanal"
+    ],
+    "selector": ".lotes-galpao-detail-section h3",
+    "before": "não",
+    "source": "lotes.table/barns/drawer; mesmos dados do resumo API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes em Criação / Galpões",
+    "title": "Evolução Mortalidade do galpão",
+    "ids": [
+      "lotes.mortalidade_semanal"
+    ],
+    "selector": "#chartGalpaoDetalhe",
+    "before": "não",
+    "source": "lotes.table/barns/drawer; mesmos dados do resumo API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes / detalhe do Galpão",
+    "title": "Idade atual",
+    "ids": [
+      "lotes.idade_atual"
+    ],
+    "selector": "#galpaoDrawerResumo>div:nth-child(1)",
+    "before": "não",
+    "source": "lotes.drawer; cards recebidos da API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes / detalhe do Galpão",
+    "title": "Aves alojadas",
+    "ids": [
+      "lotes.aves_alojadas"
+    ],
+    "selector": "#galpaoDrawerResumo>div:nth-child(3)",
+    "before": "não",
+    "source": "lotes.drawer; cards recebidos da API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes / detalhe do Galpão",
+    "title": "Média de peso",
+    "ids": [
+      "lotes.peso_medio"
+    ],
+    "selector": "#galpaoDrawerResumo>div:nth-child(4)",
+    "before": "não",
+    "source": "lotes.drawer; cards recebidos da API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Lotes / detalhe do Galpão",
+    "title": "Mortalidade",
+    "ids": [
+      "lotes.mortalidade"
+    ],
+    "selector": "#galpaoDrawerResumo>div:nth-child(5)",
+    "before": "não",
+    "source": "lotes.drawer; cards recebidos da API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Histórico / Mortalidade",
+    "title": "Tabela hierárquica semanal",
+    "ids": [
+      "historico.tabela_mortalidade",
+      "historico.pesos_lote"
+    ],
+    "selector": ".history-table-heading",
+    "before": "sim: modal Histórico; apenas botão genérico",
+    "source": "historico.values/renderTable → analytics.query_cohort/cards; vw_historico_lotes_criacao_portal",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Histórico / Peso",
+    "title": "Tabela hierárquica por idade",
+    "ids": [
+      "historico.tabela_peso",
+      "historico.pesos_lote"
+    ],
+    "selector": ".history-table-heading",
+    "before": "mesmo botão genérico",
+    "source": "historico.values/renderTable; mesmos dados API historico-abertos/resumo",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Qtde Programada",
+    "ids": [
+      "rxp.programada"
+    ],
+    "selector": "[data-rxp-formula=\"programada\"]",
+    "before": "sim: mini-button, modal RxP",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Qtde Real",
+    "ids": [
+      "rxp.real"
+    ],
+    "selector": "[data-rxp-formula=\"real\"]",
+    "before": "sim: mini-button, modal RxP",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Dif Qtde RxP",
+    "ids": [
+      "rxp.diferenca"
+    ],
+    "selector": "[data-rxp-formula=\"diferenca\"]",
+    "before": "sim: mini-button, modal RxP",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Registros com Diferença",
+    "ids": [
+      "rxp.registros"
+    ],
+    "selector": "[data-rxp-formula=\"registros\"]",
+    "before": "sim: mini-button, modal RxP",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Comparativo Unidade/Destino e Mês",
+    "ids": [
+      "rxp.programada",
+      "rxp.real",
+      "rxp.diferenca",
+      "rxp.dif_percent",
+      "rxp.registros"
+    ],
+    "selector": "#tituloComparativoRxp",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Diferença por Semana",
+    "ids": [
+      "rxp.diferenca",
+      "rxp.dif_percent"
+    ],
+    "selector": "#rxpWeeklyTitle",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Ranking de Galpões",
+    "ids": [
+      "rxp.diferenca",
+      "rxp.dif_percent",
+      "rxp.programada",
+      "rxp.real"
+    ],
+    "selector": "#rxpRankingTitle",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Diferença de Aves Abatidas",
+    "title": "Tabela de Produtores no modal",
+    "ids": [
+      "rxp.programada",
+      "rxp.real",
+      "rxp.diferenca",
+      "rxp.dif_percent",
+      "rxp.tecnico"
+    ],
+    "selector": "#modalAbateTitulo",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "RxP / modal de produtores",
+    "title": "Qtde Programada",
+    "ids": [
+      "rxp.programada"
+    ],
+    "selector": ".abate-modal-summary>div:nth-child(1)",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "RxP / modal de produtores",
+    "title": "Qtde Real",
+    "ids": [
+      "rxp.real"
+    ],
+    "selector": ".abate-modal-summary>div:nth-child(2)",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "RxP / modal de produtores",
+    "title": "Dif Qtde RxP",
+    "ids": [
+      "rxp.diferenca"
+    ],
+    "selector": ".abate-modal-summary>div:nth-child(3)",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "RxP / modal de produtores",
+    "title": "Dif %",
+    "ids": [
+      "rxp.dif_percent"
+    ],
+    "selector": ".abate-modal-summary>div:nth-child(4)",
+    "before": "não",
+    "source": "rxp-data.cards/query + rxp-ranking + rxp-weekly-chart; campos oficiais de rxp/detalhes; vínculo do técnico na API",
+    "status": "padronizado"
+  },
+  {
+    "screen": "GPD por Fase",
+    "title": "Gráfico e tabela por dia/semana/total",
+    "ids": [
+      "gpd.07",
+      "gpd.14",
+      "gpd.21",
+      "gpd.28",
+      "gpd.35",
+      "gpd.35_abate"
+    ],
+    "selector": ".phase-heading",
+    "before": "sim: modal exclusivo, texto em HTML",
+    "source": "gpd-fases.draw/render; API gpd-fases/resumo; gpd_fases_dinamica.individual/aggregate",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "IEP",
+    "ids": [
+      "desempenho.iep"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "CA",
+    "ids": [
+      "desempenho.ca"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "CAC",
+    "ids": [
+      "desempenho.cac"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "GPD",
+    "ids": [
+      "desempenho.gmd"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "% Mortalidade",
+    "ids": [
+      "desempenho.mortalidade"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "Idade Média",
+    "ids": [
+      "desempenho.idade"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "Peso Médio",
+    "ids": [
+      "desempenho.peso_medio"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "Vazio",
+    "ids": [
+      "desempenho.vazio"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "% Morte no Transporte",
+    "ids": [
+      "desempenho.morte_transporte"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "CAC Ref",
+    "ids": [
+      "desempenho.cac_ref"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / desempenho",
+    "title": "Aves Abatidas",
+    "ids": [
+      "desempenho.aves_abatidas"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Lotes em Criação",
+    "ids": [
+      "lotes.lotes_criacao"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Aves Alojadas",
+    "ids": [
+      "lotes.aves_alojadas"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Mortalidade no Período (Qtde)",
+    "ids": [
+      "lotes.mortalidade_qtde"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Mortalidade no Período (%)",
+    "ids": [
+      "lotes.mortalidade"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Peso Médio Geral",
+    "ids": [
+      "lotes.peso_medio"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Mortalidade Semanal",
+    "ids": [
+      "lotes.mortalidade_semanal"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Média da Coluna de Peso por Idade",
+    "ids": [
+      "lotes.peso_semanal"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / lotes",
+    "title": "Curva de Crescimento de Peso",
+    "ids": [
+      "lotes.crescimento"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Lotes consultados",
+    "ids": [
+      "historico.lotes"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Aves alojadas",
+    "ids": [
+      "historico.aves"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Mortalidade acumulada",
+    "ids": [
+      "historico.mortalidade"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Peso médio atual",
+    "ids": [
+      "historico.peso_atual"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Peso do pintinho, peso de abate e PS Pintinho x 7 dias",
+    "ids": [
+      "historico.pesos_lote"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Tabela — Mortalidade por semana",
+    "ids": [
+      "historico.tabela_mortalidade"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / historico",
+    "title": "Tabela — Peso por idade",
+    "ids": [
+      "historico.tabela_peso"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Qtde Programada",
+    "ids": [
+      "rxp.programada"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Qtde Real",
+    "ids": [
+      "rxp.real"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Dif Qtde RxP",
+    "ids": [
+      "rxp.diferenca"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Registros com Diferença",
+    "ids": [
+      "rxp.registros"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Último técnico do produtor",
+    "ids": [
+      "rxp.tecnico"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / rxp",
+    "title": "Dif %",
+    "ids": [
+      "rxp.dif_percent"
+    ],
+    "selector": "catálogo de fórmulas",
+    "before": "não: disclosure com texto próprio",
+    "source": "catálogos atuais; correspondente fonte acima",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Detalhamento / Mortalidade",
+    "title": "Conferência por faixa e registros com divergência",
+    "ids": [
+      "desempenho.mortalidade-faixas"
+    ],
+    "selector": "#mortalityReview>summary",
+    "before": "não",
+    "source": "mortalidade-chart.audit; mortalidade_faixas.aggregate e exclusões do backend",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 7 dias",
+    "ids": [
+      "gpd.07"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 14 dias",
+    "ids": [
+      "gpd.14"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 21 dias",
+    "ids": [
+      "gpd.21"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 28 dias",
+    "ids": [
+      "gpd.28"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 35 dias",
+    "ids": [
+      "gpd.35"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "GPD 35 dias–abate",
+    "ids": [
+      "gpd.35_abate"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "Idade atual do galpão",
+    "ids": [
+      "lotes.idade_atual"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  },
+  {
+    "screen": "Fórmulas / complementos",
+    "title": "Mortalidade por faixa e lotes do período",
+    "ids": [
+      "desempenho.mortalidade-faixas"
+    ],
+    "selector": "catálogo",
+    "before": "sem card próprio no catálogo; métrica já existente em outra tela",
+    "source": "mesma entrada central usada pelo gráfico/detalhe",
+    "status": "padronizado"
+  }
+]

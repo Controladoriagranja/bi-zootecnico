@@ -9,6 +9,7 @@
     <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 <link href="assets/css/mobile-filters.css?v=mobile-telas-20261029-1" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/indicator-formulas.css?v=20261106-fx">
 </head>
 <body data-page="historico" class="history-page">
 <div class="app-shell history-shell">
@@ -36,7 +37,7 @@
         <div class="history-table-heading">
             <div><h2>Histórico por semana</h2><p>Ano da recepção. Abra uma semana para consultar produtores e galpões.</p></div>
             <div class="history-table-heading-actions">
-                <button class="mini-button" type="button" data-historico-formula="tabela" aria-label="Ver fórmula da tabela"><span class="formula-fx">ƒx</span></button>
+                <span data-formula-mount="historico.tabela_mortalidade historico.tabela_peso historico.pesos_lote"></span>
                 <div class="history-view-filter" role="radiogroup" aria-label="Visualização da tabela">
                     <button type="button" class="history-view-button active" data-history-view="mortality" role="radio" aria-checked="true">Mortalidade</button>
                     <button type="button" class="history-view-button" data-history-view="weight" role="radio" aria-checked="false">Peso</button>
@@ -53,25 +54,21 @@
         </div>
     </section>
 </div>
-<div class="dialog-layer hidden" id="formulaModalHistorico">
-    <div class="dialog-backdrop" id="formulaBackdropHistorico"></div>
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="formulaTituloHistorico" tabindex="-1">
-        <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="formulaTituloHistorico"></h2></div><button class="icon-button" id="formulaFecharHistorico" type="button" aria-label="Fechar fórmula">×</button></header>
-        <div class="dialog-body"><div class="info-block"><span>Fórmula</span><div class="code-inline" id="formulaExpressaoHistorico"></div></div><div class="info-block"><span>Descrição</span><p id="formulaDescricaoHistorico"></p></div><div id="formulaExplicacaoHistorico"></div></div>
-    </section>
-</div>
 
-<script src="assets/js/formula-ui.js?v=ajustes-20261008-1"></script>
+
+<script src="assets/js/formulas-registry.js?v=20261106-fx"></script>
+<script src="assets/js/indicator-formulas.js?v=20261106-fx"></script>
+<script src="assets/js/formula-ui.js?v=20261106-fx"></script>
 <script src="assets/js/theme.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/historico-formulas.js?v=pintinho-7-dias-20261023-1"></script>
+<script src="assets/js/historico-formulas.js?v=20261106-fx"></script>
 <script src="assets/js/mobile-filters.js?v=mobile-todas-20261027-1"></script>
 <script src="assets/js/filters.js?v=status-acerto-proprio-20261104-1"></script>
 <script src="assets/js/config.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/api.js?v=retomada-meses-20261105-1"></script>
 <script src="assets/js/api-screen.js?v=atualizacao-20261020-2"></script>
-<script src="assets/js/unavailable.js?v=ajustes-20261008-1"></script>
-<script src="assets/js/historico.js?v=historico-sem-cards-20261026-1"></script>
+<script src="assets/js/unavailable.js?v=20261106-fx"></script>
+<script src="assets/js/historico.js?v=20261106-fx"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=menu-20261029-1"></script>
 </body>
