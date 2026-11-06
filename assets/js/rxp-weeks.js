@@ -12,7 +12,7 @@ window.RxpWeekFilter = (() => {
     const number = 1 + Math.round((date-first)/604800000);
     const sunday = new Date(date); sunday.setUTCDate(sunday.getUTCDate()+6);
     const short = d => d.slice(8,10)+'/'+d.slice(5,7);
-    return {key:monday,label:`Semana ${number} / ${year} · ${short(monday)}–${short(sunday.toISOString().slice(0,10))}`};
+    return {key:monday,year,number,end:sunday.toISOString().slice(0,10),label:`Semana ${number} / ${year} · ${short(monday)}–${short(sunday.toISOString().slice(0,10))}`};
   }
   function attach(controller) {
     const normalize = controller.normalizeOptions.bind(controller);
@@ -49,5 +49,5 @@ window.RxpWeekFilter = (() => {
       return result;
     };
   }
-  return {attach};
+  return {attach,week};
 })();
