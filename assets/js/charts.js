@@ -78,8 +78,8 @@ window.ZooCharts = (() => {
                 const narrow = chart.getWidth() < 700;
                 const keep = new Set(years);
                 chart.setOption({ series: chart.getOption().series.map(s => ({
-                    name: s.name, label: { show: keep.has(Number(s.name)) },
-                    labelLayout: { hideOverlap: Number(s.name) !== years[0] }
+                    name: s.name, label: { show: state.plants || keep.has(Number(s.name)) },
+                    labelLayout: { hideOverlap: state.plants || Number(s.name) !== years[0] }
                 })) });
                 if (state.narrow !== narrow) {
                     chart.setOption({ dataZoom: [{ start: 0, end: narrow ? 25 : 100 }] });
@@ -242,7 +242,8 @@ window.ZooCharts = (() => {
 
     function evolution(chart, response, metricName, decimals = 2, unit = "") {
         const c = common();
-        instances.set(chart, { kind: "evolution" });
+        const plants = response.agrupamento === 'planta_de_abate';
+        instances.set(chart, { kind: "evolution", plants });
 
         const formatEvolutionValue = value => value === null || value === undefined ? "—" :
             Number(value).toLocaleString("pt-BR", {
@@ -251,7 +252,7 @@ window.ZooCharts = (() => {
         const newestYear = Math.max(...response.series.map(s => Number(s.ano)));
         const series = response.series.map(
             (serie, index) => ({
-                name: String(serie.ano),
+                name: plants ? String(serie.planta_de_abate) : String(serie.ano),
                 type: "bar",
                 data: serie.valores,
                 ...valueLabels(chart, "top", decimals, unit),
@@ -260,7 +261,7 @@ window.ZooCharts = (() => {
                     fontSize: 12, fontWeight: 700, color: c.text,
                     formatter: p => p.value == null ? "" : formatEvolutionValue(p.value),
                     backgroundColor: c.card, padding: [3, 4], borderRadius: 3 },
-                labelLayout: { hideOverlap: Number(serie.ano) !== newestYear },
+                labelLayout: { hideOverlap: plants || Number(serie.ano) !== newestYear },
                 barGap: "35%",
                 barMaxWidth: 22,
                 itemStyle: {

@@ -14,22 +14,25 @@ let metricId =
 
 // Nova modificação de 26/10/2026: comportamento restrito à mortalidade.
 const mortalityMode = metricId === 'mortalidade';
+const transportMode = metricId === 'morte_transporte';
+const singleYearMode = mortalityMode || transportMode;
+const detailYearId = mortalityMode ? 'anoMortalidade' : 'anoTransporte';
 let mortalityGrouping = 'semanal', mortalityPayload = null;
-// Um único controle de ano no DOM: substituir somente na mortalidade.
-if(mortalityMode) {
-    const select=document.createElement('select');select.id='anoMortalidade';select.ariaLabel='Ano da mortalidade';
+// Um unico ano para mortalidade e transporte; demais indicadores conservam selecao multipla.
+if(singleYearMode) {
+    const select=document.createElement('select');select.id=detailYearId;select.ariaLabel='Ano da análise';
     document.getElementById('ano').replaceWith(select);
-    document.getElementById('tituloEvolucao').textContent='Mortalidade semanal';
+    document.getElementById('tituloEvolucao').textContent=mortalityMode?'Mortalidade semanal':'Morte no Transporte por planta de abate';
 }
 let metricCatalog = [];
 
 
 const DETAIL_FILTERS = [
     {
-        id: mortalityMode ? "anoMortalidade" : "ano",
+        id: singleYearMode ? detailYearId : "ano",
         apiKey: "ano",
         search: false,
-        multi: !mortalityMode
+        multi: !singleYearMode
     },
     {
         id: "mes",
@@ -195,7 +198,7 @@ function registrarIndicador() {
                         .value;
 
                 atualizarUrl();
-                if ((metricId === 'mortalidade') !== mortalityMode) {
+                if ((metricId === 'mortalidade') !== mortalityMode || (metricId === 'morte_transporte') !== transportMode) {
                     window.location.reload(); return;
                 }
                 carregarDetalhes(false);
@@ -363,6 +366,11 @@ function render() {
     if (mortalityMode) {
         document.getElementById('tituloEvolucao').textContent = `Mortalidade ${mortalityGrouping === 'mensal' ? 'mensal' : 'semanal'} · ${allFilters().ano}`;
         if(mortalityPayload) MortalityChart.draw(evolucaoChart,mortalityPayload);
+    } else if(transportMode) {
+        document.getElementById('tituloEvolucao').textContent=`% Morte no Transporte por planta de abate · ${allFilters().ano}`;
+        document.querySelector('#tituloEvolucao + p').textContent='Média ponderada por aves alojadas, por mês e planta de abate. No celular, deslize horizontalmente sobre o gráfico.';
+        if(detalhesData.evolucao?.agrupamento !== 'planta_de_abate')throw new Error('Atualize o backend para a evolução por planta de abate.');
+        ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
     } else {
         ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
     }
@@ -372,19 +380,20 @@ function render() {
 async function carregarDetalhes(
     initial = false
 ) {
-    if(mortalityMode) {
-        const yearSelect=document.getElementById('anoMortalidade');
+    if(singleYearMode) {
+        const yearSelect=document.getElementById(detailYearId);
         const allOption=yearSelect.querySelector('option[value=""]');
         allOption?.remove();
         if(!yearSelect.value) yearSelect.value=[...yearSelect.options].map(o=>o.value).filter(Boolean).sort((a,b)=>Number(b)-Number(a))[0]||'';
         if(!yearSelect.value) {
-            ++detailRequestId;requestController?.abort();mortalityPayload=null;MortalityChart.clear();evolucaoChart.clear();
+            ++detailRequestId;requestController?.abort();mortalityPayload=null;if(mortalityMode)MortalityChart.clear();evolucaoChart.clear();rankingTecnicosChart.clear();rankingProdutoresChart.clear();
             document.getElementById('kpiValor').textContent='\u2014';
             const error=document.getElementById('mensagemErro');error.textContent='Sem ano disponivel para os filtros selecionados.';error.classList.remove('hidden');
             document.getElementById('dashboardAtualizando').classList.add('hidden');return;
         }
-        mortalityPayload=null;MortalityChart.clear();atualizarUrl();
-        document.getElementById('tituloEvolucao').textContent=`Mortalidade ${mortalityGrouping==='semanal'?'semanal':'mensal'} · ${yearSelect.value}`;
+        if(mortalityMode){mortalityPayload=null;MortalityChart.clear();}
+        atualizarUrl();
+        document.getElementById('tituloEvolucao').textContent=mortalityMode?`Mortalidade ${mortalityGrouping==='semanal'?'semanal':'mensal'} · ${yearSelect.value}`:`% Morte no Transporte por planta de abate · ${yearSelect.value}`;
     }
     const requestId = ++detailRequestId;
     exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
@@ -598,16 +607,16 @@ async function aplicarParametrosUrl() {
                 .filter(Boolean);
 
         if (values.length) {
-            if(mortalityMode && field.apiKey === 'ano') {
+            if(singleYearMode && field.apiKey === 'ano') {
                 const chosen=[...values].sort((a,b)=>Number(b)-Number(a))[0];
                 const option=document.createElement('option');option.value=chosen;option.textContent=chosen;
-                document.getElementById('anoMortalidade').appendChild(option);
+                document.getElementById(detailYearId).appendChild(option);
             }
             filters.set(
                 field.apiKey,
                 field.multi
                     ? values
-                    : (field.apiKey === "ano" && mortalityMode ? [...values].sort((a,b)=>Number(b)-Number(a))[0] : values[0])
+                    : (field.apiKey === "ano" && singleYearMode ? [...values].sort((a,b)=>Number(b)-Number(a))[0] : values[0])
             );
         }
     });
