@@ -3,15 +3,16 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
 const {chromium}=require('C:/Users/vchaves/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const root=path.resolve(__dirname,'..');
 const records=Array.from({length:1205},(_,i)=>({id:i+1,fonte:i%2?'real':'ave',unidade:i%2?'REAL ALIMENTOS':'AVE NOVA',
-  data:['2026-10-05','2026-11-02','2026-11-09','2026-11-16'][i%4],galpao:`G${String(i%385+1).padStart(2,'0')}`,produtor:'Produtor teste',tecnico:'Técnico teste',tipo_granja:'Integrada',modelo:'Dark house',lote:'1',
+  data:['2026-10-05','2026-11-02','2026-10-12','2026-10-19'][i%4],galpao:`G${String(i%385+1).padStart(2,'0')}`,produtor:'Produtor teste',tecnico:'Técnico teste',tipo_granja:'Integrada',modelo:'Dark house',lote:'1',
   programada:100+i%13,real:85+i%9,difQtdeRxP:i%20===0?50:-(1+i%11)}));
 function cards(rows){const result=rows.reduce((a,r)=>({programada:a.programada+r.programada,real:a.real+r.real,diferenca:a.diferenca+r.difQtdeRxP,registrosComDiferenca:a.registrosComDiferenca+Number(r.difQtdeRxP!==0)}),{programada:0,real:0,diferenca:0,registrosComDiferenca:0});return {...result,difPercent:result.programada?result.diferenca/result.programada*100:null};}
-function match(row,url,ignore){return ['ano','mes','dia','data','unidade','galpao','produtor','tecnico','tipo_granja','modelo'].every(key=>{
+const allRecords=[...records,...[0,null,-1,90,90].map((real,i)=>({...records[0],id:2000+i,galpao:'NAO-REALIZADO',produtor:'Somente sem realizacao',data:i<3?'2026-11-05':i===3?'2026-11-06':'2026-11-07',real,programada:900000,difQtdeRxP:-800000}))];
+function match(row,url,ignore){if(url.searchParams.get('data_fim')&&row.data>url.searchParams.get('data_fim'))return false;return ['ano','mes','dia','data','unidade','galpao','produtor','tecnico','tipo_granja','modelo'].every(key=>{
  const selected=url.searchParams.getAll(key);if(!selected.length||key===ignore)return true;
  const value=key==='ano'?row.data.slice(0,4):key==='mes'?String(Number(row.data.slice(5,7))):key==='dia'?String(Number(row.data.slice(8,10))):row[key];
  return selected.includes(value);
 });}
-const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03:00'};
+const meta={data_referencia:'2026-11-06',rules_version:'rxp-2026-10-15',realizados_ate:'2026-11-05',atualizado_em:'2026-11-06T08:00:00-03:00'};
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
  try{
@@ -23,7 +24,7 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
    const url=new URL(route.request().url());
    if(url.hostname.endsWith('workers.dev')){
     requests.push({path:url.pathname,params:Object.fromEntries(url.searchParams),dates:url.searchParams.getAll('data')});
-    const rows=empty?[]:records.filter(r=>match(r,url));let body;
+    const rows=empty?[]:allRecords.filter(r=>match(r,url));let body;
     if(url.pathname.endsWith('/filtros')){
      body=Object.fromEntries(['ano','mes','dia','data','unidade','galpao','produtor','tecnico','tipo_granja','modelo'].map(key=>[key,[...new Set(records.filter(r=>match(r,url,key)).map(r=>key==='ano'?r.data.slice(0,4):key==='mes'?String(Number(r.data.slice(5,7))):key==='dia'?String(Number(r.data.slice(8,10))):r[key]))].sort()]));
     }else if(url.pathname.endsWith('/detalhes')){
@@ -55,30 +56,33 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
    return {labels:plot.xAxis[0].data,values:plot.series[0].data.map(d=>d?.value??d),scale:[plot.yAxis[0].min,plot.yAxis[0].max],axis:[axis.yAxis[0].min,axis.yAxis[0].max],pixels:[echarts.getInstanceByDom(document.querySelector('#rxpWeeklyChart')).convertToPixel({yAxisIndex:0},0),echarts.getInstanceByDom(document.querySelector('#rxpWeeklyAxis')).convertToPixel({yAxisIndex:0},0)],
     scroll:scroll.scrollLeft,end:scroll.scrollWidth-scroll.clientWidth,width:scroll.clientWidth,canvas:document.querySelector('#rxpWeeklyChart').clientWidth,axisX:document.querySelector('#rxpWeeklyAxis').getBoundingClientRect().x};
   });
-  let weeks=await weekly();assert.equal(weeks.labels.length,47);assert.equal(weeks.values[41],0);
+  assert.equal((await page.evaluate(()=>RxpData.query('/detalhes'))).total,1205);assert.equal(await page.locator('#filtroGalpao input[value="NAO-REALIZADO"]').count(),0);assert(requests.every(r=>r.params.data_fim==='2026-11-05'));
+  let weeks=await weekly();assert.equal(weeks.labels.length,45);assert.equal(weeks.values[43],0);
   assert.equal(weeks.values[44],cards(records.filter(r=>r.data==='2026-11-02')).diferenca);
   assert.deepEqual(weeks.scale,weeks.axis);assert(Math.abs(weeks.canvas/weeks.labels.length-weeks.width/4)<1);assert(Math.abs(weeks.scroll-weeks.end)<2);
   assert(Math.abs(weeks.pixels[0]-weeks.pixels[1])<1,'Eixo fixo e colunas alinhados na vertical');
   await page.locator('.rxp-weekly-scroll').evaluate(el=>el.scrollLeft=0);assert.equal((await weekly()).axisX,weeks.axisX);
   await page.locator('.rxp-weekly-scroll').evaluate(el=>el.scrollLeft=el.scrollWidth-el.clientWidth);
   await page.locator('.rxp-weekly-card').scrollIntoViewIfNeeded();
-  await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpWeeklyChart')).dispatchAction({type:'showTip',seriesIndex:0,dataIndex:46}));
-  const weekTip=page.getByText('Semana 47 / 2026',{exact:true});await weekTip.waitFor({state:'visible'});
+  await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpWeeklyChart')).dispatchAction({type:'showTip',seriesIndex:0,dataIndex:44}));
+  const weekTip=page.getByText('Semana 45 / 2026',{exact:true});await weekTip.waitFor({state:'visible'});
   await page.waitForTimeout(300);
   const tipRect=await weekTip.locator('..').boundingBox();assert(tipRect.x>=0&&tipRect.x+tipRect.width<=1441&&tipRect.y>=0&&tipRect.y+tipRect.height<=1001,'Tooltip semanal cabe na janela');
   assert.equal(await weekTip.evaluate(el=>Boolean(el.closest('#rxpWeeklyChart'))),false,'Tooltip fora do scroll');
   await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpWeeklyChart')).dispatchAction({type:'hideTip'}));
   await page.evaluate(()=>scrollTo(0,0));
   const groups=[...new Set(records.map(r=>r.galpao))].map(galpao=>({galpao,...cards(records.filter(r=>r.galpao===galpao))}));
-  const descending=groups.toSorted((a,b)=>Math.abs(b.diferenca)-Math.abs(a.diferenca)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true}));
+  const descending=groups.toSorted((a,b)=>Math.abs(b.difPercent)-Math.abs(a.difPercent)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true}));
   let option=await chart();assert.equal(option.series[0].data.length,15);
   assert.deepEqual(option.yAxis[0].data,descending.slice(0,15).map(r=>r.galpao));
-  assert.deepEqual(option.series[0].data.map(d=>d.value),descending.slice(0,15).map(r=>r.diferenca));
+  assert.deepEqual(option.series[0].data.map(d=>d.value),descending.slice(0,15).map(r=>r.difPercent));
   assert.equal(requests.filter(r=>r.path.endsWith('/detalhes')&&r.params.tamanho==='500').length,3);
   const previewFolder=path.join(root,'tests/frontend-previews/rxp-ranking-20261106');await fs.mkdir(previewFolder,{recursive:true});
   await page.waitForTimeout(350);await page.screenshot({path:path.join(previewFolder,'pagina-desktop.png'),fullPage:true});
   assert.equal(await page.locator('#filtroGalpao').count(),1);
   assert(await page.evaluate(()=>document.querySelector('#filtroSemana').compareDocumentPosition(document.querySelector('#filtroDia'))&Node.DOCUMENT_POSITION_FOLLOWING));
+  assert((await page.locator('#statusRxp').innerText()).includes('05/11/2026 (D-1)'));
+  const label=await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpRankingChart')).getOption().series[0].label.formatter({value:1.23,dataIndex:0}));assert(label.includes('1,23%')&&label.includes(' aves)'));
   const tooltip=await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpRankingChart')).getOption().tooltip[0].formatter([{dataIndex:0}]));
   assert(tooltip.includes('Qtde Programada:')&&tooltip.includes('Qtde Real:')&&tooltip.includes('Dif %:')&&tooltip.includes('Dif Qtde RxP:'));
   const firstValue=descending[0].diferenca;assert.notEqual(firstValue,descending[0].real-descending[0].programada);
@@ -94,23 +98,23 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
   const rankTip=page.getByText('Galpão '+lastBarn,{exact:true});await rankTip.waitFor({state:'visible'});await page.waitForTimeout(300);
   const rankTipRect=await rankTip.locator('..').boundingBox();assert(rankTipRect.x>=0&&rankTipRect.x+rankTipRect.width<=1441&&rankTipRect.y>=0&&rankTipRect.y+rankTipRect.height<=1001);
   await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rxpRankingChart')).dispatchAction({type:'hideTip'}));
-  await page.locator('#rxpRankingAscending').click();assert.equal((await chart()).yAxis[0].data[0],groups.toSorted((a,b)=>Math.abs(a.diferenca)-Math.abs(b.diferenca)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true}))[0].galpao);
+  await page.locator('#rxpRankingAscending').click();assert.equal((await chart()).yAxis[0].data[0],groups.toSorted((a,b)=>Math.abs(a.difPercent)-Math.abs(b.difPercent)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true}))[0].galpao);
   await page.locator('#rxpRankingMetric').selectOption('real');
   await page.locator('#rxpRankingDescending').click();assert.equal(Math.max(...groups.map(r=>r.real)),(await chart()).series[0].data[0].value);
   assert.equal(requests.filter(r=>r.path.endsWith('/detalhes')&&r.params.tamanho==='500').length,3,'Trocar metrica/ordem nao refaz consulta');
   await page.locator('#filtroSemana .checkbox-multiselect-trigger').click();
   await page.locator('#filtroSemana input[value="2026-11-02"]').check();
   await ready();
-  await page.locator('#filtroSemana input[value="2026-11-16"]').check();
+  await page.locator('#filtroSemana input[value="2026-10-19"]').check();
   await ready();
   assert.equal(await page.locator('#filtroSemana .checkbox-multiselect-label').innerText(),'2 selecionados');
-  const selectedRows=records.filter(r=>['2026-11-02','2026-11-16'].includes(r.data));
+  const selectedRows=records.filter(r=>['2026-10-19','2026-11-02'].includes(r.data));
   assert.equal(await page.locator('#kpiDiferenca').innerText(),cards(selectedRows).diferenca.toLocaleString('pt-BR'));
-  const filtered=requests.filter(r=>r.path.endsWith('/resumo')).at(-1);assert.deepEqual(filtered.dates,['2026-11-02','2026-11-16']);assert(!('semana' in filtered.params));
-  weeks=await weekly();assert.equal(weeks.values[45],0);assert(Math.abs(weeks.scroll-weeks.end)<2);
+  assert.equal(requests.length,3,'Filtros reutilizam a leitura completa sem novas requisicoes');assert.equal((await page.evaluate(()=>RxpData.query('/detalhes',{data:['2026-10-19','2026-11-02']}))).total,selectedRows.length);
+  weeks=await weekly();assert.equal(weeks.values[43],0);assert(Math.abs(weeks.scroll-weeks.end)<2);
   await page.locator('h1').click();await page.locator('#visaoMensalRxp').click();
   await page.waitForFunction(()=>document.querySelector('#tabelaMensalRxp').textContent.includes('novembro'));
-  assert.deepEqual(requests.filter(r=>r.params.etapa==='mensal').at(-1).dates,['2026-11-02','2026-11-16']);
+  assert.equal(requests.length,3,'Mensal reutiliza os mesmos registros');
   assert.equal(await page.locator('.abate-monthly-table tbody td').first().evaluate(el=>getComputedStyle(el).position),'sticky');
   assert.equal(await page.locator('#tabelaMensalRxpTotal th').count(),7);
   const monthlyHeights=await page.locator('.rxp-left-stack, .rxp-ranking-card').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().height));
@@ -134,11 +138,12 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
   await page.setViewportSize({width:1440,height:1000});
   await page.locator('#visaoUnidadeRxp').click();await page.locator('[data-rxp-unit="-1"]').click();
   await page.waitForFunction(()=>document.querySelector('#rxpPage').textContent.includes('Página'));
-  assert.deepEqual(requests.filter(r=>r.path.endsWith('/detalhes')&&r.params.tamanho==='50').at(-1).dates,['2026-11-02','2026-11-16']);
+  assert.equal(requests.length,3,'Modal reutiliza os mesmos registros');
   await page.locator('#modalAbateFechar').click();
   await page.locator('#filtroGalpao .checkbox-multiselect-trigger').click();await page.locator('#filtroGalpao input[value="G02"]').check();await ready();
   assert.equal((await chart()).yAxis[0].data.length,1);
   await page.locator('h1').click();
+  await page.locator('#rxpRankingMetric').selectOption('difPercent');
   const out=path.join(root,'tests/frontend-previews/rxp-ranking-20261106');await fs.mkdir(out,{recursive:true});
   for(const width of [1440,1100,1099,768,390])for(const theme of ['light','dark']){
    await page.setViewportSize({width,height:1000});await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.dispatchEvent(new Event('dashboard:theme-changed'));},theme);
@@ -155,9 +160,8 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
   }
   await page.setViewportSize({width:1440,height:1000});await page.locator('#limparFiltrosAbate').click();await ready();
   assert.equal(await page.locator('#filtroSemana .checkbox-multiselect-label').innerText(),'Todos');assert.equal((await chart()).yAxis[0].data.length,385);
-  failRanking=true;await page.locator('#filtroAno .checkbox-multiselect-trigger').click();await page.locator('#filtroAno input[value="2026"]').check();
-  await page.locator('#rxpRankingRetry').waitFor({state:'visible'});assert.equal(await page.locator('#rxpRankingStatus').innerText(),'Ranking indisponível');
-  failRanking=false;await page.locator('#rxpRankingRetry').click();await ready();
+  failRanking=true;await page.locator('#limparFiltrosAbate').click();await page.locator('#erroRxp').waitFor({state:'visible'});assert.equal(await page.locator('#kpiReal').innerText(),'—');
+  failRanking=false;await page.locator('#limparFiltrosAbate').click();await ready();
   empty=true;await page.locator('#limparFiltrosAbate').click();
   await page.waitForFunction(()=>document.querySelector('#rxpRankingMessage').textContent==='Sem dados para os filtros selecionados');
   assert.equal((await chart()).series[0].data.length,0);
@@ -187,6 +191,6 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
    return {before,after:control.values().data.length,datesUnique:new Set(control.values().data).size};
   });
   assert.deepEqual(longSelection,{before:500,after:500,datesUnique:500});await isolated.close();
-  console.log(JSON.stringify({resultado:'OK',paginacaoCompleta:1205,galpoes:385,barrasHorizontais:true,semanasMultiplas:true,selecaoLongaDatas:500,semanalOrigem:true,eixoYfixo:true,quatroColunas:true,galpaoPreservado:true,origemDiferencaPreservada:true,top15Todos:true,metricasOrdenacao:true,modalMensalFiltrados:true,larguras:5,temas:2,falhaRetry:true,errors}));
+  console.log(JSON.stringify({resultado:'OK',paginacaoCompleta:1205,galpoes:385,barrasHorizontais:true,semanasMultiplas:true,selecaoLongaDatas:500,semanalOrigem:true,eixoYfixo:true,quatroColunas:true,galpaoPreservado:true,origemDiferencaPreservada:true,top15Todos:true,metricasOrdenacao:true,modalMensalFiltrados:true,larguras:5,temas:2,falhaRetry:true,d1:true,realMaiorQueZero:true,ordenacaoPercentual:true,semBackend:true,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -9,7 +9,7 @@ window.FORMULAS_RXP = [
       "Qtde Programada"
     ],
     "passos": [
-      "Aplicar os filtros selecionados.",
+      "Considerar somente registros com Qtde Real > 0 e Data até ontem (America/Sao_Paulo). Aplicar os filtros selecionados.",
       "Somar os valores válidos da coluna Qtde Programada."
     ]
   },
@@ -23,7 +23,7 @@ window.FORMULAS_RXP = [
       "Qtde Real"
     ],
     "passos": [
-      "Aplicar os filtros selecionados.",
+      "Considerar somente registros com Qtde Real > 0 e Data até ontem (America/Sao_Paulo). Aplicar os filtros selecionados.",
       "Somar os valores válidos da coluna Qtde Real."
     ]
   },
@@ -37,7 +37,7 @@ window.FORMULAS_RXP = [
       "Dif Qtde RxP"
     ],
     "passos": [
-      "Aplicar os filtros selecionados.",
+      "Considerar somente registros com Qtde Real > 0 e Data até ontem (America/Sao_Paulo). Aplicar os filtros selecionados.",
       "Somar os valores válidos da coluna Dif Qtde RxP."
     ]
   },
@@ -51,7 +51,7 @@ window.FORMULAS_RXP = [
       "Dif Qtde RxP"
     ],
     "passos": [
-      "Aplicar os filtros.",
+      "Considerar somente registros com Qtde Real > 0 e Data até ontem (America/Sao_Paulo). Aplicar os filtros.",
       "Contar diferenças válidas, positivas ou negativas."
     ]
   },

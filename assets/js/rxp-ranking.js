@@ -8,9 +8,9 @@ window.RxpBarnRanking = (() => {
   const equal=(a,b)=>Math.abs(a-b)<=1e-8*Math.max(1,Math.abs(a),Math.abs(b));
   function message(text) { E('rxpRankingMessage').textContent=text;E('rxpRankingMessage').classList.toggle('hidden',!text); }
   function draw(resetScroll=false) {
-    const difference=metric()==='diferenca';
-    E('rxpRankingDescending').title=difference?'Maior diferença absoluta → Menor':'Maior quantidade → Menor';
-    E('rxpRankingAscending').title=difference?'Menor diferença absoluta → Maior':'Menor quantidade → Maior';
+    const percentage=metric()==='difPercent',difference=percentage||metric()==='diferenca';
+    E('rxpRankingDescending').title=percentage?'Maior diferença percentual absoluta → Menor':difference?'Maior diferença absoluta → Menor':'Maior quantidade → Menor';
+    E('rxpRankingAscending').title=percentage?'Menor diferença percentual absoluta → Maior':difference?'Menor diferença absoluta → Maior':'Menor quantidade → Maior';
     E('rxpRankingDescending').setAttribute('aria-pressed',String(descending));
     E('rxpRankingAscending').setAttribute('aria-pressed',String(!descending));
     E('rxpRankingAll').setAttribute('aria-pressed',String(all));
@@ -18,12 +18,13 @@ window.RxpBarnRanking = (() => {
     if (rows===null) return;
     const selected=[...rows].sort((a,b)=>{
       // Diferenca: maior magnitude absoluta; quantidades: maior valor numerico.
-      const value=row=>difference?Math.abs(row.diferenca):row[metric()];
+      if(a[metric()]==null||b[metric()]==null)return (a[metric()]==null)-(b[metric()]==null)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true});
+      const value=row=>difference?Math.abs(row[metric()]):row[metric()];
       return (value(a)-value(b))*(descending?-1:1)||a.galpao.localeCompare(b.galpao,'pt-BR',{numeric:true});
     });
     const visible=all?selected:selected.slice(0,15);
     E('rxpRankingAll').disabled=rows.length<=15;
-    E('rxpRankingStatus').textContent=rows.length?`${visible.length} de ${rows.length} galpões · ${difference?'ordem pela diferença absoluta':'ordem pela quantidade'}`:'Nenhum galpão no contexto';
+    E('rxpRankingStatus').textContent=rows.length?`${visible.length} de ${rows.length} galpões · ${percentage?'ordem pela diferença percentual absoluta':difference?'ordem pela diferença absoluta':'ordem pela quantidade'}`:'Nenhum galpão no contexto';
     E('rxpRankingAll').title=E('rxpRankingStatus').textContent+(all?' · Mostrar Top 15':' · Ver todos');
     const element=E('rxpRankingChart'),viewport=element.parentElement;
     element.style.width='100%';
@@ -40,13 +41,13 @@ window.RxpBarnRanking = (() => {
           const row=visible[points[0]?.dataIndex]; if(!row)return '';
           return `<strong>Galpão ${H(row.galpao)}</strong><br>Qtde Programada: ${N(row.programada)}<br>Qtde Real: ${N(row.real)}<br>Dif %: ${row.difPercent==null?'—':N(row.difPercent,2)+'%'}<br>Dif Qtde RxP: ${N(row.diferenca)}`;
         }},
-      grid:{left:62,right:84,top:12,bottom:32},
-      xAxis:{type:'value',splitNumber:3,minInterval:1,axisLabel:{color:muted,fontSize:10,hideOverlap:true,formatter:value=>N(value)},splitLine:{lineStyle:{color:color('--border'),opacity:.6}}},
+      grid:{left:62,right:percentage?130:84,top:12,bottom:32},
+      xAxis:{type:'value',splitNumber:3,minInterval:percentage?0:1,axisLabel:{color:muted,fontSize:10,hideOverlap:true,formatter:value=>N(value,percentage?1:0)+(percentage?'%':'')},splitLine:{lineStyle:{color:color('--border'),opacity:.6}}},
       yAxis:{type:'category',inverse:true,data:visible.map(row=>row.galpao),axisLabel:{color:text,interval:0,fontSize:11,width:54,overflow:'truncate'},axisTick:{show:false},axisLine:{show:false}},
-      series:[{name:({diferenca:'Dif Qtde RxP',real:'Qtde Real',programada:'Qtde Programada'})[metric()],type:'bar',barMaxWidth:18,
+      series:[{name:({difPercent:'Dif %',diferenca:'Dif Qtde RxP',real:'Qtde Real',programada:'Qtde Programada'})[metric()],type:'bar',barMaxWidth:18,
         data:visible.map(row=>({value:row[metric()],itemStyle:{color:difference&&row.diferenca<0?negative:color('--primary'),borderRadius:row[metric()]<0?[5,0,0,5]:[0,5,5,0]},
           label:{position:'right',color:difference&&row.diferenca<0?negative:text}})),
-        label:{show:true,fontSize:11,formatter:params=>N(params.value)},labelLayout:{hideOverlap:true}}]},true);
+        label:{show:true,fontSize:11,formatter:params=>percentage?`${N(params.value,2)}%${element.clientWidth<500?'\n':' '}(${N(visible[params.dataIndex].diferenca)} aves)`:N(params.value)},labelLayout:{hideOverlap:true}}]},true);
   }
   function clear() {
     ++requestId;abort?.abort();rows=null;contextKey='';chart?.clear();
@@ -62,7 +63,7 @@ window.RxpBarnRanking = (() => {
     let expected,read=0,pages=1;
     try {
       for(let page=1;page<=pages;page++) {
-        const result=await apiGet('/api/bi/rxp/detalhes',{...params,pagina:page,tamanho:500,ordenar:'id',direcao:'asc'},{signal});
+        const result=await RxpData.query('/api/bi/rxp/detalhes',{...params,pagina:page,tamanho:500,ordenar:'id',direcao:'asc'},{signal});
         if(id!==requestId)return;
         if(!Array.isArray(result.dados)||!Number.isInteger(result.total)||result.total<0||!Number.isInteger(result.total_paginas)||result.total_paginas<0)throw new Error('Não foi possível conferir todos os registros do ranking.');
         if(page===1){expected=result.total;pages=Math.max(1,result.total_paginas);}

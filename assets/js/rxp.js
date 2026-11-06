@@ -30,7 +30,7 @@
     if(!data||data.carga_completa===false||monthlyPending)return;
     const id=++monthlyId;monthlyAbort=new AbortController();monthlyPending=true;
     try{
-      const result=await apiGet('/api/bi/rxp/resumo',{...context,etapa:'mensal'},{signal:monthlyAbort.signal});
+      const result=await RxpData.query('/api/bi/rxp/resumo',{...context,etapa:'mensal'},{signal:monthlyAbort.signal});
       if(id!==monthlyId)return;
       if(!result.rules_version||!Array.isArray(result.monthly?.rows)||!result.monthly?.totals)throw new Error('Visão mensal indisponível. Atualize o backend da API.');
       monthlyData=result.monthly;renderMonthly();
@@ -66,7 +66,7 @@
     const card=E("kpiDiferenca").closest(".abate-kpi-diff");
     card.classList.remove("is-negative","is-positive","is-zero");card.classList.add(state(data.cards.diferenca));
     E("kpiDiferencaLegenda").textContent=data.cards.diferenca<0?"aves abaixo do programado":data.cards.diferenca>0?"aves acima do programado":"sem diferença no contexto atual";
-    E("statusRxp").textContent=data.carga_completa===false?"Carregando comparativo…":"Dados recebidos da API";
+    E("statusRxp").textContent=data.realizados_ate?`Realizados até ${date(data.realizados_ate)} (D-1)`:"API sem confirmação do corte D-1. Instale a atualização do backend.";
     E("periodoRxp").textContent="AVE NOVA / REAL ALIMENTOS";
     E("tabelaUnidadesAbate").innerHTML=data.carga_completa===false?'<tr><td colspan="7">Carregando comparativo por unidade…</td></tr>':data.groups.length?data.groups.map((g,i)=>row(g.unidade,g.cards,i)).join(""):'<tr><td colspan="7">Nenhum registro para os filtros selecionados.</td></tr>';
     E("tabelaUnidadesAbateTotal").innerHTML=data.carga_completa===false?"":row("Total",data.cards,-1);
@@ -84,7 +84,7 @@
     ["modalProgramada","modalReal","modalDiferenca","modalDifPercent"].forEach(k=>E(k).textContent="—");
     E("rxpPrevious").disabled=true;E("rxpNext").disabled=true;
     try{
-      const result=await apiGet('/api/bi/rxp/detalhes',{...context,...(unit?{unidade:unit}:{}),pagina:page,tamanho:50},{signal:detailAbort.signal});
+      const result=await RxpData.query('/api/bi/rxp/detalhes',{...context,...(unit?{unidade:unit}:{}),pagina:page,tamanho:50},{signal:detailAbort.signal});
       if(id!==detailId)return;
       if(!Array.isArray(result.dados)||!result.cards||!Number.isInteger(result.total))throw new Error("Contrato de detalhes incompatível.");
       [["modalProgramada","programada",0],["modalReal","real",0],["modalDiferenca","diferenca",0],["modalDifPercent","difPercent",2]].forEach(([k,v,d])=>E(k).textContent=N(result.cards[v],d));
@@ -99,7 +99,7 @@
   E("rxpPrevious").addEventListener("click",()=>{page--;details();});E("rxpNext").addEventListener("click",()=>{page++;details();});
   ["modalAbateFechar","modalAbateBackdrop"].forEach(id=>E(id).addEventListener("click",close));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!E("modalAbate").classList.contains("hidden"))close();});
-  const screen=A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
+  const screen=RxpData.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
     fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroSemana","data"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
     clear:()=>{RxpBarnRanking.clear();data=null;monthlyData=null;++monthlyId;monthlyAbort?.abort();monthlyPending=false;E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E('tabelaMensalRxpTotal').innerHTML='';close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
   RxpWeekFilter.attach(screen.filters);
