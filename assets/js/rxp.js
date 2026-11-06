@@ -56,7 +56,7 @@
   function close(){++detailId;detailAbort?.abort();E("modalAbate").classList.add("hidden");opener?.focus();}
   function row(label,c,index) {
     const tag=index===-1?'th':'td';
-    return `<tr class="abate-row ${state(c.diferenca)}"><${tag}><strong>${H(label)}</strong></${tag}><${tag} class="num">${N(c.programada)}</${tag}><${tag} class="num">${N(c.real)}</${tag}><${tag} class="num">${percent(c.difPercent)}</${tag}><${tag} class="num">${pill(c.diferenca)}</${tag}><${tag} class="num">${N(c.registrosComDiferenca)}</${tag}><${tag} class="action"><button class="mini-button" type="button" data-rxp-unit="${index}">Ver produtores</button></${tag}></tr>`;
+    return `<tr class="abate-row ${state(c.diferenca)}"><${tag}><strong>${H(label)}</strong></${tag}><${tag} class="num">${N(c.programada)}</${tag}><${tag} class="num">${N(c.real)}</${tag}><${tag} class="num">${percent(c.difPercent)}</${tag}><${tag} class="num">${pill(c.diferenca)}</${tag}><${tag} class="num">${N(c.registrosComDiferenca)}</${tag}><${tag} class="action"><button class="mini-button" type="button" data-rxp-unit="${index}" aria-label="Ver produtores de ${H(label)}"><span class="rxp-producers-full">Ver produtores</span><span class="rxp-producers-short" aria-hidden="true">Ver</span></button></${tag}></tr>`;
   }
   function render(result,params){
     data=result;context=params;
@@ -75,6 +75,7 @@
       E("modalAbate").classList.remove("hidden");E("modalAbateFechar").focus();details();
     }));
     if(monthlyView)loadMonthly();
+    if(data.carga_completa!==false)RxpBarnRanking.load(context,data.cards);
   }
   async function details(){
     const id=++detailId;detailAbort?.abort();detailAbort=new AbortController();
@@ -97,8 +98,9 @@
   E("rxpPrevious").addEventListener("click",()=>{page--;details();});E("rxpNext").addEventListener("click",()=>{page++;details();});
   ["modalAbateFechar","modalAbateBackdrop"].forEach(id=>E(id).addEventListener("click",close));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!E("modalAbate").classList.contains("hidden"))close();});
-  A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
-    fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
-    clear:()=>{data=null;monthlyData=null;++monthlyId;monthlyAbort?.abort();monthlyPending=false;E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E('tabelaMensalRxpTotal').innerHTML='';close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
+  const screen=A.connect({bi:"rxp",errorId:"erroRxp",clearId:"limparFiltrosAbate",progressive:true,
+    fields:[["filtroAno","ano"],["filtroMes","mes"],["filtroSemana","data"],["filtroDia","dia"],["filtroUnidade","unidade"],["filtroProdutor","produtor"],["filtroGalpao","galpao"],["filtroTecnico","tecnico"],["filtroTipoGranja","tipo_granja"],["filtroModelo","modelo"]],
+    clear:()=>{RxpBarnRanking.clear();data=null;monthlyData=null;++monthlyId;monthlyAbort?.abort();monthlyPending=false;E('tabelaMensalRxp').innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E('tabelaMensalRxpTotal').innerHTML='';close();["kpiProgramada","kpiReal","kpiDiferenca","kpiRegistros"].forEach(id=>E(id).textContent="—");E("statusRxp").textContent="Consultando…";E("tabelaUnidadesAbate").innerHTML='<tr><td colspan="7">Consultando…</td></tr>';E("tabelaUnidadesAbateTotal").innerHTML="";},render});
+  RxpWeekFilter.attach(screen.filters);
   BIUnavailable.formulas({prefix:"Rxp",catalog:FORMULAS_RXP,attribute:"data-rxp-formula"});
 })();

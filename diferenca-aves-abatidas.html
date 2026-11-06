@@ -9,6 +9,7 @@
     <link href="assets/css/app.css?v=busca-filtros-20261023-1" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 <link href="assets/css/mobile-filters.css?v=mobile-telas-20261029-1" rel="stylesheet">
+<link href="assets/css/rxp-comparison.css?v=ranking-semana-20261106-1" rel="stylesheet">
 </head>
 <body data-page="diferenca-abate" class="abate-page">
 <div class="app-shell">
@@ -49,6 +50,10 @@
             <div class="filter-field">
                 <span>Mês</span>
                 <div class="checkbox-multiselect" id="filtroMes"></div>
+            </div>
+            <div class="filter-field">
+                <span>Semana</span>
+                <div class="checkbox-multiselect" id="filtroSemana"></div>
             </div>
             <div class="filter-field">
                 <span>Dia</span>
@@ -110,7 +115,8 @@
         </article>
     </section>
 
-    <section class="card abate-table-card">
+    <div class="rxp-comparison-grid">
+    <section class="card abate-table-card rxp-comparison-card">
         <div class="card-heading-row abate-section-heading">
             <div>
                 <div class="card-kicker">Visão consolidada</div>
@@ -127,11 +133,11 @@
                 <thead>
                     <tr>
                         <th>Unidade / Destino</th>
-                        <th class="num">Qtde Programada</th>
+                        <th class="num" title="Qtde Programada">Programada</th>
                         <th class="num">Qtde Real</th>
                         <th class="num">Dif %</th>
                         <th class="num abate-diff-heading">Dif Qtde RxP</th>
-                        <th class="num">Registros c/ Dif.</th>
+                        <th class="num" title="Registros com Diferença">Reg. c/ Dif.</th>
                         <th class="action">Ação</th>
                     </tr>
                 </thead>
@@ -143,18 +149,34 @@
             <table class="abate-table abate-monthly-table" aria-label="Comparativo mensal de aves abatidas">
                 <thead><tr>
                     <th>Mês / Ano</th>
-                    <th class="num">AVE NOVA · Esperado</th>
-                    <th class="num">AVE NOVA · Realizado</th>
-                    <th class="num">REAL ALIMENTOS · Esperado</th>
-                    <th class="num">REAL ALIMENTOS · Realizado</th>
-                    <th class="num">Total · Esperado</th>
-                    <th class="num">Total · Realizado</th>
+                    <th class="num" title="AVE NOVA · Esperado">AVE NOVA · Esp.</th>
+                    <th class="num" title="AVE NOVA · Realizado">AVE NOVA · Real.</th>
+                    <th class="num" title="REAL ALIMENTOS · Esperado">REAL ALIM. · Esp.</th>
+                    <th class="num" title="REAL ALIMENTOS · Realizado">REAL ALIM. · Real.</th>
+                    <th class="num" title="Total · Esperado">Total · Esp.</th>
+                    <th class="num" title="Total · Realizado">Total · Real.</th>
                 </tr></thead>
                 <tbody id="tabelaMensalRxp"></tbody>
                 <tfoot id="tabelaMensalRxpTotal"></tfoot>
             </table>
         </div>
     </section>
+    <section class="card abate-table-card rxp-ranking-card" aria-labelledby="rxpRankingTitle">
+        <div class="card-heading-row abate-section-heading">
+            <div><div class="card-kicker">Visão consolidada</div><h2 id="rxpRankingTitle">Ranking de Galpões</h2><p id="rxpRankingStatus" role="status" aria-live="polite">Consultando…</p></div>
+        </div>
+        <div class="rxp-ranking-controls">
+            <label class="filter-field"><span>Métrica</span><select id="rxpRankingMetric"><option value="diferenca">Dif Qtde RxP</option><option value="real">Qtde Real</option><option value="programada">Qtde Programada</option></select></label>
+            <div class="rxp-view-toggle" role="group" aria-label="Ordenação do ranking"><button type="button" id="rxpRankingDescending" aria-pressed="true">Maior diferença → Menor</button><button type="button" id="rxpRankingAscending" aria-pressed="false">Menor diferença → Maior</button></div>
+            <button type="button" class="mini-button" id="rxpRankingAll" aria-pressed="false">Ver todos</button>
+        </div>
+        <div class="rxp-ranking-viewport">
+            <div id="rxpRankingChart" role="img" aria-label="Ranking de galpões por diferença de aves"></div>
+        </div>
+        <p id="rxpRankingMessage" class="rxp-ranking-message" role="status">Carregando ranking…</p>
+        <button type="button" class="mini-button hidden" id="rxpRankingRetry">Tentar novamente</button>
+    </section>
+    </div>
 
 </div>
 
@@ -218,8 +240,11 @@
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/api.js?v=retomada-meses-20261105-1"></script>
 <script src="assets/js/api-screen.js?v=atualizacao-20261020-2"></script>
+<script src="assets/vendor/echarts/echarts.min.js"></script>
 <script src="assets/js/unavailable.js?v=rxp-20261015-2"></script>
-<script src="assets/js/rxp.js?v=rxp-20261015-2"></script>
+<script src="assets/js/rxp-ranking.js?v=ranking-semana-20261106-1"></script>
+<script src="assets/js/rxp-weeks.js?v=ranking-semana-20261106-1"></script>
+<script src="assets/js/rxp.js?v=ranking-semana-20261106-1"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=menu-20261029-1"></script>
 </body>
