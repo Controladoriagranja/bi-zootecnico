@@ -81,6 +81,9 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
   assert.deepEqual(requests.filter(r=>r.params.etapa==='mensal').at(-1).dates,['2026-11-02','2026-11-16']);
   assert.equal(await page.locator('.abate-monthly-table tbody td').first().evaluate(el=>getComputedStyle(el).position),'sticky');
   assert.equal(await page.locator('#tabelaMensalRxpTotal th').count(),7);
+  const monthlyHeights=await page.locator('.rxp-comparison-grid > .card').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().height));
+  assert.equal(monthlyHeights[0],monthlyHeights[1],'Mensal acompanha a altura do ranking no desktop');
+  assert(await page.locator('.rxp-ranking-controls').evaluate(el=>Boolean(el.closest('.rxp-ranking-heading'))));
   const preview=path.join(root,'tests/frontend-previews/rxp-ranking-20261106');await fs.mkdir(preview,{recursive:true});
   await page.waitForTimeout(350);
   await page.locator('.rxp-comparison-grid').screenshot({path:path.join(preview,'mensal-desktop.png')});
@@ -101,7 +104,7 @@ const meta={rules_version:'rxp-2026-10-15',atualizado_em:'2026-11-06T08:00:00-03
   for(const width of [1440,1100,1099,768,390])for(const theme of ['light','dark']){
    await page.setViewportSize({width,height:1000});await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.dispatchEvent(new Event('dashboard:theme-changed'));},theme);
    const rects=await page.locator('.rxp-comparison-grid > .card').evaluateAll(nodes=>nodes.map(n=>({x:n.getBoundingClientRect().x,y:n.getBoundingClientRect().y,width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height})));
-   if(width>=1100){assert.equal(rects[0].y,rects[1].y);assert(Math.abs(rects[0].width-rects[1].width)<2);assert.equal(rects[0].height,rects[1].height);}else assert(rects[1].y>rects[0].y);
+   if(width>=1100){assert.equal(rects[0].y,rects[1].y);assert(Math.abs(rects[0].width-rects[1].width)<2);assert(rects[0].height<rects[1].height,'Unidade ocupa apenas a altura do conteudo');}else assert(rects[1].y>rects[0].y);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Sem overflow da pagina ${width}/${theme}`);
    await page.waitForTimeout(300);
    await page.locator('.rxp-comparison-grid').screenshot({path:path.join(out,`${width}-${theme}.png`)});

@@ -40,6 +40,7 @@
   }
   function selectView(monthly){
     monthlyView=monthly;
+    document.querySelector('.rxp-comparison-grid').dataset.view=monthly?'monthly':'unit';
     E('visaoUnidadeRxp').setAttribute('aria-pressed',String(!monthly));
     E('visaoMensalRxp').setAttribute('aria-pressed',String(monthly));
     E('comparativoUnidadeRxp').classList.toggle('hidden',monthly);
