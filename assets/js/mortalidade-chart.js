@@ -7,10 +7,24 @@ window.MortalityChart = (() => {
   const fallback = ['#1E3A8A','#2563EB','#0EA5E9','#14B8A6','#84CC16','#F59E0B'];
   let current=null, chart=null, weekStart=0, weekEnd=0, lotOpener=null;
   const element = id => document.getElementById(id);
+  // A API ja calcula as faixas somente sobre os lotes vinculados/validos.
+  // Reusar esse subtotal apenas quando os problemas correspondem a lotes pulados.
+  function presentation(period) {
+    const valid=value=>value!=null&&Number.isFinite(Number(value))&&Number(value)>=0&&Number(value)<=100;
+    const phases=current.faixas.map(f=>period.faixas?.[f.id]);
+    const reasons=(period.problemas||[]).map(issue=>issue.motivo);
+    const skipped=['sem_vinculo_base_dinamica','base_ausente_invalida_ou_aloj_nao_positivo'];
+    const partial=period.valido!==true&&reasons.some(r=>skipped.includes(r))
+      &&reasons.every(r=>skipped.includes(r)||r==='total_divergente_ou_ausente')
+      &&period.vinculados>0&&phases.every(valid)&&valid(period.total_dinamica)
+      &&Math.abs(phases.reduce((sum,value)=>sum+Number(value),0)-Number(period.total_dinamica))<=Number(current.tolerancia_pp??.01);
+    const show=phases.every(valid)&&(period.valido===true||partial);
+    return {partial,show,total:partial?period.total_dinamica:valid(period.total)?period.total:null};
+  }
   // Nova modificação de 26/10/2026: janela semanal e rolagem sem nova consulta.
   function weekCount(width) {return Math.max(3,Math.min(10,Math.floor((width-90)/85)));}
   function weekControls() {
-    const weekly=current?.agrupamento==='semanal' && current.valido;
+    const weekly=current?.agrupamento==='semanal' && current.periodos.length>0;
     element('mortalityWeekNav')?.classList.toggle('hidden',!weekly);
     if(!weekly)return;
     const periods=current.periodos;
@@ -39,9 +53,9 @@ window.MortalityChart = (() => {
     weekControls();
   }
   function clicked(event) {
-    if(!lotOpener||!current?.valido||event.componentType!=='series'||event.seriesType!=='bar')return;
+    if(!lotOpener||!current||event.componentType!=='series'||event.seriesType!=='bar')return;
     const period=current.periodos[event.dataIndex], phase=current.faixas[event.seriesIndex];
-    if(!period?.lotes||!phase)return;
+    if(!period?.lotes||!phase||!presentation(period).show)return;
     lotOpener({period,phase,year:current.ano,grouping:current.agrupamento});
   }
   function audit(payload) {
@@ -59,7 +73,7 @@ window.MortalityChart = (() => {
     const totalsMatch=rows.length>0 && rows.every(p=>p.diferenca!=null && Math.abs(Number(p.diferenca))<=tolerance);
     const reasons=[...new Set(rows.flatMap(p=>(p.problemas||[]).map(v=>v.motivo)))];
     const message=(totalsMatch?'As somas conferem com o Desempenho dentro da tolerância. ':'A soma das faixas ainda não foi conciliada com o Desempenho. ')
-      +'Gráfico interrompido: '+reasons.map(r=>labels[r]||r).join('; ')+'. Os valores não foram ajustados.';
+      +'Gráfico mantido com os dados disponíveis. Ocorrências: '+reasons.map(r=>labels[r]||r).join('; ')+'. A tabela abaixo preserva os totais originais para conferência.';
     container.innerHTML='<p>'+esc(message)+'</p><div class="mortality-audit-scroll"><table><thead><tr><th>Período</th>'+payload.faixas.map(f=>`<th>${esc(f.nome)}</th>`).join('')+'<th>Soma</th><th>Desempenho</th><th>Diferença (p.p.)</th><th>Ocorrências</th></tr></thead><tbody>'+rows.map(p=>'<tr><th>'+esc(p.inicio)+'</th>'+payload.faixas.map(f=>`<td>${format(p.faixas[f.id])}</td>`).join('')+`<td>${format(p.soma_faixas)}</td><td>${format(p.total)}</td><td>${format(p.diferenca)}</td><td>${esc([...new Set((p.problemas||[]).map(v=>labels[v.motivo]||v.motivo))].join('; '))}</td></tr>`).join('')+'</tbody></table></div>';
     // Não duplicar cada problema na linha consolidada se ele já está listado no período.
     let details=payload.periodos.flatMap(p=>(p.problemas||[]).map(issue=>({period:p.inicio,issue})));
@@ -86,7 +100,15 @@ window.MortalityChart = (() => {
     if(payload.rules_version!=='mortalidade-faixas-2026-10-26-v1')throw new Error('Atualize o backend para as faixas de mortalidade.');
     element('mortalityAudit').classList.add('hidden');
     element('mortalityLegend').innerHTML='';
-    if(!payload.valido){weekControls();chart.clear();audit(payload);return;}
+    const displayed=payload.periodos.map(presentation);
+    const partial=displayed.filter(p=>p.partial).length;
+    const unavailable=payload.periodos.filter((p,i)=>p.lotes&&!displayed[i].show).length;
+    const notice=element('mortalityPartialNotice');
+    if(notice){
+      notice.textContent=`Resultado parcial: ${partial} período(s) com faixas calculadas apenas sobre os lotes vinculados e válidos${unavailable?`; ${unavailable} período(s) sem faixas conferidas`:''}. Nos períodos parciais, a linha também usa o total desses lotes. KPI e rankings mantêm a base completa e suas exclusões atuais. Consulte as ocorrências abaixo.`;
+      notice.classList.toggle('hidden',payload.valido===true);
+    }
+    if(!payload.valido)audit(payload);
     const host=element('evolucaoChart'),css=getComputedStyle(host);
     const c=(name,other)=>css.getPropertyValue(name).trim()||other;
     const colors=fallback.map((color,i)=>c('--mortality-band-'+i,color));
@@ -104,16 +126,23 @@ window.MortalityChart = (() => {
     element('mortalityLegend').innerHTML=names.map((name,i)=>`<span><i style="background:${colors[i]}"></i>${esc(name)}</span>`).join('')+`<span><i class="mortality-line-key" style="background:${strong}"></i>% Mort. Total</span>`;
     const series=payload.faixas.map((f,i)=>({name:f.nome,type:'bar',stack:'mortalidade',barMaxWidth:56,
       cursor:'pointer',
-      data:payload.periodos.map(p=>({value:p.faixas[f.id],itemStyle:{borderRadius:
+      data:payload.periodos.map((p,index)=>({value:displayed[index].show?p.faixas[f.id]:null,itemStyle:{borderRadius:
         p.faixas[f.id]>0 && !payload.faixas.slice(i+1).some(next=>p.faixas[next.id]>0)?[8,8,0,0]:0}})),itemStyle:{color:colors[i]},
       label:{show:true,position:'inside',fontSize:11,color:i<3?'#fff':'#122026',formatter:p=>p.value==null||p.value===0?'':format(p.value)},
       labelLayout:{hideOverlap:true}}));
     series.push({name:'% Mort. Total',type:'line',yAxisIndex:0,smooth:0.22,smoothMonotone:'x',connectNulls:false,symbol:'circle',symbolSize:7,z:10,
-      lineStyle:{color:strong,width:2.5,cap:'round',join:'round'},itemStyle:{color:strong},data:payload.periodos.map(p=>p.total),
+      lineStyle:{color:strong,width:2.5,cap:'round',join:'round'},itemStyle:{color:strong},data:displayed.map(p=>p.total),
       label:{show:true,position:'top',distance:10,fontWeight:700,fontSize:12,color:c('--mortality-total-label','#c95b65'),formatter:p=>p.value==null?'':format(p.value)},
       labelLayout:{hideOverlap:true}});
     chart.setOption({animationDuration:200,textStyle:{fontFamily:getComputedStyle(document.body).fontFamily},legend:{show:false},
-      tooltip:{trigger:'axis',confine:true,renderMode:'richText',backgroundColor:c('--card','#fff'),borderColor:c('--border','#ddd'),textStyle:{color:strong},valueFormatter:v=>format(v)+'%'},
+      tooltip:{trigger:'axis',confine:true,renderMode:'richText',backgroundColor:c('--card','#fff'),borderColor:c('--border','#ddd'),textStyle:{color:strong},valueFormatter:v=>format(v)+'%',
+        formatter:points=>{
+          const index=points[0]?.dataIndex,period=payload.periodos[index],view=displayed[index];
+          if(!period)return '';
+          return [period.inicio,...points.map(point=>`${point.seriesName}: ${format(point.value)}%`),
+            view.partial?`Parcial: ${period.vinculados} de ${period.lotes} lotes; faixas e linha sobre os vinculados.`:
+            view.show?'Faixas conferidas com o Desempenho.':'Faixas indisponíveis; linha = total do Desempenho.'].join('\n');
+        }},
       grid:{left:60,right:32,top:48,bottom:weekly?96:44},
       dataZoom:weekly?[{type:'slider',xAxisIndex:0,startValue:weekStart,endValue:weekEnd,
         bottom:12,height:24,left:60,right:32,filterMode:'filter',zoomLock:true,brushSelect:false,
@@ -128,7 +157,7 @@ window.MortalityChart = (() => {
     chart.on('datazoom',zoomed);
     chart.on('click',clicked);
   }
-  function clear(){if(chart){chart.off('datazoom',zoomed);chart.off('click',clicked);}current=null;weekControls();window.MortalityLots?.close();element('mortalityAudit')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
+  function clear(){if(chart){chart.off('datazoom',zoomed);chart.off('click',clicked);}current=null;weekControls();window.MortalityLots?.close();element('mortalityAudit')?.classList.add('hidden');element('mortalityPartialNotice')?.classList.add('hidden');element('mortalityLegend').innerHTML='';element('evolucaoChart').style.width='';}
   const resize = ()=>{if(current&&chart)draw(chart,current);};
   window.addEventListener('resize',resize);
   return {draw,clear,format,setLotOpener:callback=>{lotOpener=callback;}};
