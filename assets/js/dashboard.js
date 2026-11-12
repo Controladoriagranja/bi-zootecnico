@@ -460,12 +460,7 @@ function metricCard(
             "article"
         );
 
-    card.className =
-        `metric-card ${
-            metricId === "aves_abatidas"
-                ? "metric-card-wide"
-                : ""
-        }`;
+    card.className = "metric-card";
 
     const years =
         visibleYears();
@@ -664,6 +659,8 @@ function renderDashboard() {
             }
         }
     );
+
+    ZooCondenacoes.render(container,{years:visibleYears(),months:visibleMonths(),revision:dashboardData.atualizado_em});
 
     document
         .getElementById(
