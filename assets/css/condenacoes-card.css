@@ -22,8 +22,14 @@
 .cg-cond-dialog::backdrop{background:#0008}.cg-cond-dialog .cg-stops-type{border:0;background:none;color:var(--primary);text-decoration:underline;cursor:pointer;font:inherit}
 .cg-cond-dialog .cg-cond-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cg-cond-dialog .cg-cond-filters>label{display:grid;gap:6px;font-size:12px}.cg-cond-dialog .cg-stops-view{display:none}
 .cg-cond-dialog .cg-stops-body .button{font:inherit;cursor:pointer;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--muted);color:var(--foreground)}
-.zoo-cond-card .metric-card-header{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px}.zoo-cond-card h2{font-size:16px;margin:0;color:var(--primary)}.zoo-cond-card p{font-size:12px;margin:4px 0;color:var(--muted-foreground)}.zoo-cond-table{overflow:auto}.zoo-cond-value{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:0}.zoo-cond-value:hover{text-decoration:underline}
 .cg-cond-dialog .pcp-select-multi{min-width:0}.cg-cond-dialog .cg-cond-status:empty{display:none}
 @media(max-width:600px){.cg-cond-dialog .cg-cond-filters{grid-template-columns:1fr}}
 
 .cg-cond-dialog .cg-stops-header .button{border:1px solid var(--border);background:var(--muted);color:var(--foreground);padding:8px 12px;border-radius:7px;cursor:pointer}.cg-cond-dialog [hidden]{display:none!important}
+/* Mesmas dimensões e tipografia dos demais cartões do Desempenho. */
+.zoo-cond-card .zoo-cond-value{display:block;min-height:0;height:auto;width:calc(100% + 16px);margin:-6px -8px;padding:6px 8px;border:0;border-radius:5px;background:transparent;text-align:right;font:inherit;color:inherit;line-height:inherit;cursor:pointer}
+.zoo-cond-card .zoo-cond-value:hover{background:var(--secondary);color:var(--primary)}
+.zoo-cond-card .zoo-cond-state{font-size:12px;color:var(--muted-foreground)}
+.zoo-cond-card .details-button{font-family:inherit;cursor:pointer}
+.dashboard-grid>.metric-card-birds{grid-column:span 2}
+@media(max-width:768px){.dashboard-grid>.metric-card-birds{grid-column:span 1}}

@@ -460,7 +460,7 @@ function metricCard(
             "article"
         );
 
-    card.className = "metric-card";
+    card.className = "metric-card"+(metricId === "aves_abatidas" ? " metric-card-birds" : "");
 
     const years =
         visibleYears();
