@@ -35,7 +35,7 @@
                         <span>${item.label}</span>
                     </a>
                 `).join("")}
-            </nav>
+            </nav><nav class="pcp-support-nav" aria-label="Suporte Zootécnico"><a href="ajuda.html">Ajuda</a></nav>
         </aside>
     `;
 
