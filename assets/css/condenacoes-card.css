@@ -28,7 +28,7 @@
 .cg-cond-dialog .cg-stops-header .button{border:1px solid var(--border);background:var(--muted);color:var(--foreground);padding:8px 12px;border-radius:7px;cursor:pointer}.cg-cond-dialog [hidden]{display:none!important}
 /* Mesmas dimensões e tipografia dos demais cartões do Desempenho. */
 .zoo-cond-card .zoo-cond-value{display:block;min-height:0;height:auto;width:calc(100% + 16px);margin:-6px -8px;padding:6px 8px;border:0;border-radius:5px;background:transparent;text-align:right;font:inherit;color:inherit;line-height:inherit;cursor:pointer}
-.zoo-cond-card .zoo-cond-value:hover{background:var(--secondary);color:var(--primary)}
+.zoo-cond-card .zoo-cond-value:hover,.zoo-cond-card .zoo-cond-value:focus-visible{background:color-mix(in srgb,var(--primary) 8%,transparent);color:var(--primary)}
 .zoo-cond-card .zoo-cond-state{font-size:12px;color:var(--muted-foreground)}
 .zoo-cond-card .details-button{font-family:inherit;cursor:pointer}
 .dashboard-grid>.metric-card-birds{grid-column:span 2}
