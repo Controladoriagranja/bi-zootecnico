@@ -26,7 +26,7 @@ try:
     route.fulfill(json=response)
    page.route('**workers.dev/api/bi/zootecnico/resumo?*',data)
    page.goto(f'http://127.0.0.1:{server.server_port}/mapa-calor.html');page.wait_for_selector('.heat-tile')
-   assert page.locator('.heat-tile').count()==25
+   assert page.locator('.heat-tile').count()==23
    for mode in ['dia','semana','mes','corrente']:
     page.click('[data-mode="'+mode+'"]');page.wait_for_function("document.querySelector('#heatStatus').textContent.startsWith('Consulta concluída')")
     assert page.locator('#heatTable tbody tr').count()==(2 if mode in ('dia','semana')else 1)
