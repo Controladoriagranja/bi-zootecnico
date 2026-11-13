@@ -155,3 +155,8 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 .heat-legend{margin:9px 0;font-size:9px;gap:10px}.heat-history,.heat-rules{padding:10px 12px;margin-top:8px;font-size:11px}.heat-history-heading{margin-top:14px}
 }
 .heat-history>summary{cursor:pointer;font-weight:550}.heat-previous>header p{color:#9b6618}
+
+.heat-tile[role=button]{cursor:pointer;transition:filter .15s}.heat-tile[role=button]:hover{filter:brightness(1.06)}.heat-tile[role=button]:focus-visible{outline:3px solid #ac8642;outline-offset:-3px}
+.heat-history-dialog{width:min(1100px,94vw);max-width:94vw;max-height:90vh;padding:0;border:1px solid var(--border,#e6dfda);border-radius:12px;background:var(--card,#fff);color:var(--foreground,#201b1c);box-shadow:0 15px 60px #0003}
+.heat-history-dialog::backdrop{background:#0007}.heat-history-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,#e6dfda);gap:15px}.heat-history-dialog h2{font-size:19px;margin:0}.heat-history-dialog header p{font-size:12px;margin:5px 0 0;color:var(--muted-foreground,#777)}.heat-history-dialog button{font:inherit;font-size:12px;border:1px solid var(--border,#e6dfda);background:var(--muted,#f1ede8);color:inherit;border-radius:6px;padding:9px 14px;cursor:pointer}.heat-chart-body{padding:14px 20px}.heat-chart-body p{font-size:12px;line-height:1.6;color:var(--muted-foreground,#777)}#metricHistoryChart{width:100%;height:clamp(270px,48vh,460px)}.heat-chart-note{font-size:10px!important}
+@media(max-width:700px){.heat-history-dialog>header{padding:14px}.heat-history-dialog h2{font-size:16px}.heat-chart-body{padding:10px}}

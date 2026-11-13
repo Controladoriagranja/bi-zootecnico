@@ -34,6 +34,7 @@ try:
    page.click('.heat-history>summary')
    for view in ['dia','semana']:
     page.click('[data-mode="'+view+'"]');page.wait_for_selector('.heat-previous');assert 'Último período com dados:'in page.locator('.heat-previous header p').inner_text();assert page.locator('.heat-previous .heat-value').first.inner_text().strip()!='—'
+   page.locator('.heat-tile').first.click();page.wait_for_selector('dialog[open] canvas');assert 'Histórico mensal'in page.locator('#metricHistoryTitle').inner_text();assert page.locator('dialog[open]').count()==1;page.click('#metricHistoryClose');assert page.locator('dialog[open]').count()==0
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
    Path(r'C:/BI_Granja/Temp/heatmap-qa').mkdir(exist_ok=True);assert width<1000 or page.locator('#heatMap').bounding_box()['y']+page.locator('#heatMap').bounding_box()['height']<=1000
    page.screenshot(path=f'C:/BI_Granja/Temp/heatmap-qa/{width}.png',full_page=True)
