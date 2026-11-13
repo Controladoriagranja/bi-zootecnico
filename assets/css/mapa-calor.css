@@ -190,3 +190,6 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 .heat-selects{align-items:end}.heat-heading{margin:12px 0!important}.heat-selects .heat-filter-panel{left:auto;right:0}
 @media(max-width:1350px) and (min-width:1001px){.heat-tile .heat-value{font-size:clamp(23px,2.3vw,32px)!important}.heat-sector-map .heat-tile:first-child .heat-value{font-size:40px!important}}
 @media(max-width:700px){.heat-tile .heat-value{font-size:26px!important}.heat-sector-map .heat-tile:first-child .heat-value{font-size:36px!important}}
+
+@media(min-width:1001px){.heat-map:has([data-sector="matrizes"]){grid-template-columns:repeat(4,minmax(0,1fr))}}
+.heat-sector[data-sector="matrizes"] .heat-sector-map{grid-template-columns:1fr}.heat-sector[data-sector="matrizes"] .heat-tile{grid-column:1!important}.heat-sector[data-sector="matrizes"] .heat-situation{overflow-wrap:anywhere}
