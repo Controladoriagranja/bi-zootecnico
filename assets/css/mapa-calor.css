@@ -131,3 +131,6 @@
 .heat-history-heading select{font:inherit;padding:8px;border:1px solid var(--border,#e6dfda);border-radius:6px;background:var(--muted,#f1ede8);color:var(--foreground,#201b1c)}
 @media(max-width:1100px){.heat-map{grid-template-columns:1fr}.heat-sector-map{grid-template-columns:repeat(5,minmax(0,1fr))}.heat-sector-map .heat-tile:first-child{grid-column:span 1;min-height:210px}}
 @media(max-width:700px){.heat-sector-map{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-sector-map .heat-tile:first-child{grid-column:span 2;min-height:175px}.heat-sector-map .heat-tile:last-child{grid-column:span 1}.heat-sector-map .heat-value{font-size:25px!important}}
+
+.heat-ave-view{font:inherit;font-size:12px;padding:7px 10px;border:1px solid var(--border,#e6dfda);border-radius:6px;margin-top:10px;background:var(--muted,#f1ede8);color:var(--foreground,#201b1c)}
+.heat-sector>header{min-height:114px;box-sizing:border-box}
