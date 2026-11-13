@@ -26,11 +26,11 @@ try:
     route.fulfill(json=response)
    page.route('**workers.dev/api/bi/zootecnico/resumo?*',data)
    page.goto(f'http://127.0.0.1:{server.server_port}/mapa-calor.html');page.wait_for_selector('.heat-tile')
-   assert page.locator('.heat-tile').count()==23
+   assert page.locator('.heat-tile').count()==15
    for mode in ['dia','semana','mes','corrente']:
     page.click('[data-mode="'+mode+'"]');page.wait_for_function("document.querySelector('#heatStatus').textContent.startsWith('Consulta concluída')")
     assert page.locator('#heatTable tbody tr').count()==(2 if mode in ('dia','semana')else 1)
-   page.click('.heat-history>summary');page.select_option('#heatSector','pcp_1');assert page.locator('.heat-sector').count()==5
+   page.click('.heat-history>summary');page.select_option('#heatSector','pcp_10');assert page.locator('.heat-sector').count()==3;assert page.locator('#heatSector option[value=pcp_1]').count()==0
    page.click('.heat-history>summary')
    for view in ['dia','semana']:
     page.click('[data-mode="'+view+'"]');page.wait_for_selector('.heat-previous');assert 'Último período com dados:'in page.locator('.heat-previous header p').inner_text();assert page.locator('.heat-previous .heat-value').first.inner_text().strip()!='—'

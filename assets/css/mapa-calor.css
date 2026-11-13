@@ -162,3 +162,5 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 @media(max-width:700px){.heat-history-dialog>header{padding:14px}.heat-history-dialog h2{font-size:16px}.heat-chart-body{padding:10px}}
 
 .heat-sector[data-sector="pcp_1"] .heat-tile:last-child,.heat-sector[data-sector="pcp_2"] .heat-tile:last-child{grid-column:span 2}
+
+@media(min-width:1001px){.heat-map{grid-template-columns:repeat(3,minmax(0,1fr))}.heat-sector-map .heat-value{font-size:clamp(20px,1.8vw,32px)}}
