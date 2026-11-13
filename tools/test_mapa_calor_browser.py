@@ -30,7 +30,8 @@ try:
    for mode in ['dia','semana','mes','corrente']:
     page.click('[data-mode="'+mode+'"]');page.wait_for_function("document.querySelector('#heatStatus').textContent.startsWith('Consulta concluída')")
     assert page.locator('#heatTable tbody tr').count()==(2 if mode in ('dia','semana')else 1)
-   page.click('.heat-history>summary');page.select_option('#heatSector','pcp_10');assert page.locator('.heat-sector').count()==3;assert page.locator('#heatSector option[value=pcp_1]').count()==0
+   page.locator('.heat-selects .heat-filter-button').first.click();assert page.locator('.heat-filter-panel:not([hidden])').count()==1;page.locator('.heat-filter-panel:not([hidden]) input[type=search]').fill('2026');assert page.locator('.heat-filter-panel:not([hidden]) input[type=checkbox]').count()==1;page.keyboard.press('Escape')
+   page.click('.heat-history>summary');page.select_option('#heatSector','pcp_10',force=True);assert page.locator('.heat-sector').count()==3;assert page.locator('#heatSector option[value=pcp_1]').count()==0
    page.click('.heat-history>summary')
    for view in ['dia','semana']:
     page.click('[data-mode="'+view+'"]');page.wait_for_selector('.heat-previous');assert 'Último período com dados:'in page.locator('.heat-previous header p').inner_text();assert page.locator('.heat-previous .heat-value').first.inner_text().strip()!='—'
