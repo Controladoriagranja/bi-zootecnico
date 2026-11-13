@@ -109,3 +109,25 @@
 .heat-value{letter-spacing:-.8px!important}
 }
 
+
+/* Setores independentes, com hierarquia e dimensões iguais. */
+.heat-map{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0;background:transparent;border:0;box-shadow:none;overflow:visible}
+.heat-sector{min-width:0;background:var(--card,#fff);border:1px solid var(--border,#e6dfda);border-radius:10px;padding:6px;overflow:hidden}
+.heat-sector>header{padding:14px 12px 16px}
+.heat-sector>header h3{margin:0;font-size:16px;font-weight:600}
+.heat-sector>header p{margin:6px 0 0;font-size:10px;color:var(--muted-foreground,#777)}
+.heat-sector-map{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.heat-sector-map .heat-tile,.heat-sector-map .heat-tile:nth-child(-n+2){grid-column:span 1;min-height:210px;padding:18px 14px;justify-content:flex-start}
+.heat-sector-map .heat-tile:first-child{grid-column:span 2;min-height:180px}
+.heat-sector-map .heat-tile h3{font-size:13px;min-height:32px;line-height:1.4;margin:0 0 10px}
+.heat-sector-map .heat-value{font-size:clamp(23px,1.75vw,34px);letter-spacing:-.8px}
+.heat-sector-map .heat-value small{display:block;font-size:11px;margin:4px 0 0;letter-spacing:0}
+.heat-sector-map .heat-target{font-size:11px;margin-top:12px;line-height:1.5}
+.heat-sector-map .heat-deviation{position:static;margin-top:auto;align-self:start;font-size:10px;padding:4px 6px}
+.heat-sector-map .heat-situation{font-size:10px;line-height:1.4}
+.heat-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.heat-history-heading h2{margin:0}
+.heat-history-heading label{font-size:12px;color:var(--muted-foreground,#777)}
+.heat-history-heading select{font:inherit;padding:8px;border:1px solid var(--border,#e6dfda);border-radius:6px;background:var(--muted,#f1ede8);color:var(--foreground,#201b1c)}
+@media(max-width:1100px){.heat-map{grid-template-columns:1fr}.heat-sector-map{grid-template-columns:repeat(5,minmax(0,1fr))}.heat-sector-map .heat-tile:first-child{grid-column:span 1;min-height:210px}}
+@media(max-width:700px){.heat-sector-map{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-sector-map .heat-tile:first-child{grid-column:span 2;min-height:175px}.heat-sector-map .heat-tile:last-child{grid-column:span 1}.heat-sector-map .heat-value{font-size:25px!important}}
