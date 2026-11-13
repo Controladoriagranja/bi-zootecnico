@@ -33,3 +33,13 @@
 .zoo-cond-card .details-button{font-family:inherit;cursor:pointer}
 .dashboard-grid>.metric-card-birds{grid-column:span 2}
 @media(max-width:768px){.dashboard-grid>.metric-card-birds{grid-column:span 1}}
+
+/* Compact condemnation filters and header navigation. */
+.cg-cond-toolbar{display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,4fr);gap:12px;flex:none}
+.cg-cond-toolbar .cg-cond-view-filter{max-width:none;min-width:0}
+.cg-cond-dialog .cg-cond-toolbar .cg-cond-filters{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cg-cond-actions{display:flex;align-items:center;gap:8px}.cg-cond-actions [hidden]{display:none}
+.cg-cond-dialog>.cg-stops-body{gap:10px;padding:12px 16px}
+.cg-cond-dialog .cg-cond-status:empty{display:none}
+.cg-cond-dialog .cg-cond-groups-back{display:none}
+@media(max-width:800px){.cg-cond-toolbar{grid-template-columns:1fr}.cg-cond-dialog .cg-cond-toolbar .cg-cond-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
