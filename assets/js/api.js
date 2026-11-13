@@ -234,7 +234,9 @@ async function requestApi(endpoint, params = {}, options = {}) {
     && url.searchParams.getAll('agrupamento').length === 1
     && ['mensal', 'semanal'].includes(url.searchParams.get('agrupamento'))
     && url.searchParams.getAll('ano').length === 1;
-  if (isMortalityEvolution) {
+  if (url.searchParams.has('mapa_calor')) {
+    if(data?.ok!==true||data.admin!==true||!Array.isArray(data.periodos))throw new ApiError('Resposta incompatível com o mapa de calor.',503,'HEATMAP_CONTRACT');
+  } else if (isMortalityEvolution) {
     const ids = ['1','2','3','4','5','35_abate'];
     const validNumber = value => value === null || (typeof value === 'number' && Number.isFinite(value));
     const validValues = item => item && item.faixas

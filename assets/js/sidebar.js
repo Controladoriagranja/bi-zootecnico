@@ -41,6 +41,7 @@
 
     document.body.classList.add("has-side-nav");
     document.body.prepend(root);
+    (async()=>{try{const token=sessionStorage.getItem('granjabi_auth_token');if(!token)return;const response=await fetch('https://portal-bi-granjabrasilia.onrender.com/api/auth/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!response.ok)return;const data=await response.json(),u=data.user;if(!u||(u.isAdmin!==true&&u.role!=='admin'&&u.perfil!=='admin'))return;const a=document.createElement('a');a.className='side-nav-link'+(current==='mapa-calor'?' active':'');a.href='mapa-calor.html';a.textContent='Mapa de calor · Em desenvolvimento';root.querySelector('.side-nav-links').append(a);}catch(_){}})();
 
     const rail = root.querySelector(".side-nav-rail");
     const panel = root.querySelector(".side-nav-panel");
