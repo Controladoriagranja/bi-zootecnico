@@ -35,12 +35,16 @@
                         <span>${item.label}</span>
                     </a>
                 `).join("")}
-            </nav><nav class="pcp-support-nav" aria-label="Suporte Zootécnico"><a href="ajuda.html">Ajuda</a></nav>
+            </nav><nav class="pcp-support-nav" aria-label="Suporte Zootécnico"><a class="side-nav-help-link" href="ajuda.html">Ajuda</a></nav>
         </aside>
     `;
 
     document.body.classList.add("has-side-nav");
     document.body.prepend(root);
+    const helpStyle = document.createElement('style');
+    helpStyle.textContent = `.side-nav-panel{display:flex;flex-direction:column}.side-nav-panel .pcp-support-nav{display:block;margin-top:auto;padding:14px 0 4px;border-top:1px solid #ffffff15}.side-nav-panel .side-nav-help-link,.side-nav-panel .side-nav-help-link:visited{display:block;padding:10px 12px;color:#cbb4b3;font:inherit;font-size:12px;text-decoration:none;border-radius:3px}.side-nav-panel .side-nav-help-link:hover,.side-nav-panel .side-nav-help-link:focus-visible{color:#fff;background:#ffffff0d}`;
+    document.head.append(helpStyle);
+
 
     const rail = root.querySelector(".side-nav-rail");
     const panel = root.querySelector(".side-nav-panel");
