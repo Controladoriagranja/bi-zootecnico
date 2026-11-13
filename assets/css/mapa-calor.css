@@ -183,3 +183,10 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 .heat-history-heading label .heat-filter{display:inline-block;margin-left:6px}
 .heat-heading .heat-filter-panel{left:auto;right:0}
 @media(max-width:700px){.heat-header-tools{gap:12px}.heat-header-tools>div{padding-right:12px}#apiFilterProgress.api-filter-progress{top:12px;right:12px;font-size:11px}.heat-filter-panel{max-width:calc(100vw - 40px)}}
+
+.heat-tile .heat-value{font-size:clamp(28px,2.5vw,44px)!important;font-weight:650!important;letter-spacing:-1px!important}
+.heat-sector-map .heat-tile:first-child .heat-value{font-size:clamp(36px,3.2vw,54px)!important}
+.heat-sector-map .heat-tile h3{font-size:13px}.heat-sector-map .heat-target{font-size:11px}.heat-sector-map .heat-situation,.heat-sector-map .heat-deviation{font-size:10px}
+.heat-selects{align-items:end}.heat-heading{margin:12px 0!important}.heat-selects .heat-filter-panel{left:auto;right:0}
+@media(max-width:1350px) and (min-width:1001px){.heat-tile .heat-value{font-size:clamp(23px,2.3vw,32px)!important}.heat-sector-map .heat-tile:first-child .heat-value{font-size:40px!important}}
+@media(max-width:700px){.heat-tile .heat-value{font-size:26px!important}.heat-sector-map .heat-tile:first-child .heat-value{font-size:36px!important}}
