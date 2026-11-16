@@ -193,3 +193,9 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 
 @media(min-width:1001px){.heat-map:has([data-sector="matrizes"]){grid-template-columns:repeat(4,minmax(0,1fr))}}
 .heat-sector[data-sector="matrizes"] .heat-sector-map{grid-template-columns:1fr}.heat-sector[data-sector="matrizes"] .heat-tile{grid-column:1!important}.heat-sector[data-sector="matrizes"] .heat-situation{overflow-wrap:anywhere}
+
+/* Os valores se adaptam à largura real de cada quadrante. */
+.heat-tile{container-type:inline-size;min-width:0}
+.heat-tile .heat-value{font-size:clamp(22px,23cqw,44px)!important;max-width:100%;font-variant-numeric:tabular-nums}
+.heat-sector-map .heat-tile:first-child .heat-value{font-size:clamp(30px,17cqw,54px)!important}
+.heat-tile[data-metric="aves_media"] .heat-value{font-size:clamp(18px,19cqw,40px)!important;letter-spacing:-.6px!important}
