@@ -8,7 +8,7 @@ window.ZooCondenacoes=(()=>{
  function render(container,{years,months,revision}){
   const card=document.createElement('article');card.className='metric-card zoo-cond-card';
   card.innerHTML='<header class="metric-card-header"><div><h2>% Cond (Tot+Par Quilos)</h2><p>Mensal por ano</p></div><div class="card-actions"><span data-formula-mount="pcp.condenacoes"></span><button type="button" class="details-button zoo-cond-details">Detalhes →</button></div></header><p class="zoo-cond-state" role="status">Carregando condenações…</p><div class="metric-table-wrapper zoo-cond-table"></div>';
-  container.append(card);const monthNumbers=months.map(m=>Number(m.numero));
+  container.insertBefore(card,container.querySelector('.metric-card-birds'));const monthNumbers=months.map(m=>Number(m.numero));
   card.querySelector('.zoo-cond-details').onclick=()=>open({ano:years.join(','),mes:monthNumbers.join(',')});
   if(!years.length||!months.length){card.querySelector('.zoo-cond-state').textContent='Sem período selecionado.';return;}
   const request=year=>{const key=JSON.stringify([year,monthNumbers,revision]);if(!cache.has(key)){const promise=apiGet('/api/pcp/comparativo/condenacoes',{ano:year,mes:monthNumbers.join(','),visao:'geral'},{silent:true}).then(r=>{if(!r.ok)throw Error('Resposta incompleta');return r;}).catch(e=>{cache.delete(key);throw e;});cache.set(key,promise);}return cache.get(key);};
