@@ -3379,3 +3379,26 @@ body.lotes-drawer-open { overflow:hidden; }
 .details-header .header-toolbar { flex-wrap: wrap; }
 .details-back-button { flex-shrink: 0; font-size: 13px; font-weight: 650; white-space: nowrap; }
 .details-back-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+
+/* Contexto e indicador do detalhamento, sem alterar os filtros compartilhados. */
+.details-context-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 280px); gap: 12px; align-items: stretch; margin-bottom: 16px; }
+.details-context-grid > * { min-width: 0; }
+.details-context-grid .filter-card { margin-bottom: 0; padding: 12px; }
+.details-context-grid .filter-card-top { align-items: center; margin-bottom: 10px; }
+.details-context-grid .details-filters-with-indicator { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.details-context-grid .metric-summary-card { grid-column: auto; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; }
+.details-context-grid .metric-summary-value { margin-top: 12px; font-size: clamp(32px, 3vw, 44px); line-height: 1.15; overflow-wrap: anywhere; }
+.details-header ~ .details-top-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1200px) {
+  .details-context-grid .details-filters-with-indicator { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .details-context-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 780px) {
+  .details-header ~ .details-top-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .details-context-grid .details-filters-with-indicator { grid-template-columns: minmax(0, 1fr); }
+}
