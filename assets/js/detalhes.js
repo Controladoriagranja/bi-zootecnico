@@ -162,7 +162,8 @@ const detailRankingReturn = (() => {
     function begin(key, name) {
         if (busy || loading() || !detalhesData) return false;
         const values = filters.values();
-        if (values[key]?.length === 1 && values[key][0] === name) return false;
+        const requested = typeof key === 'object' ? key : {[key]: name};
+        if (Object.entries(requested).every(([field, value]) => values[field]?.length === 1 && values[field][0] === value)) return false;
         // Guardar tambem as opcoes evita perder selecoes que o contexto seguinte restringe.
         const options = DETAIL_FILTERS.map(field => field.multi
             ? filters.getState(field).options.map(option => ({...option}))
@@ -190,6 +191,56 @@ const detailRankingReturn = (() => {
     buttons.forEach(button => button.addEventListener('click', back));
     return {begin, end, reset, sync};
 })();
+
+const detailRankings = {
+    tecnicos: {suffix:'Tecnicos', label:'técnicos', direction:'desc', rows:[]},
+    produtores: {suffix:'Produtores', label:'produtores', direction:'desc', rows:[]},
+    galpoes: {suffix:'Galpoes', label:'galpões', direction:'desc', rows:[]}
+};
+
+function rankingSortButton(kind, unavailable = false) {
+    const state = detailRankings[kind], button = document.querySelector(`[data-ranking-sort="${kind}"]`);
+    const ascending = state.direction === 'asc';
+    button.title = `Ordem atual: ${ascending ? 'menor para maior' : 'maior para menor'}. Clique para inverter.`;
+    button.setAttribute('aria-label', `Ordenar ${state.label} do ${ascending ? 'maior para o menor' : 'menor para o maior'}`);
+    button.setAttribute('aria-pressed', String(ascending));
+    button.disabled = unavailable || state.rows.length < 2 || button.closest('[data-detail-region]').getAttribute('aria-busy') === 'true';
+    button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ascending ? 'M6 20V4m-3 3 3-3 3 3' : 'M6 4v16m-3-3 3 3 3-3'}"/><path d="${ascending ? 'M12 6h2m-2 6h5m-5 6h8' : 'M12 6h8m-8 6h5m-5 6h2'}"/></svg>`;
+}
+
+function renderDetailRanking(kind) {
+    const state = detailRankings[kind], metric = detalhesData.indicador;
+    const source = detalhesData['ranking_' + kind], available = Array.isArray(source);
+    const value = row => row.valor == null || !Number.isFinite(Number(row.valor)) ? null : Number(row.valor);
+    state.rows = available ? source.slice().sort((a, b) => {
+        const x = value(a), y = value(b);
+        if (x == null || y == null) return x == null ? y == null ? 0 : 1 : -1;
+        return (x - y) * (state.direction === 'asc' ? 1 : -1) || String(a.nome).localeCompare(String(b.nome), 'pt-BR', {numeric:true});
+    }) : [];
+    const host = document.getElementById('ranking' + state.suffix);
+    host.style.visibility = available ? 'visible' : 'hidden';
+    const audit = detalhesData.ranking_contexto, context = audit?.[kind];
+    document.getElementById('contextoRanking' + state.suffix).textContent = available
+        ? `${source.length} ${state.label} · ${Math.min(20, source.length)} visíveis${source.length > 20 ? ' · Role para ver todos' : ''}${context?.sem_identificacao ? ' · Inclui registros sem identificação' : ''}`
+        : 'Ranking de galpões indisponível nesta versão da API.';
+    const descriptions = {sum:'Soma de todos os grupos.', avg:'Média dos lotes válidos. A média simples dos grupos não reproduz o total quando eles têm quantidades diferentes de lotes.',
+        ratio_sums:'Total calculado pela divisão das somas dos componentes. Somar ou fazer média simples das barras não reproduz esse total.',
+        weighted_avg:metric.id === 'vazio' ? 'Média dos grupos ponderada por aves abatidas, sem limite de 14.' : 'Média dos grupos ponderada por aves alojadas.'};
+    document.getElementById('conferenciaRanking' + state.suffix).textContent = available && context
+        ? `${descriptions[audit.metodo] || ''} Total recomposto: ${formatMetric(context.valor_recomposto, metric)}. ${METRICAS[metric.id]?.descricao || ''}` : '';
+    if (available) ZooCharts.ranking(echarts.getInstanceByDom(host), state.rows, metric.nome, metric.unidade, metric.casas_decimais ?? 2);
+    rankingSortButton(kind, !available);
+}
+
+document.querySelectorAll('[data-ranking-sort]').forEach(button => {
+    button.addEventListener('click', () => {
+        if (!detalhesData || button.disabled) return;
+        const kind = button.dataset.rankingSort;
+        detailRankings[kind].direction = detailRankings[kind].direction === 'desc' ? 'asc' : 'desc';
+        renderDetailRanking(kind);
+    });
+    rankingSortButton(button.dataset.rankingSort);
+});
 
 
 async function carregarIndicadores() {
@@ -336,6 +387,7 @@ function markDetailUpdating(part, updating) {
     document.querySelectorAll(selector).forEach(region => {
         region.classList.toggle('detail-updating', updating);
         region.setAttribute('aria-busy', String(updating));
+        region.querySelectorAll('[data-ranking-sort]').forEach(button => rankingSortButton(button.dataset.rankingSort));
     });
 }
 
@@ -348,16 +400,6 @@ function render({principal = true, evolucao = true} = {}) {
         detalhesData.indicador;
 
     if (principal) {
-    const audit=detalhesData.ranking_contexto;
-    const descriptions={sum:'Soma de todos os grupos.',avg:'Média dos lotes válidos. A média simples dos grupos não reproduz o total quando eles têm quantidades diferentes de lotes.',
-        ratio_sums:'Total calculado pela divisão das somas dos componentes. Somar ou fazer média simples das barras não reproduz esse total.',
-        weighted_avg:metric.id==='vazio'?'Média dos grupos ponderada por aves abatidas, sem limite de 14.':'Média dos grupos ponderada por aves alojadas.'};
-    ['tecnicos','produtores'].forEach(kind=>{
-        const suffix=kind==='tecnicos'?'Tecnicos':'Produtores',rows=detalhesData['ranking_'+kind]||[],context=audit?.[kind];
-        document.getElementById('contextoRanking'+suffix).textContent=`${rows.length} ${kind==='tecnicos'?'técnicos':'produtores'} · ${Math.min(20,rows.length)} visíveis${rows.length>20?' · Role para ver todos':''}${context?.sem_identificacao?' · Inclui registros sem identificação':''}`;
-        document.getElementById('conferenciaRanking'+suffix).textContent=context?`${descriptions[audit.metodo]||''} Total recomposto: ${formatMetric(context.valor_recomposto,metric)}. ${(METRICAS[metric.id]?.descricao||'')}`:'Atualize o backend para conferir a recomposição completa deste ranking.';
-    });
-
     IndicatorFormulaUI.scan();
 
     document
@@ -393,21 +435,7 @@ function render({principal = true, evolucao = true} = {}) {
             metric
         );
 
-    ZooCharts.ranking(
-        rankingTecnicosChart,
-        detalhesData.ranking_tecnicos,
-        metric.nome,
-        metric.unidade,
-        metric.casas_decimais ?? 2
-    );
-
-    ZooCharts.ranking(
-        rankingProdutoresChart,
-        detalhesData.ranking_produtores,
-        metric.nome,
-        metric.unidade,
-        metric.casas_decimais ?? 2
-    );
+    Object.keys(detailRankings).forEach(renderDetailRanking);
     markDetailUpdating('principal', false);
     }
 
@@ -441,7 +469,7 @@ async function carregarDetalhes(
         allOption?.remove();
         if(!yearSelect.value) yearSelect.value=[...yearSelect.options].map(o=>o.value).filter(Boolean).sort((a,b)=>Number(b)-Number(a))[0]||'';
         if(!yearSelect.value) {
-            ++detailRequestId;requestController?.abort();mortalityPayload=null;if(mortalityMode)MortalityChart.clear();evolucaoChart.clear();rankingTecnicosChart.clear();rankingProdutoresChart.clear();
+            ++detailRequestId;requestController?.abort();mortalityPayload=null;if(mortalityMode)MortalityChart.clear();evolucaoChart.clear();rankingTecnicosChart.clear();rankingProdutoresChart.clear();rankingGalpoesChart.clear();
             document.getElementById('kpiValor').textContent='\u2014';
             const error=document.getElementById('mensagemErro');error.textContent='Sem ano disponivel para os filtros selecionados.';error.classList.remove('hidden');
             document.getElementById('dashboardAtualizando').classList.add('hidden');markDetailUpdating('all',false);detailRankingReturn.sync();return;
@@ -568,6 +596,8 @@ const rankingProdutoresChart =
         )
     );
 
+const rankingGalpoesChart = ZooCharts.init(document.getElementById('rankingGalpoes'));
+
 
 const evolucaoChart =
     ZooCharts.init(
@@ -601,12 +631,13 @@ async function atualizarFiltrosDetalhes(preserve) {
 rankingTecnicosChart.on(
     "click",
     async paramsChart => {
-        if(detalhesData?.ranking_tecnicos?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        if (!detailRankingReturn.begin('tecnico', paramsChart.name)) return;
+        const row = detailRankings.tecnicos.rows[paramsChart.dataIndex];
+        if(!row || row.sem_identificacao)return;
+        if (!detailRankingReturn.begin('tecnico', row.nome)) return;
         try {
             filters.set(
                 "tecnico",
-                paramsChart.name
+                row.nome
             );
 
             await atualizarFiltrosDetalhes(true);
@@ -618,18 +649,30 @@ rankingTecnicosChart.on(
 rankingProdutoresChart.on(
     "click",
     async paramsChart => {
-        if(detalhesData?.ranking_produtores?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        if (!detailRankingReturn.begin('produtor', paramsChart.name)) return;
+        const row = detailRankings.produtores.rows[paramsChart.dataIndex];
+        if(!row || row.sem_identificacao)return;
+        if (!detailRankingReturn.begin('produtor', row.nome)) return;
         try {
             filters.set(
                 "produtor",
-                paramsChart.name
+                row.nome
             );
 
             await atualizarFiltrosDetalhes(true);
         } finally { detailRankingReturn.end(); }
     }
 );
+
+rankingGalpoesChart.on('click', async paramsChart => {
+    const row = detailRankings.galpoes.rows[paramsChart.dataIndex];
+    if (!row || row.sem_identificacao || !row.produtor || !row.galpao) return;
+    if (!detailRankingReturn.begin({produtor:row.produtor, galpao:row.galpao})) return;
+    try {
+        filters.set('produtor', row.produtor);
+        filters.set('galpao', row.galpao);
+        await atualizarFiltrosDetalhes(true);
+    } finally { detailRankingReturn.end(); }
+});
 
 
 document.addEventListener(

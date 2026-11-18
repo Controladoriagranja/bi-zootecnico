@@ -5,7 +5,7 @@ const root = path.resolve(__dirname,'..');
 const git = 'C:/Users/vchaves/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/git/cmd/git.exe';
 const baseline = file => cp.execFileSync(git,['show','0c54308:'+file],{cwd:root,stdio:['ignore','pipe','ignore']});
 const meta = {arquivo:'zootecnico.vw_desempenho_acerto_portal',rules_version:'acerto-iep-mensal-2026-10-16',atualizado_em:'2026-11-18 08:05:00',periodo_recepcao:{data_inicio:'2026-10-01',data_fim:'2026-11-17'}};
-const lots = [{produtor:'Atair',tecnico:'Lucas',galpao:'A'},{produtor:'Delcio',tecnico:'Lucas',galpao:'B'},{produtor:'Maria',tecnico:'Mariana',galpao:'C'}];
+const lots = [{produtor:'Atair',tecnico:'Lucas',galpao:'626B'},{produtor:'Delcio',tecnico:'Lucas',galpao:'626B'},{produtor:'Maria',tecnico:'Mariana',galpao:'C'}];
 const cards = {lotes:3,aves:3000,mortes:30,mortalidade:1,peso:2100,peso_atual:2.1,peso_pinto:44,peso_abate_final:3,vezes_maior:4};
 const weekly = [7,14,21,28,35].map(idade=>({idade,mortes:6,mortalidade:1,mortalidade_sem_descartes:.8,descarte_percent:.2,peso:idade*70}));
 const eligible = (q,except='') => lots.filter(row=>Object.keys(row).every(key=>key===except||!q.has(key)||q.getAll(key).includes(row[key])));
@@ -23,8 +23,10 @@ function fixture(url) {
       const point={faixas:{1:.2,2:.2,3:.2,4:.1,5:.1,'35_abate':.2},total:1,total_dinamica:1,soma_faixas:1,valido:true,lotes:3,vinculados:3,problemas:[]};
       return {rules_version:'mortalidade-faixas-2026-10-26-v1',ano:Number(q.get('ano')),agrupamento:q.get('agrupamento'),unidade:'%',valido:true,tolerancia_pp:.01,faixas:['1','2','3','4','5','35_abate'].map(id=>({id,nome:id})),periodos:[{...point,inicio:'2026-01-05',semana:2,mes:1}],consolidado:point,fonte_total:'mesma configuração, expressão mort/aloj e filtros do Desempenho',fonte_faixas:'zootecnico.base_dinamica; percentuais ponderados por aves_alojadas'};
     }
-    const ranking=key=>[...new Set(eligible(q).map(r=>r[key]))].map(nome=>({nome,valor:1.979,lotes:1}));
-    return {...meta,etapa:q.get('etapa'),indicador:{id,nome:id==='ca'?'CA':id==='mortalidade'?'% Mortalidade':'% Morte no Transporte',valor:1.979,unidade:id==='ca'?'':'%',casas_decimais:3},ranking_tecnicos:ranking('tecnico'),ranking_produtores:ranking('produtor'),ranking_contexto:{metodo:'ratio_sums',tecnicos:{valor_recomposto:1.979},produtores:{valor_recomposto:1.979}},evolucao:{...(id==='morte_transporte'?{agrupamento:'planta_de_abate',ano:Number(q.get('ano'))}:{}),meses:[{numero:1,nome:'janeiro'}],series:[{ano:2026,planta_de_abate:'AVE NOVA',valores:[1.979]}]}};
+    const scores={Lucas:2.1,Mariana:1.8,Atair:2.2,Delcio:1.9,Maria:1.8};
+    const ranking=key=>[...new Set(eligible(q).map(r=>r[key]))].map(nome=>({nome,valor:scores[nome],lotes:1}));
+    const ranking_galpoes=eligible(q).map(row=>({nome:row.galpao+' · '+row.produtor,produtor:row.produtor,galpao:row.galpao,valor:scores[row.produtor],lotes:1}));
+    return {...meta,etapa:q.get('etapa'),indicador:{id,nome:id==='ca'?'CA':id==='mortalidade'?'% Mortalidade':'% Morte no Transporte',valor:1.979,unidade:id==='ca'?'':'%',casas_decimais:3},ranking_tecnicos:ranking('tecnico'),ranking_produtores:ranking('produtor'),ranking_galpoes,ranking_contexto:{metodo:'ratio_sums',tecnicos:{valor_recomposto:1.979},produtores:{valor_recomposto:1.979},galpoes:{valor_recomposto:1.979}},evolucao:{...(id==='morte_transporte'?{agrupamento:'planta_de_abate',ano:Number(q.get('ano'))}:{}),meses:[{numero:1,nome:'janeiro'}],series:[{ano:2026,planta_de_abate:'AVE NOVA',valores:[1.979]}]}};
   }
   return {...meta,etapa:q.get('etapa'),cards,weekly,metas:{mortalidade_semanal:{valor:1,unidade:'%',comparacao:'<=',referencia_mes:'2026-11-01'}},groups:[{tipo_granja:'Integrada',produtor:'Atair',linhagem:'COBB',cards,weekly}],galpoes:[{produtor:'Atair',galpao:'A',idade_atual:35,linhagens:['COBB'],cards,weekly}],hierarchy:[{campo:'semana',valor:'42',cards,weekly,children:[]}]};
 }
@@ -33,7 +35,7 @@ function fixture(url) {
   try {
     const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],calls=[];
     page.setDefaultTimeout(12000);
-    let oldVersion=false, delay=0, evolutionDelay=0, failFilters=false, emptyDetails=false;
+    let oldVersion=false, delay=0, evolutionDelay=0, failFilters=false, emptyDetails=false, legacyBarns=false;
     page.on('pageerror',e=>errors.push(e.message));
     await page.addInitScript(()=>sessionStorage.setItem('granjabi_auth_token','local-test-only'));
     await page.route('**/*',async route=>{
@@ -43,8 +45,9 @@ function fixture(url) {
         if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
         if(evolutionDelay&&url.searchParams.get('etapa')==='evolucao')await new Promise(resolve=>setTimeout(resolve,evolutionDelay));
         const body=fixture(url);
+        if(legacyBarns){delete body.ranking_galpoes;if(body.ranking_contexto)delete body.ranking_contexto.galpoes;}
         if(emptyDetails&&url.pathname.endsWith('/zootecnico/detalhes')){
-          body.indicador.valor=null;body.ranking_tecnicos=[];body.ranking_produtores=[];body.evolucao.series=[];
+          body.indicador.valor=null;body.ranking_tecnicos=[];body.ranking_produtores=[];body.ranking_galpoes=[];body.evolucao.series=[];
         }
         return route.fulfill({status:failFilters&&url.pathname.endsWith('/filtros')?503:200,contentType:'application/json',body:JSON.stringify(body)}).catch(()=>{});
       }
@@ -83,7 +86,7 @@ function fixture(url) {
     const firstDraws=await draws(),heightBefore=await page.locator('#rankingProdutores').locator('..').evaluate(el=>el.clientHeight);
     let start=calls.length;await click('Tecnicos','Lucas');
     const firstDelta=await draws();
-    assert.equal(firstDelta.rankings-firstDraws.rankings,2,'Each ranking drawn once');
+    assert.equal(firstDelta.rankings-firstDraws.rankings,3,'Each ranking drawn once');
     assert.equal(firstDelta.evolution-firstDraws.evolution,1,'Evolution drawn once');
     assert.equal(firstDelta.clears-firstDraws.clears,0,'No clearing between responses');
     assert.equal(await page.locator('#rankingProdutores').locator('..').evaluate(el=>el.clientHeight),heightBefore,'Viewport height remains stable');
@@ -95,11 +98,11 @@ function fixture(url) {
     assert.equal(await page.locator('[data-ranking-back]:visible').count(),0);
     // Delayed evolution must not redraw or clear fresh rankings.
     evolutionDelay=500;const beforePartial=await draws();await trigger('Tecnicos','Lucas');
-    await page.waitForFunction(n=>window.__detailDraws.rankings===n+2,beforePartial.rankings);
+    await page.waitForFunction(n=>window.__detailDraws.rankings===n+3,beforePartial.rankings);
     assert.equal((await draws()).evolution,beforePartial.evolution);
     assert.equal(await page.locator('#mortalityEvolutionCard').getAttribute('aria-busy'),'true');
     assert.equal(await page.locator('.details-top-grid [data-detail-region]').first().getAttribute('aria-busy'),'false');
-    await ready();assert.equal((await draws()).rankings,beforePartial.rankings+2);
+    await ready();assert.equal((await draws()).rankings,beforePartial.rankings+3);
     evolutionDelay=0;await back();assert.deepEqual(await state(),base);
     // Rapid graph/return clicks must not add parallel transactions.
     delay=120;start=calls.length;await trigger('Tecnicos','Lucas');
@@ -143,6 +146,33 @@ function fixture(url) {
     emptyDetails=false;await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>carregarDetalhes(false));await ready();
     assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rankingTecnicos')).getOption().animation),false);
     await page.emulateMedia({reducedMotion:'no-preference'});
+    // Icon-only sorting is local, independent per card, and click indices match sorted rows.
+    await page.goto(initial);await ready();const sortBase=await state();
+    const names=kind=>page.evaluate(kind=>echarts.getInstanceByDom(document.getElementById('ranking'+kind)).getOption().yAxis[0].data,kind);
+    const beforeSort=calls.length;
+    for(const [kind,suffix] of [['tecnicos','Tecnicos'],['produtores','Produtores'],['galpoes','Galpoes']]){
+      const button=page.locator(`[data-ranking-sort="${kind}"]`);assert.equal((await button.innerText()).trim(),'');
+      const descending=await names(suffix);await button.click();assert.equal(await button.getAttribute('aria-pressed'),'true');
+      assert.deepEqual(await names(suffix),descending.slice().reverse());await button.click();assert.deepEqual(await names(suffix),descending);
+    }
+    assert.equal(calls.length,beforeSort,'Sorting makes no API requests');
+    await page.locator('[data-ranking-sort="tecnicos"]').click();await click('Tecnicos','Mariana');assert.deepEqual((await state()).tecnico,['Mariana']);await back();
+    await page.locator('[data-ranking-sort="produtores"]').click();await click('Produtores','Maria');assert.deepEqual((await state()).produtor,['Maria']);await back();
+    await page.locator('[data-ranking-sort="galpoes"]').click();await click('Galpoes','626B · Delcio');
+    assert.deepEqual((await state()).galpao,['626B']);assert.deepEqual((await state()).produtor,['Delcio']);await back();assert.deepEqual(await state(),sortBase);
+    const xs=await page.locator('.details-top-grid > article').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().x));assert(xs[0]<xs[1]&&xs[1]<xs[2],'Barn ranking on the right');
+    for(const width of [360,768,1440])for(const theme of ['light','dark']){
+      await page.setViewportSize({width,height:1000});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);await page.waitForTimeout(100);
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Responsive grid');
+      assert.equal(await page.locator('.ranking-heading-actions > .if-button').count(),3,'Formula button in all three cards');
+      if(width===1440&&theme==='light')await page.locator('.details-top-grid').screenshot({path:path.join(root,'tests/frontend-previews/ranking-galpoes-20261118.png')});
+    }
+    // An older backend leaves the new card unavailable, while current rankings keep working.
+    legacyBarns=true;await page.evaluate(()=>carregarDetalhes(false));await ready();
+    assert((await page.locator('#contextoRankingGalpoes').innerText()).includes('indisponível'));
+    assert(await page.locator('[data-ranking-sort="galpoes"]').isDisabled());
+    assert.equal(await page.locator('#mensagemErro:not(.hidden)').count(),0);assert((await names('Tecnicos')).length>0);
+    legacyBarns=false;
     // A/B on the seven published pages: identical initial request sequences.
     const pages=['index.html','detalhes.html?indicador=ca','lotes.html','historico.html','gpd-por-fase.html','diferenca-aves-abatidas.html','formulas.html'];
     const counts={};await page.setViewportSize({width:1440,height:1000});
@@ -158,6 +188,6 @@ function fixture(url) {
       counts[old?'stable':'new']=result;
     }
     assert.deepEqual(counts.new,counts.stable);assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({result:'PASS',undoLevels:2,multiSelectionRestored:true,rapidClicks:true,failedRequestRecovery:true,manualFilterAndIndicatorReset:true,singleYearIndicators:2,viewportChecks:8,pagesCompared:pages.length,initialRequestsUnchanged:true,rankingDrawsPerUpdate:2,evolutionDrawsPerUpdate:1,noIntermediateClears:true,stableViewport:true,errors}));
+    console.log(JSON.stringify({result:'PASS',undoLevels:2,multiSelectionRestored:true,rapidClicks:true,failedRequestRecovery:true,manualFilterAndIndicatorReset:true,singleYearIndicators:2,viewportChecks:14,pagesCompared:pages.length,initialRequestsUnchanged:true,rankingDrawsPerUpdate:3,evolutionDrawsPerUpdate:1,noIntermediateClears:true,stableViewport:true,localSort:true,sortedClickIdentity:true,barnProducerFilters:true,legacyBackendCompatible:true,errors}));
   }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
