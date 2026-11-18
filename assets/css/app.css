@@ -3380,15 +3380,6 @@ body.lotes-drawer-open { overflow:hidden; }
 .details-back-button { flex-shrink: 0; font-size: 13px; font-weight: 650; white-space: nowrap; }
 .details-back-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
-/* Selecao dos rankings, independente dos filtros gerais. */
-.ranking-clear-selection { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--primary); font: inherit; font-size: 12px; cursor: pointer; }
-.ranking-clear-selection { min-height: 40px; padding: 6px 10px; flex-shrink: 0; margin-left: auto; font-weight: 650; }
-.ranking-clear-selection:hover { background: var(--secondary); }
-.ranking-clear-selection:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.details-top-grid .card-heading-row:has([data-ranking-clear]) { flex-wrap: wrap; }
-.details-top-grid .card-heading-row:has([data-ranking-clear]) > div:first-child { flex: 1 1 140px; }
-.details-top-grid .card-heading-row > .ranking-clear-selection[hidden] { display: none; }
-
 
 /* Contexto e indicador do detalhamento, sem alterar os filtros compartilhados. */
 .details-context-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 280px); gap: 12px; align-items: stretch; margin-bottom: 16px; }

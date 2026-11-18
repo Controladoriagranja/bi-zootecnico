@@ -92,31 +92,6 @@ const inheritedKeys = [
 let detalhesData = null;
 let requestController = null;
 let detailRequestId = 0;
-const rankingSelection = {};
-
-function renderRankingSelection() {
-    const hasSelection = Object.keys(rankingSelection).length > 0;
-    document.querySelectorAll('[data-ranking-clear]').forEach(button => {
-        button.hidden = !hasSelection;
-    });
-}
-
-function resetRankingSelection() {
-    Object.keys(rankingSelection).forEach(key => delete rankingSelection[key]);
-    renderRankingSelection();
-}
-
-function refreshRankingSelection() {
-    renderRankingSelection();
-    atualizarUrl();
-    return carregarDetalhes(false);
-}
-
-function selectRanking(key, name) {
-    if (rankingSelection[key] === name) delete rankingSelection[key];
-    else rankingSelection[key] = name;
-    return refreshRankingSelection();
-}
 
 
 function semAno2022(series) {
@@ -130,7 +105,6 @@ const filters = new FilterController({
     fields: DETAIL_FILTERS,
 
     onChange: () => {
-        resetRankingSelection();
         atualizarUrl();
         carregarDetalhes(false);
     },
@@ -167,8 +141,7 @@ function inheritedFilters() {
 function allFilters() {
     return {
         ...inheritedFilters(),
-        ...filters.values(),
-        ...rankingSelection
+        ...filters.values()
     };
 }
 
@@ -580,7 +553,12 @@ rankingTecnicosChart.on(
     "click",
     async paramsChart => {
         if(detalhesData?.ranking_tecnicos?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        await selectRanking('tecnico', paramsChart.name);
+        filters.set(
+            "tecnico",
+            paramsChart.name
+        );
+
+        await atualizarFiltrosDetalhes(true);
     }
 );
 
@@ -589,16 +567,14 @@ rankingProdutoresChart.on(
     "click",
     async paramsChart => {
         if(detalhesData?.ranking_produtores?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        await selectRanking('produtor', paramsChart.name);
+        filters.set(
+            "produtor",
+            paramsChart.name
+        );
+
+        await atualizarFiltrosDetalhes(true);
     }
 );
-
-document.querySelectorAll('[data-ranking-clear]').forEach(button => {
-    button.addEventListener('click', () => {
-        resetRankingSelection();
-        refreshRankingSelection();
-    });
-});
 
 
 document.addEventListener(
@@ -616,7 +592,6 @@ document
     .addEventListener(
         "click",
         async () => {
-            resetRankingSelection();
             filters.clear();
 
             await atualizarFiltrosDetalhes(false);
