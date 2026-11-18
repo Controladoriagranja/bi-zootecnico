@@ -105,6 +105,7 @@ const filters = new FilterController({
     fields: DETAIL_FILTERS,
 
     onChange: () => {
+        detailRankingReturn.reset();
         atualizarUrl();
         carregarDetalhes(false);
     },
@@ -144,6 +145,51 @@ function allFilters() {
         ...filters.values()
     };
 }
+
+// Apenas historico local: as consultas e o contexto continuam no FilterController original.
+const detailRankingReturn = (() => {
+    const history = [];
+    let busy = false;
+    const buttons = [...document.querySelectorAll('[data-ranking-back]')];
+    const loading = () => !document.getElementById('dashboardAtualizando').classList.contains('hidden');
+    function sync() {
+        buttons.forEach(button => {
+            button.classList.toggle('hidden', !history.length);
+            button.disabled = busy || loading();
+        });
+    }
+    function reset() { history.length = 0; sync(); }
+    function begin(key, name) {
+        if (busy || loading() || !detalhesData) return false;
+        const values = filters.values();
+        if (values[key]?.length === 1 && values[key][0] === name) return false;
+        // Guardar tambem as opcoes evita perder selecoes que o contexto seguinte restringe.
+        const options = DETAIL_FILTERS.map(field => field.multi
+            ? filters.getState(field).options.map(option => ({...option}))
+            : document.getElementById(field.id).innerHTML);
+        history.push({values, options});
+        busy = true; sync(); return true;
+    }
+    function end() { busy = false; sync(); }
+    async function back() {
+        if (busy || loading() || !history.length) return;
+        const previous = history.pop();
+        busy = true; sync();
+        try {
+            filters.invalidateRefresh();
+            DETAIL_FILTERS.forEach((field, index) => {
+                if (field.multi) filters.renderMultiOptions(field, previous.options[index], previous.values[field.apiKey] || []);
+                else {
+                    document.getElementById(field.id).innerHTML = previous.options[index];
+                    filters.set(field.apiKey, previous.values[field.apiKey] || '');
+                }
+            });
+            await atualizarFiltrosDetalhes(true);
+        } finally { end(); }
+    }
+    buttons.forEach(button => button.addEventListener('click', back));
+    return {begin, end, reset, sync};
+})();
 
 
 async function carregarIndicadores() {
@@ -190,6 +236,7 @@ function registrarIndicador() {
         .addEventListener(
             "change",
             () => {
+                detailRankingReturn.reset();
                 metricId =
                     document
                         .getElementById(
@@ -421,6 +468,7 @@ async function carregarDetalhes(
         .classList
         .remove("hidden");
 
+    detailRankingReturn.sync();
     try {
         if(mortalityMode) {
             // Somente duas consultas, em paralelo. A evolução antiga não é usada.
@@ -499,6 +547,7 @@ async function carregarDetalhes(
             )
             .classList
             .add("hidden");
+        detailRankingReturn.sync();
     }
 }
 
@@ -553,12 +602,15 @@ rankingTecnicosChart.on(
     "click",
     async paramsChart => {
         if(detalhesData?.ranking_tecnicos?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        filters.set(
-            "tecnico",
-            paramsChart.name
-        );
+        if (!detailRankingReturn.begin('tecnico', paramsChart.name)) return;
+        try {
+            filters.set(
+                "tecnico",
+                paramsChart.name
+            );
 
-        await atualizarFiltrosDetalhes(true);
+            await atualizarFiltrosDetalhes(true);
+        } finally { detailRankingReturn.end(); }
     }
 );
 
@@ -567,12 +619,15 @@ rankingProdutoresChart.on(
     "click",
     async paramsChart => {
         if(detalhesData?.ranking_produtores?.[paramsChart.dataIndex]?.sem_identificacao)return;
-        filters.set(
-            "produtor",
-            paramsChart.name
-        );
+        if (!detailRankingReturn.begin('produtor', paramsChart.name)) return;
+        try {
+            filters.set(
+                "produtor",
+                paramsChart.name
+            );
 
-        await atualizarFiltrosDetalhes(true);
+            await atualizarFiltrosDetalhes(true);
+        } finally { detailRankingReturn.end(); }
     }
 );
 
@@ -592,6 +647,7 @@ document
     .addEventListener(
         "click",
         async () => {
+            detailRankingReturn.reset();
             filters.clear();
 
             await atualizarFiltrosDetalhes(false);
