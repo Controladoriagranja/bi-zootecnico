@@ -331,7 +331,15 @@ function formatMetric(
 }
 
 
-function render() {
+function markDetailUpdating(part, updating) {
+    const selector = part === 'all' ? '[data-detail-region]' : `[data-detail-region="${part}"]`;
+    document.querySelectorAll(selector).forEach(region => {
+        region.classList.toggle('detail-updating', updating);
+        region.setAttribute('aria-busy', String(updating));
+    });
+}
+
+function render({principal = true, evolucao = true} = {}) {
     if (!detalhesData) {
         return;
     }
@@ -339,6 +347,7 @@ function render() {
     const metric =
         detalhesData.indicador;
 
+    if (principal) {
     const audit=detalhesData.ranking_contexto;
     const descriptions={sum:'Soma de todos os grupos.',avg:'Média dos lotes válidos. A média simples dos grupos não reproduz o total quando eles têm quantidades diferentes de lotes.',
         ratio_sums:'Total calculado pela divisão das somas dos componentes. Somar ou fazer média simples das barras não reproduz esse total.',
@@ -384,13 +393,6 @@ function render() {
             metric
         );
 
-    document
-        .getElementById(
-            "tituloEvolucao"
-        )
-        .textContent =
-        `Evolução de ${metric.nome}`;
-
     ZooCharts.ranking(
         rankingTecnicosChart,
         detalhesData.ranking_tecnicos,
@@ -406,7 +408,11 @@ function render() {
         metric.unidade,
         metric.casas_decimais ?? 2
     );
+    markDetailUpdating('principal', false);
+    }
 
+    if (evolucao) {
+    document.getElementById('tituloEvolucao').textContent = `Evolução de ${metric.nome}`;
     document.getElementById('mortalityEvolutionCard').classList.toggle('mortality-evolution',mortalityMode);
     document.getElementById('mortalityGrouping').classList.toggle('hidden',!mortalityMode);
     document.getElementById('mortalityLegend').classList.toggle('hidden',!mortalityMode);
@@ -420,6 +426,8 @@ function render() {
         ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
     } else {
         ZooCharts.evolution(evolucaoChart,detalhesData.evolucao,metric.nome,metric.casas_decimais ?? 2,metric.unidade);
+    }
+    markDetailUpdating('evolucao', false);
     }
 }
 
@@ -436,24 +444,16 @@ async function carregarDetalhes(
             ++detailRequestId;requestController?.abort();mortalityPayload=null;if(mortalityMode)MortalityChart.clear();evolucaoChart.clear();rankingTecnicosChart.clear();rankingProdutoresChart.clear();
             document.getElementById('kpiValor').textContent='\u2014';
             const error=document.getElementById('mensagemErro');error.textContent='Sem ano disponivel para os filtros selecionados.';error.classList.remove('hidden');
-            document.getElementById('dashboardAtualizando').classList.add('hidden');return;
+            document.getElementById('dashboardAtualizando').classList.add('hidden');markDetailUpdating('all',false);detailRankingReturn.sync();return;
         }
-        if(mortalityMode){mortalityPayload=null;MortalityChart.clear();}
+        if(mortalityMode) mortalityPayload=null;
         atualizarUrl();
         document.getElementById('tituloEvolucao').textContent=mortalityMode?`Mortalidade ${mortalityGrouping==='semanal'?'semanal':'mensal'} · ${yearSelect.value}`:`% Morte no Transporte por planta de abate · ${yearSelect.value}`;
     }
     const requestId = ++detailRequestId;
-    exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
     document.getElementById("mensagemErro").classList.add("hidden");
-    document.getElementById("kpiValor").textContent = "—";
-    ['Tecnicos','Produtores'].forEach(suffix=>{
-        document.getElementById('contextoRanking'+suffix).textContent='';
-        document.getElementById('conferenciaRanking'+suffix).textContent='';
-    });
-    document.getElementById("kpiNome").textContent = METRICAS[metricId]?.nome || "Indicador";
     document.getElementById("tituloDetalhes").textContent = "Detalhamento • " + (METRICAS[metricId]?.nome || "Indicador");
     IndicatorFormulaUI.scan();
-    rankingTecnicosChart?.clear(); rankingProdutoresChart?.clear(); evolucaoChart?.clear();
     if (requestController) {
         requestController.abort();
     }
@@ -468,28 +468,31 @@ async function carregarDetalhes(
         .classList
         .remove("hidden");
 
+    markDetailUpdating('all', true);
     detailRankingReturn.sync();
     try {
         if(mortalityMode) {
             // Somente duas consultas, em paralelo. A evolução antiga não é usada.
-            detalhesData=null;
             const snapshot=allFilters(), options={signal:requestController.signal};
+            let principalReady = false;
             const principal=apiGet(APP_CONFIG.endpoints.detalhes,
                 {...snapshot,indicador:'mortalidade',etapa:'principal'},options).then(response=>{
                     if(requestId !== detailRequestId)return response;
                     if(!response.ranking_contexto)throw new Error('Atualize o backend para os rankings completos.');
-                    detalhesData=response;render();return response;
+                    detalhesData=response;principalReady=true;
+                    render({principal:true,evolucao:!!mortalityPayload});return response;
                 });
             const evolution=apiGet(APP_CONFIG.endpoints.detalhes,
                 {...snapshot,indicador:'mortalidade',etapa:'evolucao',agrupamento:mortalityGrouping},options).then(payload=>{
                     if(requestId !== detailRequestId)return payload;
-                    mortalityPayload=payload;if(detalhesData)render();return payload;
+                    mortalityPayload=payload;
+                    if(principalReady)render({principal:false,evolucao:true});return payload;
                 });
             await Promise.all([principal,evolution]);
             return;
         }
-        const response =
-            await ApiProgressive.details(
+        let principalReady = false;
+        await ApiProgressive.details(
                 APP_CONFIG
                     .endpoints
                     .detalhes,
@@ -506,15 +509,11 @@ async function carregarDetalhes(
                     if (requestId !== detailRequestId) return;
                     if (!response.ranking_contexto) throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
                     detalhesData = response;
-                    render();
-                    if (!response.carga_completa) document.getElementById('tituloEvolucao').textContent += ' · Carregando…';
+                    render({principal:!principalReady,evolucao:response.carga_completa});
+                    principalReady = true;
                 }
             );
 
-        if (requestId !== detailRequestId) return;
-        if(!response.ranking_contexto)throw new Error('Atualize o backend do Anderson para os rankings completos e a conferência dos totais.');
-        detalhesData = response;
-        render();
     }
     catch (error) {
         if (requestId !== detailRequestId) return;
@@ -526,6 +525,7 @@ async function carregarDetalhes(
         }
 
         console.error(error);
+        requestController?.abort();
         exibirAtualizacaoDados(document.getElementById('ultimaAtualizacao'),null);
 
         const el =
@@ -534,8 +534,8 @@ async function carregarDetalhes(
             );
 
         el.textContent =
-            error.message
-            || "Falha ao carregar detalhamento.";
+            (error.message || "Falha ao carregar detalhamento.")
+            + (detalhesData ? ' Os dados anteriores continuam visíveis nas partes que não foram atualizadas.' : '');
 
         el.classList.remove("hidden");
     }
@@ -547,6 +547,7 @@ async function carregarDetalhes(
             )
             .classList
             .add("hidden");
+        markDetailUpdating('all', false);
         detailRankingReturn.sync();
     }
 }
@@ -582,9 +583,7 @@ if(mortalityMode)MortalityChart.setLotOpener(selection=>MortalityLots.open({...s
 async function atualizarFiltrosDetalhes(preserve) {
     ++detailRequestId;
     requestController?.abort();
-    detalhesData=null;
-    document.getElementById("kpiValor").textContent="—";
-    rankingTecnicosChart.clear();rankingProdutoresChart.clear();evolucaoChart.clear();
+    markDetailUpdating('all', true);
     document.getElementById("dashboardAtualizando").classList.remove("hidden");
     document.getElementById("mensagemErro").classList.add("hidden");
     try {
@@ -595,6 +594,7 @@ async function atualizarFiltrosDetalhes(preserve) {
         if(error.name === "AbortError")return;
         const el=document.getElementById("mensagemErro");el.textContent=error.message;el.classList.remove("hidden");
         document.getElementById("dashboardAtualizando").classList.add("hidden");
+        markDetailUpdating('all', false);
     }
 }
 
@@ -635,7 +635,7 @@ rankingProdutoresChart.on(
 document.addEventListener(
     "charts:theme-refresh",
     () => {
-        render();
+        if (document.getElementById('dashboardAtualizando').classList.contains('hidden')) render();
     }
 );
 

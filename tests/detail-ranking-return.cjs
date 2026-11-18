@@ -33,7 +33,7 @@ function fixture(url) {
   try {
     const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],calls=[];
     page.setDefaultTimeout(12000);
-    let oldVersion=false, delay=0, failFilters=false;
+    let oldVersion=false, delay=0, evolutionDelay=0, failFilters=false, emptyDetails=false;
     page.on('pageerror',e=>errors.push(e.message));
     await page.addInitScript(()=>sessionStorage.setItem('granjabi_auth_token','local-test-only'));
     await page.route('**/*',async route=>{
@@ -41,11 +41,26 @@ function fixture(url) {
       if(url.hostname.endsWith('workers.dev')) {
         calls.push({path:url.pathname,query:url.searchParams.toString()});
         if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
-        return route.fulfill({status:failFilters&&url.pathname.endsWith('/filtros')?503:200,contentType:'application/json',body:JSON.stringify(fixture(url))}).catch(()=>{});
+        if(evolutionDelay&&url.searchParams.get('etapa')==='evolucao')await new Promise(resolve=>setTimeout(resolve,evolutionDelay));
+        const body=fixture(url);
+        if(emptyDetails&&url.pathname.endsWith('/zootecnico/detalhes')){
+          body.indicador.valor=null;body.ranking_tecnicos=[];body.ranking_produtores=[];body.evolucao.series=[];
+        }
+        return route.fulfill({status:failFilters&&url.pathname.endsWith('/filtros')?503:200,contentType:'application/json',body:JSON.stringify(body)}).catch(()=>{});
       }
       if(url.hostname!=='bi.test')return route.fulfill({status:404,body:''});
       const file=decodeURIComponent(url.pathname).replace(/^\//,'')||'index.html';
-      try{return route.fulfill({body:oldVersion?baseline(file):fs.readFileSync(path.join(root,file)),contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.fulfill({status:404,body:''});}
+      try{
+        let body=oldVersion?baseline(file):fs.readFileSync(path.join(root,file));
+        if(file==='assets/js/detalhes.js')body=Buffer.from(`(() => {
+          window.__detailDraws={rankings:0,evolution:0,clears:0};
+          const ranking=ZooCharts.ranking,evolution=ZooCharts.evolution,init=ZooCharts.init;
+          ZooCharts.ranking=(...args)=>{__detailDraws.rankings++;return ranking(...args)};
+          ZooCharts.evolution=(...args)=>{__detailDraws.evolution++;return evolution(...args)};
+          ZooCharts.init=(...args)=>{const chart=init(...args),clear=chart.clear.bind(chart);chart.clear=(...a)=>{__detailDraws.clears++;return clear(...a)};return chart;};
+        })();\n`+body.toString());
+        return route.fulfill({body,contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'application/javascript'});
+      }catch{return route.fulfill({status:404,body:''});}
     });
     const ready=async()=>{
       try{await page.waitForFunction(()=>document.querySelector('#dashboardAtualizando')?.classList.contains('hidden')&&document.querySelector('#kpiValor')?.textContent.trim()==='1,979',null,{timeout:12000});}
@@ -64,15 +79,34 @@ function fixture(url) {
     await click('Tecnicos','Lucas');const stableClick=calls.slice(first);oldVersion=false;
     await page.goto(initial);await ready();const base=await state();
     assert.equal(await page.locator('[data-ranking-back]:visible').count(),0);
+    const draws=()=>page.evaluate(()=>({...window.__detailDraws}));
+    const firstDraws=await draws(),heightBefore=await page.locator('#rankingProdutores').locator('..').evaluate(el=>el.clientHeight);
     let start=calls.length;await click('Tecnicos','Lucas');
+    const firstDelta=await draws();
+    assert.equal(firstDelta.rankings-firstDraws.rankings,2,'Each ranking drawn once');
+    assert.equal(firstDelta.evolution-firstDraws.evolution,1,'Evolution drawn once');
+    assert.equal(firstDelta.clears-firstDraws.clears,0,'No clearing between responses');
+    assert.equal(await page.locator('#rankingProdutores').locator('..').evaluate(el=>el.clientHeight),heightBefore,'Viewport height remains stable');
     assert.deepEqual(calls.slice(start),stableClick,'Same calls as the original click, including cascading option updates');
     assert.deepEqual((await state()).tecnico,['Lucas']);assert.deepEqual((await state()).produtor,['Atair','Delcio']);
     const technician=await state();await click('Produtores','Atair');assert.deepEqual((await state()).produtor,['Atair']);
     await back();assert.deepEqual(await state(),technician);
     start=calls.length;await back();assert.deepEqual(await state(),base);assert.equal(calls.length-start,3);
     assert.equal(await page.locator('[data-ranking-back]:visible').count(),0);
+    // Delayed evolution must not redraw or clear fresh rankings.
+    evolutionDelay=500;const beforePartial=await draws();await trigger('Tecnicos','Lucas');
+    await page.waitForFunction(n=>window.__detailDraws.rankings===n+2,beforePartial.rankings);
+    assert.equal((await draws()).evolution,beforePartial.evolution);
+    assert.equal(await page.locator('#mortalityEvolutionCard').getAttribute('aria-busy'),'true');
+    assert.equal(await page.locator('.details-top-grid [data-detail-region]').first().getAttribute('aria-busy'),'false');
+    await ready();assert.equal((await draws()).rankings,beforePartial.rankings+2);
+    evolutionDelay=0;await back();assert.deepEqual(await state(),base);
     // Rapid graph/return clicks must not add parallel transactions.
     delay=120;start=calls.length;await trigger('Tecnicos','Lucas');
+    assert(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rankingTecnicos')).getOption().series[0].data.length>0),'Old graph stays visible during options fetch');
+    assert.equal((await page.locator('#kpiValor').innerText()).trim(),'1,979','Old KPI is retained and marked updating');
+    assert(await page.locator('#apiFilterProgress').isVisible(),'Reuse Aplicando filtros');
+    assert.equal(await page.locator('#dashboardAtualizando').innerText(),'','No duplicate loading indicator');
     await page.evaluate(()=>document.querySelector('[data-ranking-back]').click());
     await trigger('Tecnicos','Mariana');await trigger('Produtores','Atair');
     assert(await page.locator('[data-ranking-back]').first().isDisabled());await ready();
@@ -101,6 +135,14 @@ function fixture(url) {
       if(width===1440&&theme==='light')await page.locator('.details-top-grid').screenshot({path:path.join(root,'tests/frontend-previews/detail-ranking-return-20261118.png')});
     }
     await page.locator('[data-ranking-back]').last().click();await ready();assert.deepEqual(await state(),base);
+    // An empty response removes old bars even though charts are merged for smooth updates.
+    emptyDetails=true;await page.evaluate(()=>carregarDetalhes(false));
+    assert.equal((await page.locator('#kpiValor').innerText()).trim(),'—');
+    assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rankingTecnicos')).getOption().series[0].data.length),0);
+    assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#evolucaoChart')).getOption().series.length),0);
+    emptyDetails=false;await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>carregarDetalhes(false));await ready();
+    assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#rankingTecnicos')).getOption().animation),false);
+    await page.emulateMedia({reducedMotion:'no-preference'});
     // A/B on the seven published pages: identical initial request sequences.
     const pages=['index.html','detalhes.html?indicador=ca','lotes.html','historico.html','gpd-por-fase.html','diferenca-aves-abatidas.html','formulas.html'];
     const counts={};await page.setViewportSize({width:1440,height:1000});
@@ -116,6 +158,6 @@ function fixture(url) {
       counts[old?'stable':'new']=result;
     }
     assert.deepEqual(counts.new,counts.stable);assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({result:'PASS',undoLevels:2,multiSelectionRestored:true,rapidClicks:true,failedRequestRecovery:true,manualFilterAndIndicatorReset:true,singleYearIndicators:2,viewportChecks:8,pagesCompared:pages.length,initialRequestsUnchanged:true,errors}));
+    console.log(JSON.stringify({result:'PASS',undoLevels:2,multiSelectionRestored:true,rapidClicks:true,failedRequestRecovery:true,manualFilterAndIndicatorReset:true,singleYearIndicators:2,viewportChecks:8,pagesCompared:pages.length,initialRequestsUnchanged:true,rankingDrawsPerUpdate:2,evolutionDrawsPerUpdate:1,noIntermediateClears:true,stableViewport:true,errors}));
   }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

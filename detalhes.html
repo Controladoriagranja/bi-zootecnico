@@ -24,6 +24,7 @@
 <link href="assets/css/mortalidade-chart.css?v=visual-lotes-20261026-5" rel="stylesheet"/>
 <link href="assets/css/mobile-filters.css?v=20261118-cabecalhos" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/indicator-formulas.css?v=20261106-fx">
+<link rel="stylesheet" href="assets/css/detail-updates.css?v=20261118-suave-1">
 </head>
 <body data-page="desempenho">
 <div class="app-shell">
@@ -100,7 +101,7 @@
 </div>
 </div>
 </section>
-<article class="card metric-summary-card">
+<article class="card metric-summary-card" data-detail-region="principal">
 <div class="card-heading-row">
 <div>
 <div class="card-kicker">
@@ -124,7 +125,7 @@
 <div class="alert alert-error hidden" id="mensagemErro"></div>
 <section class="details-top-grid">
 
-<article class="card chart-card">
+<article class="card chart-card" data-detail-region="principal">
 <div class="card-heading-row">
 <div>
 <div class="card-kicker">
@@ -135,10 +136,10 @@
 <button type="button" class="details-button hidden" data-ranking-back title="Retornar à seleção anterior">↶ Voltar seleção</button>
 </div>
 <p class="ranking-context" id="contextoRankingTecnicos"></p>
-<div class="ranking-scroll" tabindex="0" role="region" aria-label="Ranking completo de técnicos, com rolagem"><div class="chart chart-ranking" id="rankingTecnicos"></div></div>
+<div class="ranking-scroll" data-stable-ranking tabindex="0" role="region" aria-label="Ranking completo de técnicos, com rolagem"><div class="chart chart-ranking" id="rankingTecnicos"></div></div>
 <p class="ranking-reconciliation" id="conferenciaRankingTecnicos"></p>
 </article>
-<article class="card chart-card">
+<article class="card chart-card" data-detail-region="principal">
 <div class="card-heading-row">
 <div>
 <div class="card-kicker">
@@ -149,11 +150,11 @@
 <button type="button" class="details-button hidden" data-ranking-back title="Retornar à seleção anterior">↶ Voltar seleção</button>
 </div>
 <p class="ranking-context" id="contextoRankingProdutores"></p>
-<div class="ranking-scroll" tabindex="0" role="region" aria-label="Ranking completo de produtores, com rolagem"><div class="chart chart-ranking" id="rankingProdutores"></div></div>
+<div class="ranking-scroll" data-stable-ranking tabindex="0" role="region" aria-label="Ranking completo de produtores, com rolagem"><div class="chart chart-ranking" id="rankingProdutores"></div></div>
 <p class="ranking-reconciliation" id="conferenciaRankingProdutores"></p>
 </article>
 </section>
-<article class="card chart-card evolution-card" id="mortalityEvolutionCard">
+<article class="card chart-card evolution-card" id="mortalityEvolutionCard" data-detail-region="evolucao">
 <div class="card-heading-row">
 <div>
 <div class="card-kicker">
@@ -193,10 +194,7 @@
 </dialog>
 </article>
 </div>
-<div class="updating-pill hidden" id="dashboardAtualizando">
-<span class="spinner"></span>
-    Atualizando...
-</div>
+<div class="hidden" id="dashboardAtualizando" aria-hidden="true"></div>
 <script src="assets/vendor/echarts/echarts.min.js"></script>
 <script src="assets/js/formulas-registry.js?v=20261106-fx"></script>
 <script src="assets/js/indicator-formulas.js?v=20261106-fx"></script>
@@ -207,11 +205,11 @@
 <script src="assets/js/theme.js?v=ajustes-20261008-1"></script>
 <script src="assets/js/mobile-filters.js?v=mobile-todas-20261027-1"></script>
 <script src="assets/js/filters.js?v=status-acerto-proprio-20261104-1"></script>
-<script src="assets/js/charts.js?v=transporte-plantas-20261106-1"></script>
+<script src="assets/js/charts.js?v=20261118-suave-1"></script>
 <script src="assets/js/date-time.js?v=atualizacao-20261020-2"></script>
 <script src="assets/js/mortalidade-chart.js?v=parcial-recolhido-20261106-2"></script>
 <script src="assets/js/mortalidade-lotes.js?v=visual-lotes-20261026-5"></script>
-<script src="assets/js/detalhes.js?v=20261118-voltar-fluxo-original"></script>
+<script src="assets/js/detalhes.js?v=20261118-suave-1"></script>
 <script src="assets/js/table-sort.js?v=fases-20261019-1"></script>
 <script src="assets/js/sidebar.js?v=0ad4a9525aa8"></script>
 <script src="assets/js/overview-return.js?v=3"></script></body>

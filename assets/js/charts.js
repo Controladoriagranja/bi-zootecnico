@@ -64,10 +64,11 @@ window.ZooCharts = (() => {
         const state = instances.get(chart);
         if (state?.kind === "ranking") {
             const narrow = chart.getDom().clientWidth < 500;
-            const height = Math.max(narrow ? 360 : 330, state.count * (narrow ? 28 : 22) + 48);
-            chart.getDom().style.height = height + "px";
             const viewport=chart.getDom().closest('.ranking-scroll');
-            if(viewport)viewport.style.maxHeight=(state.count>20?10+20*(height-44)/state.count:height)+'px';
+            const stable=viewport?.hasAttribute('data-stable-ranking');
+            const height = Math.max(stable ? viewport.clientHeight : narrow ? 360 : 330, state.count * (narrow ? 28 : 22) + 48);
+            chart.getDom().style.height = height + "px";
+            if(viewport)viewport.style.maxHeight=stable?'':(state.count>20?10+20*(height-44)/state.count:height)+'px';
         }
         chart.resize();
         if (state?.kind) {
@@ -150,8 +151,11 @@ window.ZooCharts = (() => {
         instances.set(chart, { kind: "ranking", count: rows.length });
 
         chart.setOption({
-            animationDuration: 450,
+            animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            animationDuration: 180,
+            animationDurationUpdate: 180,
             animationEasing: "cubicOut",
+            animationEasingUpdate: "cubicOut",
 
             grid: {
                 left: 150,
@@ -221,6 +225,7 @@ window.ZooCharts = (() => {
             },
 
             series: [{
+                id: 'ranking-values',
                 type: "bar",
                 data: rows.map(r => r.valor),
                 ...valueLabels(chart, "right", decimals, unit),
@@ -236,14 +241,14 @@ window.ZooCharts = (() => {
                     borderRadius: [0, 8, 8, 0]
                 }
             }]
-        }, true);
+        }, {replaceMerge: ['series']});
         resize(chart);
     }
 
     function evolution(chart, response, metricName, decimals = 2, unit = "") {
         const c = common();
         const plants = response.agrupamento === 'planta_de_abate';
-        instances.set(chart, { kind: "evolution", plants });
+        instances.set(chart, {...instances.get(chart), kind: "evolution", plants });
 
         const formatEvolutionValue = value => value === null || value === undefined ? "—" :
             Number(value).toLocaleString("pt-BR", {
@@ -252,6 +257,7 @@ window.ZooCharts = (() => {
         const newestYear = Math.max(...response.series.map(s => Number(s.ano)));
         const series = response.series.map(
             (serie, index) => ({
+                id: plants ? String(serie.planta_de_abate) : String(serie.ano),
                 name: plants ? String(serie.planta_de_abate) : String(serie.ano),
                 type: "bar",
                 data: serie.valores,
@@ -281,7 +287,10 @@ window.ZooCharts = (() => {
         );
 
         chart.setOption({
-            animationDuration: 500,
+            animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            animationDuration: 180,
+            animationDurationUpdate: 180,
+            animationEasingUpdate: 'cubicOut',
             color: [
                 c.primary,
                 c.primary2,
@@ -366,7 +375,7 @@ window.ZooCharts = (() => {
             ],
 
             series
-        }, true);
+        }, {replaceMerge: ['series']});
         resize(chart);
     }
 

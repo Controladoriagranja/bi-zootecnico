@@ -1,0 +1,16 @@
+/* Exclusivo do detalhamento: preservar dados e espaco durante a consulta. */
+[data-detail-region].detail-updating .chart,
+[data-detail-region].detail-updating .metric-summary-value { opacity: .5; }
+[data-detail-region] .chart,
+[data-detail-region] .metric-summary-value { transition: opacity 150ms ease; }
+[data-detail-region].detail-updating .chart { pointer-events: none; }
+.details-top-grid .ranking-scroll[data-stable-ranking] {
+  height: clamp(360px, 44vh, 480px);
+}
+@media (max-width: 767px) {
+  .details-top-grid .ranking-scroll[data-stable-ranking] { height: 360px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-detail-region] .chart,
+  [data-detail-region] .metric-summary-value { transition: none; }
+}
