@@ -4,6 +4,8 @@
 
 ## Contexto do drill-down e colunas mensais/semanais
 
+O botão compacto “Limpar filtros”, ao lado de Mensal/Semanal, remove Grupo, Condenação, Técnico, Fornecedor e o histórico de navegação. Restaura o ano, mês, dia e visão usados na abertura da subtela, sem modificar os filtros da página principal e sem trocar o modo Mensal/Semanal escolhido. Em uma abertura diária do PCP, o dia/unidade/turno originais continuam limitando o relatório após limpar. A limpeza renova a consulta e invalida caches do subrelatório.
+
 O clique em qualquer grupo, condenação ou fornecedor seleciona o mesmo valor no respectivo filtro. Um histórico interno preserva as seleções anteriores (inclusive múltiplas), a navegação, ordenação, página e rolagem; Voltar restaura o nível anterior. Alterações explícitas de período continuam válidas ao voltar e reiniciam apenas as posições de paginação. Alterações manuais de grupo/condenação ou visão iniciam a navegação pelo resumo, mantendo os valores escolhidos nos filtros.
 
 Ao final da linha de filtros, o seletor Mensal | Semanal determina as colunas dos resumos de grupos e condenações. Semanal agrupa pela semana ISO, com cabeçalhos Semana NN/AAAA. O filtro Semana limita os dias consultados; o seletor Mensal/Semanal controla a apresentação. Ano, mês, visão, técnico, fornecedor e dias continuam sendo respeitados. As semanas nos limites de mês/ano são cortadas pelos dias do período selecionado e por D−1.

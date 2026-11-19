@@ -1,6 +1,6 @@
 /* Uma linha em todas as larguras; no telefone a faixa desliza lateralmente. */
 .cg-cond-dialog .cg-cond-toolbar {
-  display:grid; grid-template-columns:repeat(8,minmax(125px,1fr)) 164px;
+  display:grid; grid-template-columns:repeat(8,minmax(125px,1fr)) 164px auto;
   gap:10px; min-width:0; width:100%; overflow-x:auto; overflow-y:hidden;
   padding-bottom:6px; flex:none; scrollbar-width:thin; box-sizing:border-box;
 }
@@ -28,8 +28,20 @@
 }
 .cg-cond-granularity button[aria-pressed="true"] { color:var(--primary); background:var(--card); box-shadow:0 1px 3px #0002; }
 .cg-cond-granularity button:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+.cg-cond-dialog .cg-stops-body .cg-cond-clear {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  align-self:end; height:34px; min-height:34px; margin-bottom:3px; padding:0 10px;
+  border:1px solid color-mix(in srgb,var(--destructive,#a34747) 30%,transparent);
+  border-radius:8px; color:var(--destructive,#a34747);
+  background:color-mix(in srgb,var(--destructive,#a34747) 5%,var(--card));
+  font:inherit; font-size:11px; font-weight:650; white-space:nowrap; cursor:pointer;
+}
+.cg-cond-dialog .cg-stops-body .cg-cond-clear:hover { background:var(--destructive,#a34747); border-color:var(--destructive,#a34747); color:#fff; }
+.cg-cond-clear svg { width:14px; height:14px; flex:none; }
+.cg-cond-clear:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
 .cg-cond-dialog > .cg-stops-body { overflow:auto; overscroll-behavior:contain; }
 @media(max-width:767px) {
-  .cg-cond-dialog .cg-cond-toolbar { grid-template-columns:repeat(8,140px) 164px; }
+  .cg-cond-dialog .cg-cond-toolbar { grid-template-columns:repeat(8,140px) 164px auto; }
+  .cg-cond-dialog .cg-stops-body .cg-cond-clear { height:40px; min-height:40px; margin-bottom:0; padding-inline:12px; }
   .cg-cond-dialog .cg-cond-summary:not([hidden]),.cg-cond-dialog .cg-cond-detail:not([hidden]) { flex:1 0 max(240px,45dvh); }
 }
