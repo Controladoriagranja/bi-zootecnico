@@ -171,9 +171,25 @@ async function suite(browser, width) {
     await assertContext(['Z'], 'Total');
     // Periodo muda sem perder causa/tipo, fornecedor e tecnico no drill-down.
     await change('cgCondAno',['2026']); await change('cgCondMes',['11']);
-    await page.locator('#cgCondSemana').selectOption('2026-11-09'); await idle();
+    await change('cgCondSemana',['2026-11-09']);
     let period=await last();
     assert.equal(period.dias,'2026-11-09,2026-11-10,2026-11-11,2026-11-12,2026-11-13,2026-11-14,2026-11-15');
+    // Selecionar outra semana pelo mesmo componente visual dos demais filtros.
+    await page.locator('#cgCondSemanaMulti .checkbox-multiselect-trigger').click();
+    if(process.env.CONDENACOES_PREVIEW_DIR) await page.screenshot({path:path.join(process.env.CONDENACOES_PREVIEW_DIR,path.basename(root)+'-semanas-multi-'+width+'.png')});
+    await page.locator('#cgCondSemanaMulti input[value="2026-11-16"]').check(); await idle();
+    assert.equal((await last()).dias.split(',').length,14);
+    assert.equal(new Set((await last()).dias.split(',')).size,14);
+    assert((await last()).dias.includes('2026-11-22'));
+    await page.locator('#cgCondSemanaMulti input[value="2026-11-09"]').uncheck(); await idle();
+    assert.equal((await last()).dias.split(',').length,7);
+    assert(!(await last()).dias.includes('2026-11-10'));
+    await page.locator('#cgCondSemanaMulti input[data-all]').check(); await idle();
+    assert.equal((await last()).dias,undefined,'Todas as semanas equivalem ao periodo completo');
+    await page.locator('#cgCondSemanaMulti input[data-all]').uncheck(); await idle();
+    assert.equal((await last()).dias,undefined);
+    await page.keyboard.press('Escape');
+    await change('cgCondSemana',['2026-11-09']);
     assert.equal(period.causa,cause); assert.equal(period.tipo,'Total');
     assert.deepEqual(JSON.parse(period.fornecedores),['Z']); assert.deepEqual(JSON.parse(period.tecnicos),[technician]);
     await page.locator('.cg-cond-rows .pcp-sort-button').nth(14).click(); await idle();
@@ -181,28 +197,41 @@ async function suite(browser, width) {
     await page.locator('.cg-cond-back').click(); await idle();
     assert.equal((await last()).dias,period.dias);
     await change('cgCondMes',['10','11']);
-    await page.locator('#cgCondSemana').selectOption('2026-10-26'); await idle();
+    await change('cgCondSemana',['2026-10-26']);
     assert.equal((await last()).dias,'2026-10-26,2026-10-27,2026-10-28,2026-10-29,2026-10-30,2026-10-31,2026-11-01');
     await change('cgCondMes',['11']);
     assert.equal((await last()).dias,'2026-11-01','Semana limitada aos meses selecionados');
     await change('cgCondAno',['2024']); await change('cgCondMes',['2']);
-    await page.locator('#cgCondSemana').selectOption('2024-02-26'); await idle();
+    await change('cgCondSemana',['2024-02-26']);
     assert.equal((await last()).dias,'2024-02-26,2024-02-27,2024-02-28,2024-02-29');
     await change('cgCondAno',['2020','2021']); await change('cgCondMes',['12','1']);
-    await page.locator('#cgCondSemana').selectOption('2020-12-28'); await idle();
-    assert((await page.locator('#cgCondSemana option:checked').textContent()).startsWith('Semana 53'));
+    await change('cgCondSemana',['2020-12-28']);
+    assert((await page.locator('#cgCondSemana option[value="2020-12-28"]').textContent()).startsWith('Semana 53'));
     assert.equal((await last()).dias,'2020-12-28,2020-12-29,2020-12-30,2020-12-31,2021-01-01,2021-01-02,2021-01-03');
-    await page.locator('#cgCondSemana').selectOption(''); await idle();
+    await change('cgCondSemana',[]);
     assert.equal((await last()).dias,undefined);
+    // Selecionar tudo em varios anos nao estoura o limite da API atual.
+    await change('cgCondAno',['2020','2021','2022','2023','2024','2025','2026']);
+    await change('cgCondMes',[]);
+    const everyWeek=await page.locator('#cgCondSemana').evaluate(select=>[...select.options].map(o=>o.value).filter(Boolean));
+    await change('cgCondSemana',everyWeek);
+    assert.equal((await last()).dias,undefined);
+    const requestsBefore=await page.evaluate(()=>calls.length);
+    await change('cgCondSemana',everyWeek.slice(1));
+    assert.equal(await page.evaluate(()=>calls.length),requestsBefore,'Nao enviar recorte maior que o limite do servidor');
+    assert.equal(await page.locator('#cgCondSemana').evaluate(s=>s.value.split(',').length),everyWeek.length);
+    assert(await page.locator('.cg-cond-period-warning').isVisible());
+    await change('cgCondAno',['2026']); await change('cgCondMes',['11']);
+    await change('cgCondSemana',[]);
     // Menus continuam clicaveis dentro da subtela mesmo com a faixa deslocada.
-    for(const id of ['cgCondAno','cgCondFornecedor']) {
+    for(const id of ['cgCondAno','cgCondSemana','cgCondFornecedor']) {
       const trigger=page.locator('#'+id+'Multi .checkbox-multiselect-trigger');
       await trigger.click();
       const panel=page.locator('#'+id+'Multi .checkbox-multiselect-panel');
       assert(await panel.isVisible());
       const bounds=await panel.boundingBox(),dialogBounds=await page.locator('dialog').boundingBox();
       assert(bounds.x>=dialogBounds.x&&bounds.x+bounds.width<=dialogBounds.x+dialogBounds.width+1,JSON.stringify({id,bounds,dialogBounds}));
-      await panel.locator('input[type=search]').fill(id==='cgCondAno'?'2026':'Z');
+      await panel.locator('input[type=search]').fill(id==='cgCondAno'?'2026':id==='cgCondSemana'?'Semana':'Z');
       assert(await panel.locator('[data-filter-option]:visible').count()>0);
       await page.keyboard.press('Escape');
       assert.equal(await page.locator('dialog').evaluate(d=>d.open),true);
@@ -214,7 +243,7 @@ async function suite(browser, width) {
     assert.equal(fresh.causa,undefined); assert.equal(fresh.fornecedores,undefined); assert.equal(fresh.tecnicos,undefined);
     assert.deepEqual(errors, []);
     capturedRequests.push(...await page.evaluate(() => calls));
-    console.log(`PASS ${path.basename(root)} ${width}px: filtros, drill-down, ano/mes/semana, limites de mes/ano, ano bissexto, uma linha e menus dentro da subtela`);
+    console.log(`PASS ${path.basename(root)} ${width}px: semanas multiplas, checkbox/busca/selecionar tudo, drill-down, limites do periodo, uma linha e menus dentro da subtela`);
   } finally { await page.close(); }
 }
 (async () => {

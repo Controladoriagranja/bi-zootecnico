@@ -13,11 +13,14 @@ window.PcpCondPeriod = (() => {
   function create(el,onChange) {
     const toolbar=el.querySelector('.cg-cond-toolbar');
     toolbar.setAttribute('role','region'); toolbar.setAttribute('aria-label','Filtros de condenações'); toolbar.tabIndex=0;
-    toolbar.insertAdjacentHTML('afterbegin','<div class="cg-cond-period"><label>Ano<select id="cgCondAno"></select></label><label>Mês<select id="cgCondMes"></select></label><label>Semana<select id="cgCondSemana" data-pcp-multi="native" title="Semana do ano, de segunda a domingo"><option value="">Todas</option></select></label></div>');
+    toolbar.insertAdjacentHTML('afterbegin','<div class="cg-cond-period"><label>Ano<select id="cgCondAno"></select></label><label>Mês<select id="cgCondMes"></select></label><label>Semana<select id="cgCondSemana" title="Semana do ano, de segunda a domingo"><option value="">Todas</option></select></label></div>');
     const year=el.querySelector('#cgCondAno'),month=el.querySelector('#cgCondMes'),week=el.querySelector('#cgCondSemana');
     PcpMulti.enhance(el.querySelector('.cg-cond-period'));
     const values=select=>PcpMulti.values(select.value);
     const selected=select=>values(select).length?values(select):[...select.options].map(o=>o.value).filter(Boolean);
+    const warning=document.createElement('p'); warning.className='cg-cond-period-warning'; warning.setAttribute('role','alert'); warning.hidden=true; toolbar.after(warning);
+    const snapshot=()=>({year:year.value,month:month.value,week:week.value});
+    let accepted;
     function days() {
       const result=[];
       for(const y of selected(year)) for(const m of selected(month)) {
@@ -27,14 +30,23 @@ window.PcpCondPeriod = (() => {
       return [...new Set(result)].sort();
     }
     function refreshWeeks() {
-      const keep=week.value,starts=[...new Set(days().map(d=>iso(monday(date(d)))))];
+      const keep=values(week),starts=[...new Set(days().map(d=>iso(monday(date(d)))))];
       week.innerHTML='<option value="">Todas</option>'+starts.map(start=>'<option value="'+start+'">'+weekLabel(start)+'</option>').join('');
-      week.value=starts.includes(keep)?keep:'';
+      week.value=keep.filter(start=>starts.includes(start)).join(',');
     }
     function change() {
       if(this!==week) refreshWeeks();
-      const dates=week.value?days().filter(d=>iso(monday(date(d)))===week.value):[];
-      onChange({ano:selected(year).join(','),mes:selected(month).join(','),...(dates.length?{dias:dates.join(',')}:{})});
+      const allDays=days(),weeks=new Set(values(week));
+      const dates=weeks.size?allDays.filter(d=>weeks.has(iso(monday(date(d))))):[];
+      const filteredDays=dates.length&&dates.length!==allDays.length?dates.join(','):'';
+      // Respeita o limite de 4000 caracteres da API existente, sem ampliar o recorte.
+      if(filteredDays.length>4000) {
+        year.value=accepted.year; month.value=accepted.month; refreshWeeks(); week.value=accepted.week;
+        warning.textContent='Para combinar tantas semanas, selecione menos anos ou meses. A seleção anterior foi mantida.';
+        warning.hidden=false; return;
+      }
+      warning.hidden=true; accepted=snapshot();
+      onChange({ano:selected(year).join(','),mes:selected(month).join(','),...(filteredDays?{dias:filteredDays}:{})});
     }
     year.onchange=month.onchange=week.onchange=change;
     function set(q) {
@@ -42,10 +54,11 @@ window.PcpCondPeriod = (() => {
       const years=[...new Set([...Array.from({length:Math.max(1,now-2019)},(_,i)=>String(2020+i)),...PcpMulti.values(q.ano)])].sort();
       year.innerHTML=years.map(y=>'<option value="'+Number(y)+'">'+Number(y)+'</option>').join('');
       month.innerHTML=Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'">'+new Date(Date.UTC(2026,i,1)).toLocaleDateString('pt-BR',{month:'long',timeZone:'UTC'})+'</option>').join('');
-      year.value=String(q.ano||now); month.value=String(q.mes||'').split(',').filter(Boolean).map(Number).join(','); week.value=''; refreshWeeks();
+      year.value=String(q.ano||now); month.value=String(q.mes||'').split(',').filter(Boolean).map(Number).join(','); week.value=''; refreshWeeks(); accepted=snapshot(); warning.hidden=true;
     }
     function describe(q) {
-      el.querySelector('.cg-cond-context').textContent=(week.value?weekLabel(week.value)+' · ':'')+(q.dias?'Dias '+q.dias.split(',').map(br).join(', '):'Meses '+q.mes+' / '+q.ano);
+      const weeks=values(week),days=q.dias?.split(',')||[];
+      el.querySelector('.cg-cond-context').textContent=(weeks.length?(weeks.length===1?weekLabel(weeks[0]):'Semanas selecionadas: '+weeks.length)+' · ':'')+(days.length?(days.length<=7?'Dias '+days.map(br).join(', '):days.length+' dias selecionados'):'Meses '+q.mes+' / '+q.ano);
     }
     // Menus fixos escapam da faixa horizontal e continuam dentro da subtela.
     function positionMenus() {
