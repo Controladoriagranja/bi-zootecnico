@@ -1,5 +1,7 @@
 # Condenações: continuidade dos filtros no drill-down
 
+> **Proposta futura, adiada. Não instalar agora.** A implementação atual dos frontends foi adaptada para funcionar com a API existente, sem `fornecedor_detalhado`. A alteração deste módulo não é necessária para publicar os frontends. Consulte `docs/CONDENACOES_API_ATUAL.md`.
+
 Este módulo substitui `pcp_condenacoes.py` na **API compartilhada** pelo PCP e pelo Zootécnico. Não é uma nova API nem altera o `backend/main.py` histórico destes projetos.
 
 Origem: backend de referência da entrega `outputs/ranking-galpoes-20261118-v2/backend-referencia/api_zootecnico`, de 18/11/2026.
@@ -8,7 +10,7 @@ Correção: o detalhe do fornecedor agora conserva `causa` e `tipo` quando infor
 
 Para instalação no servidor, substituir apenas `pcp_condenacoes.py` no diretório existente `api_zootecnico` e reiniciar pelo procedimento habitual. O arquivo `pcp_condenacoes_mapa.json` incluso é a referência original, sem alterações. Se o servidor tiver um mapa mais recente, preservá-lo. A rota existente já registra o módulo; não é preciso criar outra rota ou alterar banco, coletores ou permissões.
 
-Publicar também os frontends atualizados dos dois projetos. A atualização da API compartilhada é necessária para o filtro funcionar de ponta a ponta; publicar somente os HTML/JS não corrige o servidor antigo.
+As instruções de substituição acima se aplicam somente à proposta futura deste módulo. Para a entrega atual, publicar apenas os frontends dos dois projetos e manter a API como está.
 
 Validação local:
 

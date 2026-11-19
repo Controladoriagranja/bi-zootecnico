@@ -8,6 +8,7 @@ const root = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const supplier = 'Y, José & Filhos';
 const technician = 'Técnico A';
 const cause = 'X / contaminação';
+const capturedRequests = [];
 
 async function suite(browser, width) {
   const page = await browser.newPage({viewport: {width, height: 900}});
@@ -44,7 +45,8 @@ async function suite(browser, width) {
         calls.push(structuredClone(q));
         const filter = (key, value) => !q[key] || JSON.parse(q[key]).includes(value);
         const rows = empty ? [] : data.filter(d => filter('fornecedores', d.fornecedor) && filter('tecnicos', d.tecnico));
-        const details = rows.filter(d => (!q.causa || d.causa === q.causa) && (!q.tipo || d.tipo === q.tipo));
+        // Reproduz a API atual: esse modo antigo ignora causa e tipo.
+        const details = rows.filter(d => q.fornecedor_detalhado || ((!q.causa || d.causa === q.causa) && (!q.tipo || d.tipo === q.tipo)));
         const summary = new Map();
         for (const d of rows) {
           const key=JSON.stringify([d.grupo,d.causa,d.tipo]);
@@ -77,6 +79,7 @@ async function suite(browser, width) {
     const last = () => page.evaluate(() => calls.at(-1));
     const assertContext = async (expectedSupplier = [supplier], type = 'Parcial') => {
       const q = await last();
+      assert.equal(q.fornecedor_detalhado, undefined, 'Usar apenas o caminho compativel da API atual');
       assert.equal(q.causa, cause); assert.equal(q.tipo, type);
       assert.deepEqual(JSON.parse(q.fornecedores), expectedSupplier);
       assert.deepEqual(JSON.parse(q.tecnicos), [technician]);
@@ -100,7 +103,7 @@ async function suite(browser, width) {
     const parentPage = (await last()).pagina;
     await page.locator('.cg-cond-rows tbody button').filter({hasText:supplier}).first().click(); await idle();
     const leaf = await assertContext();
-    assert.equal(leaf.fornecedor_detalhado, true);
+    assert.equal(leaf.fornecedor_detalhado, undefined);
     assert.equal(leaf.agrupado, path.basename(root).toLowerCase() !== 'bi-pcp');
     assert((await page.locator('.cg-cond-detail h3').textContent()).includes(cause));
     assert(!(await page.locator('.cg-cond-detail h3').textContent()).includes('Todas as condenações'));
@@ -160,11 +163,15 @@ async function suite(browser, width) {
     const fresh=await last(); assert.equal(fresh.ano,'2025'); assert.equal(fresh.visao,'111');
     assert.equal(fresh.causa,undefined); assert.equal(fresh.fornecedores,undefined); assert.equal(fresh.tecnicos,undefined);
     assert.deepEqual(errors, []);
+    capturedRequests.push(...await page.evaluate(() => calls));
     console.log(`PASS ${path.basename(root)} ${width}px: filtros, causa/tipo, fornecedor, ordenacao, paginacao, voltar, vazio, reabrir, respostas fora de ordem, novo periodo`);
   } finally { await page.close(); }
 }
 (async () => {
   const browser = await chromium.launch({headless:true, executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe', args:['--no-sandbox']});
-  try { for (const width of [1440,390]) await suite(browser,width); }
+  try {
+    for (const width of [1440,390]) await suite(browser,width);
+    if(process.env.CONDENACOES_REQUESTS_FILE) await fs.writeFile(process.env.CONDENACOES_REQUESTS_FILE,JSON.stringify(capturedRequests,null,2));
+  }
   finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode=1; });
