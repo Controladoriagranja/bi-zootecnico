@@ -219,3 +219,8 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
  .heat-sector[data-sector="pcp_10"] .heat-tile:first-child .heat-value,
  .heat-sector[data-sector="pcp_111"] .heat-tile:first-child .heat-value{font-size:clamp(22px,23cqw,44px)!important}
 }
+
+/* Mesma grade nas visoes mensal, semanal e diaria: tres pares no PCP. */
+.heat-sector[data-sector^="pcp_"] .heat-sector-map .heat-tile,
+.heat-sector[data-sector^="pcp_"] .heat-sector-map .heat-tile:first-child,
+.heat-sector[data-sector^="pcp_"] .heat-sector-map .heat-tile[data-metric="condenacao"]{grid-column:span 1}
