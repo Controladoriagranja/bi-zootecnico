@@ -6,7 +6,7 @@ Os filtros internos de condenações ficam em uma linha: Ano, Mês, Semana, Vis�
 
 O drill-down do fornecedor usa a mesma rota `/api/pcp/comparativo/condenacoes`, enviando `causa`, `tipo`, `fornecedores` e `tecnicos`, além do período, visão, página e ordenação. O parâmetro `fornecedor_detalhado` não é enviado: o modo antigo desse parâmetro ignora causa e tipo. O fornecedor clicado apenas restringe o filtro da consulta, sem sobrescrever a seleção anterior da interface.
 
-O PCP mantém as pesagens individuais no nível do fornecedor (`agrupado=false`), e o Zootécnico mantém o consolidado (`agrupado=true`). Voltar recupera os filtros anteriores. Ordenação, paginação, resultados vazios e respostas antigas não removem a seleção. Fechar e reabrir o mesmo contexto preserva os filtros; abrir outro período começa um contexto novo.
+Nos dois BIs, o resumo mostra uma linha por grupo/condenação, somando Total + Parcial e recalculando os percentuais pela mesma base de peso vivo, sem somar percentuais arredondados. O drill-down leva a causa inteira, sem restringir o tipo. A lista de fornecedores permanece consolidada (`agrupado=true`). Somente no último nível, após clicar no fornecedor, as pesagens individuais (`agrupado=false`) mostram a coluna Tipo com Total e Parcial. O servidor existente já atende esse caminho; a API permanece inalterada. Voltar recupera os filtros anteriores. Ordenação, paginação, resultados vazios e respostas antigas não removem a seleção. Fechar e reabrir o mesmo contexto preserva os filtros; abrir outro período começa um contexto novo.
 
 Os arquivos em `backend/condenacoes/` pertencem à proposta futura de alteração da API e **não são necessários nesta entrega**. Não foram instalados.
 

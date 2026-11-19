@@ -65,7 +65,10 @@ try:
             for sql, params in queries:
                 assert ' AND condenacao=ANY(%s)' in sql
                 assert [current['causa']] in params, params
-                assert ' AND tipo=%s' in sql and current['tipo'] in params
+                if current.get('tipo'):
+                    assert ' AND tipo=%s' in sql and current['tipo'] in params
+                else:
+                    assert ' AND tipo=%s' not in sql
                 for key in ['fornecedores', 'tecnicos']:
                     if current.get(key):
                         assert json.loads(current[key]) in params

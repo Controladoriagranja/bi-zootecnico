@@ -81,7 +81,7 @@ async function suite(browser, width) {
     const assertContext = async (expectedSupplier = [supplier], type = 'Parcial') => {
       const q = await last();
       assert.equal(q.fornecedor_detalhado, undefined, 'Usar apenas o caminho compativel da API atual');
-      assert.equal(q.causa, cause); assert.equal(q.tipo, type);
+      assert.equal(q.causa, cause); assert.equal(q.tipo, undefined);
       assert.deepEqual(JSON.parse(q.fornecedores), expectedSupplier);
       assert.deepEqual(JSON.parse(q.tecnicos), [technician]);
       assert.equal(q.ano, '2026'); assert.equal(q.mes, '11');
@@ -104,8 +104,12 @@ async function suite(browser, width) {
     await change('cgCondTecnico', [technician]);
     await change('cgCondFornecedor', [supplier, 'Z']);
     await page.locator('.cg-cond-summary tbody button').first().click(); await idle();
-    // Mesma causa possui Total e Parcial: selecionar explicitamente Parcial.
-    await page.locator('.cg-cond-summary tbody tr').filter({hasText:'Parcial'}).locator('button').click(); await idle();
+    // Mesma causa Total + Parcial deve aparecer uma vez, com soma intacta.
+    assert.equal(await page.locator('.cg-cond-summary tbody button').count(),1);
+    assert.equal(await page.locator('.cg-cond-summary thead').getByText('Tipo',{exact:true}).count(),0);
+    assert.equal(await page.locator('.cg-cond-summary tbody tr').first().locator('td').last().textContent(),'32,00');
+    assert.equal(await page.locator('.cg-cond-summary tbody tr').first().locator('td').nth(2).textContent(),'3,20%');
+    await page.locator('.cg-cond-summary tbody tr').filter({hasText:cause}).locator('button').click(); await idle();
     await assertContext([supplier, 'Z']);
     await page.locator('.cg-cond-rows .pcp-sort-button').nth(6).click(); await idle();
     assert.equal((await assertContext([supplier, 'Z'])).ordenar, 'peso_total');
@@ -115,7 +119,8 @@ async function suite(browser, width) {
     await page.locator('.cg-cond-rows tbody button').filter({hasText:supplier}).first().click(); await idle();
     const leaf = await assertContext();
     assert.equal(leaf.fornecedor_detalhado, undefined);
-    assert.equal(leaf.agrupado, path.basename(root).toLowerCase() !== 'bi-pcp');
+    assert.equal(leaf.agrupado, false);
+    assert.deepEqual(await page.locator('.cg-cond-rows tbody tr').evaluateAll(rows=>[...new Set(rows.map(r=>r.cells[11].textContent))].sort()),['Parcial','Total']);
     assert((await page.locator('.cg-cond-detail h3').textContent()).includes(cause));
     assert(!(await page.locator('.cg-cond-detail h3').textContent()).includes('Todas as condenações'));
     assert((await page.locator('.cg-cond-rows tbody tr').count()) >= 1);
@@ -165,7 +170,7 @@ async function suite(browser, width) {
     await assertContext(['Z']);
     assert.equal(await page.locator('.cg-cond-rows tbody button').first().textContent(), 'Z');
     await page.locator('.cg-cond-back').click(); await idle();
-    await page.locator('.cg-cond-summary tbody tr').filter({hasText:'Total'}).locator('button').click(); await idle();
+    await page.locator('.cg-cond-summary tbody tr').filter({hasText:cause}).locator('button').click(); await idle();
     await assertContext(['Z'], 'Total');
     await page.locator('.cg-cond-rows tbody button').first().click(); await idle();
     await assertContext(['Z'], 'Total');
@@ -190,7 +195,7 @@ async function suite(browser, width) {
     assert.equal((await last()).dias,undefined);
     await page.keyboard.press('Escape');
     await change('cgCondSemana',['2026-11-09']);
-    assert.equal(period.causa,cause); assert.equal(period.tipo,'Total');
+    assert.equal(period.causa,cause); assert.equal(period.tipo,undefined);
     assert.deepEqual(JSON.parse(period.fornecedores),['Z']); assert.deepEqual(JSON.parse(period.tecnicos),[technician]);
     await page.locator('.cg-cond-rows .pcp-sort-button').nth(14).click(); await idle();
     assert.equal((await last()).dias,period.dias);
