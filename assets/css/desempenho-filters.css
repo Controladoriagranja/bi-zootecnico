@@ -1,0 +1,28 @@
+/* Layout exclusivo de Desempenho Lotes Fechados; o painel mobile permanece. */
+@media (min-width: 768px) {
+  body[data-page="desempenho"] .first-page-filters {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 10px;
+    align-items: end;
+  }
+
+  body[data-page="desempenho"] .first-page-filters .filter-field > span {
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  body[data-page="desempenho"] .first-page-filters .checkbox-multiselect-trigger {
+    padding-inline: 8px;
+    gap: 4px;
+  }
+
+  body[data-page="desempenho"] .first-page-filters .checkbox-multiselect-panel {
+    width: max(100%, 260px);
+    max-width: min(380px, calc(100vw - 32px));
+  }
+
+  body[data-page="desempenho"] .first-page-filters .filter-field:nth-last-child(-n+3) .checkbox-multiselect-panel {
+    left: auto;
+    right: 0;
+  }
+}
