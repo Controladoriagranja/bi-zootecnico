@@ -1,4 +1,8 @@
 /* Exclusivo do detalhamento: preservar dados e espaco durante a consulta. */
+.details-top-grid .ranking-reconciliation {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .details-context-grid .details-filters-with-indicator {
     grid-template-columns: repeat(9, minmax(0, 1fr));
