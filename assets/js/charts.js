@@ -75,11 +75,14 @@ window.ZooCharts = (() => {
             // Merge layout only: preserve dataZoom, legend selection and series.
             chart.setOption(responsiveOptions(chart, state.kind));
             if (state.kind === "evolution") {
-                const years = chart.getOption().series.map(s => Number(s.name)).sort((a, b) => b - a);
+                // replaceMerge deixa posicoes nulas quando anos/plantas sao removidos.
+                // Atualizar apenas as series ativas, mantendo sua identidade por id.
+                const series = (chart.getOption().series || []).filter(Boolean);
+                const years = series.map(s => Number(s.name)).sort((a, b) => b - a);
                 const narrow = chart.getWidth() < 700;
                 const keep = new Set(years);
-                chart.setOption({ series: chart.getOption().series.map(s => ({
-                    name: s.name, label: { show: state.plants || keep.has(Number(s.name)) },
+                chart.setOption({ series: series.map(s => ({
+                    id: s.id, name: s.name, label: { show: state.plants || keep.has(Number(s.name)) },
                     labelLayout: { hideOverlap: state.plants || Number(s.name) !== years[0] }
                 })) });
                 if (state.narrow !== narrow) {
