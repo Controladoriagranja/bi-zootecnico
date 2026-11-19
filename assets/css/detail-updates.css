@@ -1,4 +1,31 @@
 /* Exclusivo do detalhamento: preservar dados e espaco durante a consulta. */
+@media (min-width: 768px) {
+  .details-context-grid .details-filters-with-indicator {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 8px;
+    align-items: end;
+    /* Reserva o espaco das duas linhas anteriores para preservar o card ao lado. */
+    min-height: 130px;
+    align-content: start;
+  }
+  .details-context-grid .details-filters-with-indicator .filter-field > span {
+    font-size: 10px;
+  }
+  .details-context-grid .details-filters-with-indicator :is(.checkbox-multiselect-trigger, select) {
+    padding-inline: 6px;
+    font-size: 11px;
+    gap: 4px;
+    min-width: 0;
+  }
+  .details-context-grid .details-filters-with-indicator .checkbox-multiselect-panel {
+    width: max(100%, 260px);
+    max-width: min(380px, calc(100vw - 32px));
+  }
+  .details-context-grid .details-filters-with-indicator .filter-field:nth-last-child(-n+3) .checkbox-multiselect-panel {
+    left: auto;
+    right: 0;
+  }
+}
 .details-header ~ .details-top-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .details-top-grid .card-heading-row { flex-wrap: wrap; }
 .ranking-heading-actions { margin-left: auto; flex-shrink: 0; }
