@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v6
       - name: Configurar Pages
         uses: actions/configure-pages@v5
-      - name: Preparar seis paginas e assets
+      - name: Preparar paginas e assets do site
         run: python tools/preparar_pages.py
       - name: Enviar site estatico
         uses: actions/upload-pages-artifact@v4
