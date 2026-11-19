@@ -84,5 +84,47 @@ window.PcpCondPeriod = (() => {
     el.addEventListener('keydown',event=>{if(event.key==='Escape'&&toolbar.querySelector('.checkbox-multiselect.open')){event.preventDefault();event.stopPropagation();closeMenus();}});
     return {set,describe};
   }
-  return {create};
+  function weeks(context,cutoff) {
+    const chosen=context.dias?new Set(context.dias.split(',')):null,groups=new Map();
+    for(const y of PcpMulti.values(context.ano))for(const m of PcpMulti.values(context.mes)) {
+      const d=new Date(Date.UTC(Number(y),Number(m)-1,1));
+      while(d.getUTCMonth()===Number(m)-1) {
+        const value=iso(d);
+        if(value<=cutoff&&(!chosen||chosen.has(value))) {
+          const key=iso(monday(d));if(!groups.has(key))groups.set(key,new Set());groups.get(key).add(value);
+        }
+        d.setUTCDate(d.getUTCDate()+1);
+      }
+    }
+    return [...groups].sort(([a],[b])=>a.localeCompare(b)).map(([key,days])=>({key,days:[...days].sort(),label:weekLabel(key)}));
+  }
+  async function weekly(api,query,base,options) {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(base.data_limite||''))throw Error('Data limite indisponível para a visão semanal.');
+    const periods=weeks(query,base.data_limite),responses=new Array(periods.length);let next=0;
+    await Promise.all(Array.from({length:Math.min(4,periods.length)},async()=>{
+      while(next<periods.length) {
+        if(options.signal?.aborted)throw new DOMException('Consulta cancelada','AbortError');
+        const index=next++,period=periods[index];
+        const response=await api('/api/pcp/comparativo/condenacoes',{...query,dias:period.days.join(',')},options);
+        if(!response.ok||!Array.isArray(response.resumo)||!Array.isArray(response.meses))throw Error('Semana incompleta.');
+        responses[index]=response;
+      }
+    }));
+    const rows=new Map(),totals={},labels={};let condemned=0,live=0;
+    for(let i=0;i<periods.length;i++) {
+      const period=periods[i],r=responses[i],den=Number(r.peso_vivo_kg)||0,kg=Number(r.peso_condenado_kg)||0;
+      const thursday=date(period.key);thursday.setUTCDate(thursday.getUTCDate()+3);
+      totals[period.key]={kg,peso_vivo_kg:den,percentual:den>0?kg/den:null};labels[period.key]=period.label.split(' · ')[0]+'/'+thursday.getUTCFullYear();
+      condemned+=kg;live+=den;
+      for(const source of r.resumo) {
+        const key=JSON.stringify([source.grupo,source.causa,source.tipo]);
+        if(!rows.has(key))rows.set(key,{grupo:source.grupo,causa:source.causa,tipo:source.tipo,kg:0,ocorrencias:0,meses:{}});
+        const row=rows.get(key),weight=Number(source.kg)||0;row.kg+=weight;row.ocorrencias+=Number(source.ocorrencias)||0;
+        row.meses[period.key]={kg:weight,percentual:den>0?weight/den:null};
+      }
+    }
+    return {...base,granularidade:'semanal',meses:periods.map(p=>p.key),periodo_labels:labels,totais_mensais:totals,
+      resumo:[...rows.values()].map(r=>({...r,percentual:live>0?r.kg/live:null})),peso_vivo_kg:live,peso_condenado_kg:condemned,percentual:live>0?condemned/live:null};
+  }
+  return {create,weekly,weeks};
 })();

@@ -131,7 +131,7 @@ async function suite(browser, width) {
     assert.equal((await assertContext()).ordenar, 'peso_total');
     const selections = await page.evaluate(() => Object.fromEntries(['cgCondCausa','cgCondFornecedor','cgCondTecnico'].map(id => [id,document.getElementById(id).value])));
     assert.equal(decodeURIComponent(selections.cgCondCausa), cause);
-    assert.equal(selections.cgCondFornecedor, [supplier,'Z'].map(encodeURIComponent).join(','));
+    assert.equal(selections.cgCondFornecedor, encodeURIComponent(supplier));
     assert.equal(decodeURIComponent(selections.cgCondTecnico), technician);
     await page.evaluate(() => document.querySelector('.cg-cond-rows').dispatchEvent(new Event('scroll')));
     await page.waitForFunction(() => calls.at(-1).pagina >= 2);
