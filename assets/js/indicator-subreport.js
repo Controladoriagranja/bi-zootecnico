@@ -18,9 +18,9 @@
     button.type = 'button'; button.className = 'button subreport-maximize'; button.textContent = 'Maximizar'; button.setAttribute('aria-pressed','false');
     button.onclick = () => {
       const active = dialog.classList.toggle('subreport-maximized');
-      button.textContent = active ? 'Restaurar' : 'Maximizar'; button.setAttribute('aria-pressed', String(active));
+      button.textContent = active ? 'Voltar' : 'Maximizar'; button.setAttribute('aria-pressed', String(active));
     };
-    actions.prepend(button);
+    actions.append(button);
   }
   let dialog, frame, trigger;
   dashboard.addEventListener('click', event => {
@@ -31,7 +31,7 @@
     event.preventDefault();
     if (!dialog) {
       dialog = document.createElement('dialog'); dialog.className = 'indicator-subreport'; dialog.setAttribute('aria-label','Detalhamento Zootécnico');
-      dialog.innerHTML = '<header class="subreport-header"><strong>Detalhamento Zootécnico</strong><div class="subreport-actions"><button type="button" class="button subreport-back">Voltar</button></div></header><iframe title="Detalhamento do indicador"></iframe>';
+      dialog.innerHTML = '<header class="subreport-header"><strong>Detalhamento Zootécnico</strong><div class="subreport-actions"><button type="button" class="button subreport-back">Voltar à tela de Desempenho</button></div></header><iframe title="Detalhamento do indicador"></iframe>';
       document.body.append(dialog); frame = dialog.querySelector('iframe');
       dialog.querySelector('.subreport-back').onclick = () => dialog.close();
       maximize(dialog, dialog.querySelector('.subreport-actions'));
@@ -48,7 +48,7 @@
       if (!actions) return;
       maximize(dialog, actions);
       const close = actions.querySelector('.cg-cond-close');
-      if (close) close.textContent = 'Voltar à visão geral';
+      if (close) close.textContent = 'Voltar à tela de Desempenho';
     });
   }).observe(document.body, {childList:true});
 })();

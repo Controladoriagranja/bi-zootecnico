@@ -1,0 +1,266 @@
+{
+  "CONDENACAO|TIPO": {
+    "nome": "Novo",
+    "grupo": "Responsabilidade"
+  },
+  "(NAO LANCAR)|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "ABCESSO|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "AEROSSACULITE|PARCIAL": {
+    "nome": "Aerossaculite",
+    "grupo": "Campo - Manejo"
+  },
+  "AEROSSACULITE PARCIAL|PARCIAL": {
+    "nome": "Aerossaculite",
+    "grupo": "Campo - Manejo"
+  },
+  "ALTERACOES MUSCULARES (HEMORRAGIA)|PARCIAL": {
+    "nome": "Alterações Musculares (Hemorragia)",
+    "grupo": "Apanha"
+  },
+  "ALTERACOES MUSCULARES (MIOPATIA)|PARCIAL": {
+    "nome": "Alterações Musculares (Miopatia)",
+    "grupo": "Apanha"
+  },
+  "ARTRITE|PARCIAL": {
+    "nome": "Artrite (1 articulação)",
+    "grupo": "Campo - Sanidade"
+  },
+  "ARTRITE (1 ARTICULACAO)|PARCIAL": {
+    "nome": "Artrite (1 articulação)",
+    "grupo": "Campo - Sanidade"
+  },
+  "ARTRITE (2 ARTICULACOES)|PARCIAL": {
+    "nome": "Artrite (2 articulações)",
+    "grupo": "Campo - Sanidade"
+  },
+  "ASPECTO REPUGNANTE|PARCIAL": {
+    "nome": "Aspecto Repugnante",
+    "grupo": "Campo - Manejo"
+  },
+  "CANIBALISMO|PARCIAL": {
+    "nome": "Canibalismo",
+    "grupo": "Campo - Manejo"
+  },
+  "CELULITE|PARCIAL": {
+    "nome": "Celulite",
+    "grupo": "Campo - Sanidade"
+  },
+  "CONT PCC|PARCIAL": {
+    "nome": "Cont PCC",
+    "grupo": "Indústria"
+  },
+  "CONT. PCC|PARCIAL": {
+    "nome": "Cont PCC",
+    "grupo": "Indústria"
+  },
+  "CONTAMINACAO GASTROINTESTINAL E BILIAR|PARCIAL": {
+    "nome": "Contaminação Gastrointestinal e Biliar",
+    "grupo": "Campo - Manejo"
+  },
+  "CONTAMINACAO NAO GASTROINTESTINAL-P.CHEI|PARCIAL": {
+    "nome": "Contaminação Não Gastrointestinal-P.Chei",
+    "grupo": "Campo - Manejo"
+  },
+  "CONTAMINACAO SIF|PARCIAL": {
+    "nome": "Contaminação Gastrointestinal e Biliar",
+    "grupo": "Campo - Manejo"
+  },
+  "CORACAO|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "DERMATOSE|PARCIAL": {
+    "nome": "Canibalismo",
+    "grupo": "Campo - Manejo"
+  },
+  "ESCALDAGEM EXCESSIVA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "ESTADOS ANORMAIS/PATOLOGICO NAO PREVISTO|PARCIAL": {
+    "nome": "Estados anormais ou patológicos não previstos",
+    "grupo": "Campo - Sanidade"
+  },
+  "EVISCERACAO RETARDADA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "FALHAS TECNOLOGICAS|PARCIAL": {
+    "nome": "Falhas Tecnológicas",
+    "grupo": "Indústria"
+  },
+  "FRATURA E HEMATOMA|PARCIAL": {
+    "nome": "Fratura e Hematoma",
+    "grupo": "Apanha"
+  },
+  "HEMATOMA - ROXO|PARCIAL": {
+    "nome": "Aspecto Repugnante",
+    "grupo": "Campo - Manejo"
+  },
+  "HEMATOMA - VERDE|PARCIAL": {
+    "nome": "Alterações Musculares (Miopatia)",
+    "grupo": "Apanha"
+  },
+  "HEMATOMA - VERMELHO|PARCIAL": {
+    "nome": "Hematoma - Vermelho",
+    "grupo": "Apanha"
+  },
+  "LESAO DE PELE|PARCIAL": {
+    "nome": "Lesão de Pele",
+    "grupo": "Campo - Manejo"
+  },
+  "LESAO HEPATICA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "LESAO INFLAMATORIA|PARCIAL": {
+    "nome": "Lesão Inflamatória",
+    "grupo": "Apanha"
+  },
+  "LESAO T. ASA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "LESAO T. COXA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "LESAO T. PEITO|PARCIAL": {
+    "nome": "Alterações Musculares (Hemorragia)",
+    "grupo": "Apanha"
+  },
+  "LESAO TRAUMATICA|PARCIAL": {
+    "nome": "Lesão Traumática",
+    "grupo": "Apanha"
+  },
+  "NEOPLASIA|PARCIAL": {
+    "nome": "Neoplasia",
+    "grupo": "Campo - Sanidade"
+  },
+  "PAPO CHEIO|PARCIAL": {
+    "nome": "Contaminação Não Gastrointestinal-P.Chei",
+    "grupo": "Campo - Manejo"
+  },
+  "PE COM CALO|PARCIAL": {
+    "nome": "Pé com Calo",
+    "grupo": "Campo - Manejo"
+  },
+  "SALPINGITE|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "SANGRIA INADEQUADA|PARCIAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "SEPTICEMIA|PARCIAL": {
+    "nome": "Septicemia",
+    "grupo": "Campo - Sanidade"
+  },
+  "SIND. ASCISTICA|PARCIAL": {
+    "nome": "Sind. Ascitica",
+    "grupo": "Campo - Manejo"
+  },
+  "SIND. ASCITICA|PARCIAL": {
+    "nome": "Sind. Ascitica",
+    "grupo": "Campo - Manejo"
+  },
+  "ESTERCO|RESIDUOS": {
+    "nome": "Esterco",
+    "grupo": "Resíduos"
+  },
+  "AEROSSACULITE|TOTAL": {
+    "nome": "Aerossaculite",
+    "grupo": "Campo - Sanidade"
+  },
+  "ALTERACOES MUSCULARES (HEMORRAGIA)|TOTAL": {
+    "nome": "Alterações Musculares (Hemorragia)",
+    "grupo": "Apanha"
+  },
+  "ARTRITE (2 ARTICULACOES)|TOTAL": {
+    "nome": "Artrite (2 articulações)",
+    "grupo": "Campo - Sanidade"
+  },
+  "ASPECTO REPUGNANTE|TOTAL": {
+    "nome": "Aspecto Repugnante",
+    "grupo": "Campo - Manejo"
+  },
+  "CAQUEXIA|TOTAL": {
+    "nome": "Caquexia",
+    "grupo": "Campo - Manejo"
+  },
+  "CELULITE|TOTAL": {
+    "nome": "Celulite",
+    "grupo": "Campo - Sanidade"
+  },
+  "CONT PCC|TOTAL": {
+    "nome": "Cont PCC",
+    "grupo": "Indústria"
+  },
+  "CONT. PCC|TOTAL": {
+    "nome": "Cont PCC",
+    "grupo": "Indústria"
+  },
+  "CONTAMINACAO GASTROINTESTINAL E BILIAR|TOTAL": {
+    "nome": "Contaminação Gastrointestinal e Biliar",
+    "grupo": "Campo - Manejo"
+  },
+  "CONTAMINACAO NAO GASTROINTESTINAL-P.CHEI|TOTAL": {
+    "nome": "Contaminação Não Gastrointestinal-P.Chei",
+    "grupo": "Campo - Manejo"
+  },
+  "CONTAMINACAO SIF|TOTAL": {
+    "nome": "Contaminação Gastrointestinal e Biliar",
+    "grupo": "Campo - Manejo"
+  },
+  "ESCALDADO VIVO|TOTAL": {
+    "nome": "Escaldado Vivo",
+    "grupo": "Indústria"
+  },
+  "ESCALDAGEM EXCESSIVA|TOTAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "ESTADOS ANORMAIS/PATOLOGICO NAO PREVISTO|TOTAL": {
+    "nome": "Estados anormais ou patológicos não previstos",
+    "grupo": "Campo - Sanidade"
+  },
+  "EVISCERACAO RETARDADA|TOTAL": {
+    "nome": "Não é utilizada pelo SIF",
+    "grupo": "Antigas"
+  },
+  "FALHAS TECNOLOGICAS|TOTAL": {
+    "nome": "Falhas Tecnológicas",
+    "grupo": "Indústria"
+  },
+  "LESAO DE PELE|TOTAL": {
+    "nome": "Lesão de Pele",
+    "grupo": "Campo - Manejo"
+  },
+  "LESAO TRAUMATICA|TOTAL": {
+    "nome": "Lesão Traumática",
+    "grupo": "Apanha"
+  },
+  "MAGREZA|TOTAL": {
+    "nome": "Magreza",
+    "grupo": "Campo - Manejo"
+  },
+  "NEOPLASIA|TOTAL": {
+    "nome": "Neoplasia",
+    "grupo": "Campo - Sanidade"
+  },
+  "SEPTICEMIA|TOTAL": {
+    "nome": "Septicemia",
+    "grupo": "Campo - Sanidade"
+  },
+  "SIND. ASCITICA|TOTAL": {
+    "nome": "Sind. Ascitica",
+    "grupo": "Campo - Manejo"
+  }
+}
