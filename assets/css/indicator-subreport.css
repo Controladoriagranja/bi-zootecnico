@@ -16,6 +16,12 @@ body:has(.indicator-subreport[open], .cg-cond-dialog[open]) { overflow: hidden; 
 .embedded-subreport .side-nav-root, .embedded-subreport #voltarDashboard { display:none; }
 .embedded-subreport body.has-side-nav { padding-left:0; }
 .embedded-subreport .app-shell { width:100%; max-width:none; }
+@media (min-width:768px) {
+  .embedded-subreport .app-shell {
+    width: calc(100% - 32px);
+    margin-inline: auto;
+  }
+}
 .embedded-subreport .has-side-nav .app-shell > .page-header:first-child { padding-left:0; }
 /* Corpo e tabelas permanecem dentro da janela, mesmo com filtros altos. */
 .cg-cond-dialog > .cg-stops-body { overflow:auto; overscroll-behavior:contain; }
