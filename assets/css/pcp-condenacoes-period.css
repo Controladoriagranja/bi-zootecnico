@@ -1,0 +1,26 @@
+/* Uma linha em todas as larguras; no telefone a faixa desliza lateralmente. */
+.cg-cond-dialog .cg-cond-toolbar {
+  display:grid; grid-template-columns:repeat(8,minmax(125px,1fr));
+  gap:10px; min-width:0; width:100%; overflow-x:auto; overflow-y:hidden;
+  padding-bottom:6px; flex:none; scrollbar-width:thin; box-sizing:border-box;
+}
+.cg-cond-dialog .cg-cond-toolbar :is(.cg-cond-period,.cg-cond-view-filter,.cg-cond-filters) { display:contents; }
+.cg-cond-dialog .cg-cond-toolbar :is(.cg-cond-period,.cg-cond-view-filter,.cg-cond-filters)>label { display:grid; gap:6px; min-width:0; font-size:11px; white-space:nowrap; align-content:end; }
+.cg-cond-dialog .cg-cond-toolbar select:not([hidden]) {
+  width:100%; min-width:0; height:40px; padding:0 8px;
+  border:1px solid var(--input,var(--border)); border-radius:9px;
+  background:var(--background,var(--card)); color:inherit; font:inherit;
+}
+.cg-cond-dialog .cg-cond-toolbar select[data-pcp-multi="native"] { display:block!important; }
+.cg-cond-dialog .cg-cond-toolbar .checkbox-multiselect { min-width:0; }
+.cg-cond-dialog .cg-cond-toolbar .checkbox-multiselect-panel {
+  position:fixed; right:auto; bottom:auto; margin:0;
+  min-width:0; max-width:none; overflow-y:auto; z-index:1200;
+}
+.cg-cond-dialog .cg-cond-toolbar .checkbox-multiselect-trigger { min-height:40px; }
+.cg-cond-dialog .cg-cond-toolbar .checkbox-option { white-space:normal; }
+.cg-cond-dialog > .cg-stops-body { overflow:auto; overscroll-behavior:contain; }
+@media(max-width:767px) {
+  .cg-cond-dialog .cg-cond-toolbar { grid-template-columns:repeat(8,140px); }
+  .cg-cond-dialog .cg-cond-summary:not([hidden]),.cg-cond-dialog .cg-cond-detail:not([hidden]) { flex:1 0 max(240px,45dvh); }
+}

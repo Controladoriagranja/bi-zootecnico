@@ -7,6 +7,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from datetime import date
 
 captures = [Path(arg) for arg in sys.argv[1:]]
 root = Path(__file__).resolve().parents[1]
@@ -69,6 +70,10 @@ try:
                     if current.get(key):
                         assert json.loads(current[key]) in params
                 assert sql.count('%s') == len(params)
+                assert sorted(map(int,current['ano'].split(','))) in params
+                assert sorted(map(int,current['mes'].split(','))) in params
+                if current.get('dias'):
+                    assert set(map(date.fromisoformat,current['dias'].split(','))) in [set(p) for p in params if isinstance(p,list)]
             assert queries[-1][1][-1] == (current.get('pagina', 1) - 1) * 200
             checked += 1
         print(f'PASS API original: {capture.name}: {len(calls)} requisicoes, {checked} detalhamentos; causa/tipo/fornecedor, contagem, pagina e SQL parametrizado')

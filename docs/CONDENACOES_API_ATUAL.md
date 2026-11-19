@@ -2,6 +2,8 @@
 
 **Publicar os frontends do PCP e do Zootécnico. Não substituir módulos, reiniciar ou atualizar a API.**
 
+Os filtros internos de condenações ficam em uma linha: Ano, Mês, Semana, Visão, Grupo, Condenação, Técnico e Fornecedor. No celular a faixa tem rolagem horizontal; os menus abrem dentro dos limites da subtela. Ano e mês permitem múltiplas seleções; semana escolhe uma semana ISO do ano (segunda a domingo), com número e intervalo de datas em padrão brasileiro. Apenas os dias da semana dentro dos anos/meses selecionados são enviados no parâmetro `dias` já existente. A seleção “Todas” não restringe os dias. Ao abrir por uma célula diária, o dia original é preservado até alterar um filtro de período. Trocar o período dentro da subtela mantém os filtros e o drill-down atuais; voltar preserva o período escolhido. Ano/mês incompatíveis removem apenas a semana que não pertence ao novo período.
+
 O drill-down do fornecedor usa a mesma rota `/api/pcp/comparativo/condenacoes`, enviando `causa`, `tipo`, `fornecedores` e `tecnicos`, além do período, visão, página e ordenação. O parâmetro `fornecedor_detalhado` não é enviado: o modo antigo desse parâmetro ignora causa e tipo. O fornecedor clicado apenas restringe o filtro da consulta, sem sobrescrever a seleção anterior da interface.
 
 O PCP mantém as pesagens individuais no nível do fornecedor (`agrupado=false`), e o Zootécnico mantém o consolidado (`agrupado=true`). Voltar recupera os filtros anteriores. Ordenação, paginação, resultados vazios e respostas antigas não removem a seleção. Fechar e reabrir o mesmo contexto preserva os filtros; abrir outro período começa um contexto novo.
