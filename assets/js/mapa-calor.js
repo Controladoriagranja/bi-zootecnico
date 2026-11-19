@@ -34,6 +34,11 @@ if(historyMode==='mes'){
  // Reuse it instead of requesting and relabeling monthly values.
  answers=[payload];
  first.setUTCDate(1);
+ // Show the whole selected month up to the API's D-1 cutoff, even when
+ // the user clicked an earlier day or week in that month.
+ anchor.setUTCMonth(anchor.getUTCMonth()+1,0);
+ const cutoff=new Date(payload.fim+'T12:00:00Z');
+ if(!Number.isNaN(cutoff.getTime())&&cutoff<anchor)anchor.setTime(cutoff.getTime());
  if(historyMode==='semana'){
   first.setUTCDate(first.getUTCDate()-((first.getUTCDay()+6)%7));
  }
