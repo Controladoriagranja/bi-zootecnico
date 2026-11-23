@@ -59,12 +59,7 @@ const DETAIL_FILTERS = [
         search: true,
         multi: true
     },
-    {
-        id: "produtor",
-        apiKey: "produtor",
-        search: true,
-        multi: true
-    },
+    FazendaFilter.field,
     {
         id: "tecnico",
         apiKey: "tecnico",
@@ -103,6 +98,7 @@ function semAno2022(series) {
 
 const filters = new FilterController({
     fields: DETAIL_FILTERS,
+    optionsObserver: FazendaFilter.ensureOptions,
 
     onChange: () => {
         detailRankingReturn.reset();
@@ -142,7 +138,8 @@ function inheritedFilters() {
 function allFilters() {
     return {
         ...inheritedFilters(),
-        ...filters.values()
+        ...filters.values(),
+        ...FazendaFilter.rankingParams
     };
 }
 
@@ -194,7 +191,7 @@ const detailRankingReturn = (() => {
 
 const detailRankings = {
     tecnicos: {suffix:'Tecnicos', label:'técnicos', direction:'desc', rows:[]},
-    produtores: {suffix:'Produtores', label:'produtores', direction:'desc', rows:[]},
+    produtores: {suffix:'Produtores', label:'fazendas', direction:'desc', rows:[]},
     galpoes: {suffix:'Galpoes', label:'galpões', direction:'desc', rows:[]}
 };
 
@@ -331,6 +328,9 @@ function atualizarUrl() {
         }
     );
 
+    const backParams = new URLSearchParams(next);
+    backParams.delete('indicador'); backParams.delete('dimensao_produtor');
+    document.getElementById('voltarDashboard').href = `index.html?${backParams}`;
     history.replaceState(
         null,
         "",
@@ -650,12 +650,12 @@ rankingProdutoresChart.on(
     "click",
     async paramsChart => {
         const row = detailRankings.produtores.rows[paramsChart.dataIndex];
-        if(!row || row.sem_identificacao)return;
-        if (!detailRankingReturn.begin('produtor', row.nome)) return;
+        if(!row || row.sem_identificacao || !row.codigo)return;
+        if (!detailRankingReturn.begin('fazenda', row.codigo)) return;
         try {
             filters.set(
-                "produtor",
-                row.nome
+                "fazenda",
+                row.codigo
             );
 
             await atualizarFiltrosDetalhes(true);
@@ -665,10 +665,10 @@ rankingProdutoresChart.on(
 
 rankingGalpoesChart.on('click', async paramsChart => {
     const row = detailRankings.galpoes.rows[paramsChart.dataIndex];
-    if (!row || row.sem_identificacao || !row.produtor || !row.galpao) return;
-    if (!detailRankingReturn.begin({produtor:row.produtor, galpao:row.galpao})) return;
+    if (!row || row.sem_identificacao || !row.codigo || !row.galpao) return;
+    if (!detailRankingReturn.begin({fazenda:row.codigo, galpao:row.galpao})) return;
     try {
-        filters.set('produtor', row.produtor);
+        filters.set('fazenda', row.codigo);
         filters.set('galpao', row.galpao);
         await atualizarFiltrosDetalhes(true);
     } finally { detailRankingReturn.end(); }

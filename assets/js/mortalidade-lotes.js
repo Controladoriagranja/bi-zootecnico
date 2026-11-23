@@ -22,10 +22,10 @@ window.MortalityLots=(()=>{
     const excluded=data.resumo?.lotes_excluidos||0;
     E('mortalityLotsContext').textContent=`${date(data.data_inicio)} a ${date(data.data_fim)} · ${data.total} lotes${excluded?` · ${excluded} excluídos por valores negativos`:''}`;
     const phase=selection.phase;
-    const heads=['Produtor','Galpão','Lote','Alojamento','Abate','Aves alojadas',phase.nome,'% Mort. Total','Detalhe'];
+    const heads=['Fazenda','Galpão','Lote','Alojamento','Abate','Aves alojadas',phase.nome,'% Mort. Total','Detalhe'];
     E('mortalityLotsContent').innerHTML=data.dados.length?'<div class="mortality-lots-table-scroll"><table><thead><tr>'+heads.map(h=>`<th>${H(h)}</th>`).join('')+'</tr></thead><tbody>'+data.dados.map(row=>{
       const phases=data.faixas.map(f=>`<div class="${f.id===phase.id?'selected':''}"><dt>${H(f.nome)}</dt><dd>${N(row.faixas[f.id])}%</dd></div>`).join('');
-      return `<tr><td><strong>${H(row.produtor||row.codigo_produtor||'—')}</strong><small>Cód. ${H(row.codigo_produtor||'—')}</small></td><td>${H(row.galpao||'—')}</td><td>${H(row.lote||'—')}</td><td>${H(date(row.alojamento))}</td><td>${H(date(row.abate))}</td><td class="num">${N(row.aves_alojadas,0)}</td><td class="num selected">${N(row.faixas[phase.id])}%</td><td class="num">${N(row.mortalidade)}%</td><td><details><summary>Ver lote</summary><div class="mortality-lot-expanded"><p>Técnico: ${H(row.tecnico||'—')}</p><dl>${phases}</dl>${!row.base_vinculada?'<p>Sem vínculo na base dinâmica.</p>':''}</div></details></td></tr>`;
+      return `<tr><td><strong>${H(FazendaFilter.label(row.codigo_produtor,row.produtor))}</strong></td><td>${H(row.galpao||'—')}</td><td>${H(row.lote||'—')}</td><td>${H(date(row.alojamento))}</td><td>${H(date(row.abate))}</td><td class="num">${N(row.aves_alojadas,0)}</td><td class="num selected">${N(row.faixas[phase.id])}%</td><td class="num">${N(row.mortalidade)}%</td><td><details><summary>Ver lote</summary><div class="mortality-lot-expanded"><p>Técnico: ${H(row.tecnico||'—')}</p><dl>${phases}</dl>${!row.base_vinculada?'<p>Sem vínculo na base dinâmica.</p>':''}</div></details></td></tr>`;
     }).join('')+'</tbody></table></div>':'<p>Nenhum lote para este período e estes filtros.</p>';
     const warning=data.resumo && (!data.resumo.valido || Math.abs(Number(data.resumo.total)-Number(selection.period.total))>0.01);
     E('mortalityLotsWarning').textContent=warning?'Os dados consultados agora apresentam atualização ou divergência em relação ao gráfico. Recarregue a análise para conferir os totais.':'';

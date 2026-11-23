@@ -33,12 +33,7 @@ const FIRST_FILTERS = [
         search: true,
         multi: true
     },
-    {
-        id: "produtor",
-        apiKey: "produtor",
-        search: true,
-        multi: true
-    },
+    FazendaFilter.field,
     {
         id: "galpao",
         apiKey: "galpao",
@@ -124,6 +119,7 @@ function validPeriod() {
 
 const filters = new FilterController({
     fields: FIRST_FILTERS,
+    optionsObserver: FazendaFilter.ensureOptions,
 
     onChange: () => {
         carregarDashboard(false);
@@ -839,7 +835,8 @@ async function iniciar() {
         filters.register();
 
         const formulas = { metricas: DASHBOARD_METRIC_ORDER.map(id => METRICAS[id]) };
-        const applied=await filters.loadOptions({ preserve: false });
+        FazendaFilter.restore(filters, new URLSearchParams(location.search));
+        const applied=await filters.loadOptions({ preserve: true });
 
         formulasCatalogo = {};
 

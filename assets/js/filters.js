@@ -135,6 +135,8 @@ class FilterController {
             .querySelector(".checkbox-multiselect-label")
             .textContent = this.summary(state);
 
+        if (field.apiKey === "fazenda") state.button.title = this.summary(state);
+
         state.button.classList.toggle(
             "has-selection",
             state.selected.size > 0
@@ -305,6 +307,8 @@ normalizeOptions(field, raw) {
             .filter(Boolean)
             .sort((a, b) => Number(a.value) - Number(b.value));
     }
+
+    if (field.apiKey === "fazenda") return FazendaFilter.options(items);
 
     if (field.apiKey === "tipo_linhagem") {
         return items
