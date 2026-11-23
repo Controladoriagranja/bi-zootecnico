@@ -6,6 +6,7 @@
     const current = document.body.dataset.page || "";
 
     const items = [
+        { id: "acompanhamento-mortalidades", label: "ACOMPANHAMENTO LAN\u00c7. MORTALIDADES", href: "acompanhamento-mortalidades.html" },
         { id: "desempenho", label: "Desempenho Lotes Fechados", href: "index.html" },
         { id: "gpd-fases", label: "GPD por Fase", href: "gpd-por-fase.html" },
         { id: "lotes", label: "Lotes em Criação", href: "lotes.html" },
