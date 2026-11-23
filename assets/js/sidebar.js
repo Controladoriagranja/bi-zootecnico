@@ -6,12 +6,12 @@
     const current = document.body.dataset.page || "";
 
     const items = [
-        { id: "acompanhamento-mortalidades", label: "ACOMPANHAMENTO LAN\u00c7. MORTALIDADES", href: "acompanhamento-mortalidades.html" },
         { id: "desempenho", label: "Desempenho Lotes Fechados", href: "index.html" },
         { id: "gpd-fases", label: "GPD por Fase", href: "gpd-por-fase.html" },
         { id: "lotes", label: "Lotes em Criação", href: "lotes.html" },
         { id: "historico", label: "Histórico de Lotes em Criação", href: "historico.html" },
         { id: "diferenca-abate", label: "Diferença de Aves Abatidas", href: "diferenca-aves-abatidas.html" },
+        { id: "acompanhamento-mortalidades", label: "Acompanhamento Lan\u00e7. Mortalidades", href: "acompanhamento-mortalidades.html" },
         { id: "formulas", label: "Fórmulas", href: "formulas.html" }
     ];
 
