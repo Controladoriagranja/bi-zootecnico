@@ -15,7 +15,15 @@
  class LancFilters extends FilterController {
   normalizeOptions(field,items){
    const options=super.normalizeOptions(field,items);
+   if(field.apiKey==='tecnico')return options.map(option=>({...option,label:String(data.technicianName(option.value))})).sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));
    return field.apiKey==='data_base'?options.map(option=>({...option,label:option.value.split('-').reverse().join('/')})):options;
+  }
+  applySearch(field){
+   if(field.apiKey==='tecnico')this.getState(field).list?.querySelectorAll('[data-filter-option]').forEach(row=>{
+    const input=row.querySelector('input:not([data-all])');
+    if(input)row.dataset.filterLabel=`${data.technicianName(input.value)} ${input.value}`;
+   });
+   super.applySearch(field);
   }
  }
  const filters=new LancFilters({fields,optionsProvider:current=>data.options(current),optionsObserver:options=>{
