@@ -5,7 +5,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'outputs/acompanhamen
 const audit=JSON.parse(fs.readFileSync(path.join(out,'inspecao-planilha.json'),'utf8'));
 const vm=require('node:vm');
 const fields=['data_base','unidade','tecnico','granja','galpao','lote','dias_atraso','status_peso'];
-const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%2?'14660':'13886',galpao:String(i+1),tecnico:i%2?'HRN':'CVB',idade:14,idd_umo:i%3?14:null,dias_atraso:i%3?0:null,glp:String(i+1),tec:i%2?'HRN':'CVB',status_peso:i%5?'':'PESO ATRASADO',data_base:'2026-11-19',unidade:'052',lote:'0065'}));
+const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%2?'14660':'13886',galpao:String(i+1),tecnico:i%2?'HRN':'CVB',idade:14,idd_ups:i%2?7:null,idd_umo:i%3?14:null,dias_atraso:i%3?0:null,glp:String(i+1),tec:i%2?'HRN':'CVB',status_peso:i%5?'':'PESO ATRASADO',data_base:'2026-11-19',unidade:'052',lote:'0065'}));
 apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',tecnico:'OLD'});
 (async()=>{
  const boundaryRows=[
@@ -18,6 +18,9 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
  const sandbox={window:{}};
  const adapter=fs.readFileSync(path.join(root,'assets/js/acompanhamento-mortalidades-data.js'),'utf8').replace(/const rawRows = .*;\r?\n/,`const rawRows = ${JSON.stringify(boundaryRows)};\n`);
  vm.runInNewContext(adapter,sandbox);
+ assert.equal(sandbox.window.LancMortalidadesData.technicianName(' cvb '),'CRISTIANO VALADARES BARRETO');
+ assert.equal(sandbox.window.LancMortalidadesData.technicianName('NOVA_SIGLA'),'NOVA_SIGLA');
+ assert.equal(sandbox.window.LancMortalidadesData.technicianName(null),null);
  const boundaries=await sandbox.window.LancMortalidadesData.query({},{order:'example_id'});
  assert.deepEqual(Array.from(boundaries.dados,r=>r.status_peso),['','','PESO ATRASADO',null,null]);
  assert.deepEqual(Array.from(boundaries.dados,r=>r.dias_atraso),[4,5,6,null,-2]);
@@ -41,13 +44,15 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   });
   const url='http://bi.test/acompanhamento-mortalidades.html';
   await page.goto(url);await page.waitForFunction(()=>document.getElementById('lancCount').textContent.startsWith('219'));
-  assert.deepEqual((await page.locator('#lancHead button').allTextContents()).map(t=>t.replace(/[↑↓↕]/g,'').trim()),['GRANJA','GALPAO','TÉCNICO','IDADE','IDD UMO','DIAS ATRASO MORT.','GLP','TÉC','STATUS PESO']);
+  assert.deepEqual((await page.locator('#lancHead button').allTextContents()).map(t=>t.replace(/[↑↓↕]/g,'').trim()),['GRANJA','GALPAO','TÉCNICO','IDADE','Idade última mortalidade','DIAS ATRASO MORT.','Idade última pesagem','GLP','TÉC','STATUS PESO']);
   assert.equal(await page.locator('#lancUpdated').textContent(),'—');
   const all=await page.evaluate(()=>LancMortalidadesData.query({},{size:500}));
   assert.equal(all.dados.length,219);
   for(const source of audit.records){
    const row=all.dados.find(r=>r.example_id==='excel:'+source.excel_row);
    assert.equal(row.dias_atraso,source.values.AJ);
+   assert.equal(row.idd_ups,source.values.I);
+   assert.equal(row.idd_umo,source.values.N);
    assert.equal(row.glp,String(source.values.C));assert.equal(row.tec,source.values.F);
    assert.equal(row.status_peso||'',source.values.AM||'');
   }
@@ -57,7 +62,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   await page.locator('#lancFormulaMount button').click();
   await page.locator('#indicatorFormulaDialog').waitFor({state:'visible'});
   assert.equal(await page.locator('#indicatorFormulaDialog [data-formula-section]').count(),4);
-  assert.match(await page.locator('#indicatorFormulaDialog').textContent(),/IDADE − IDD UMO/);
+  assert.match(await page.locator('#indicatorFormulaDialog').textContent(),/IDADE − Idade última mortalidade/);
   await page.locator('#indicatorFormulaDialog .if-close').click();
   await page.locator('#lanc_granja button').click();
   await page.locator('#lanc_granja input[type=search]').fill('29168');
@@ -91,6 +96,15 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   assert.equal((await page.locator('#lanc_data_base input[value="2026-11-19"]').locator('..').textContent()).trim(),'19/11/2026');
   assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(6)').textContent(),'—');
   assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(6)').textContent(),'0');
+  assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(3)').textContent(),'CRISTIANO VALADARES BARRETO');
+  assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(9)').textContent(),'CVB');
+  assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(3)').textContent(),'HUGO RODRIGUES NOGUEIRA');
+  assert.equal(await page.locator('#lanc_tecnico input[value="CVB"]').count(),1);
+  assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(7)').textContent(),'—');
+  assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(7)').textContent(),'7');
+  await page.locator('#lancHead button').filter({hasText:'Idade última pesagem'}).click();
+  await page.waitForFunction(()=>document.querySelector('#lancHead th:nth-child(7)').getAttribute('aria-sort')==='asc'+'ending');
+  assert.ok(apiCalls.some(u=>u.includes('ordenar=idd_ups')));
   await page.locator('#lancNext').click();await page.waitForFunction(()=>document.getElementById('lancPage').textContent==='2 / 3');
   await page.locator('#lancPrevious').click();await page.waitForFunction(()=>document.getElementById('lancPage').textContent==='1 / 3');
   assert.equal(await page.locator('#lancPrevious').isDisabled(),true);
@@ -103,6 +117,6 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   mode='503';await page.reload();await page.locator('#lancError').waitFor({state:'visible'});
   assert.ok(!(await page.locator('#lancSource').textContent()).includes('Dados de exemplo'));
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({result:'PASS',columns:9,excelRowsChecked:219,weightDelayed:16,formulaModal:4,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,exampleFallbackOnly404:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
+  console.log(JSON.stringify({result:'PASS',columns:10,excelRowsChecked:219,weightDelayed:16,formulaModal:4,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,exampleFallbackOnly404:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -21,9 +21,9 @@
  const filters=new LancFilters({fields,optionsProvider:current=>data.options(current),optionsObserver:options=>{
   for(const key of ['data_base','unidade'])document.querySelector(`[data-lanc-filter="${key}"]`).hidden=!(options[key]?.length);
  },onChange:()=>load(1)});
- const columns=[['granja','GRANJA'],['galpao','GALPAO'],['tecnico','TÉCNICO'],['idade','IDADE'],['idd_umo','IDD UMO'],['dias_atraso','DIAS ATRASO MORT.'],['glp','GLP'],['tec','TÉC'],['status_peso','STATUS PESO']];
- const numeric=new Set(['idade','idd_umo','dias_atraso']);
- function format(value,key){if(value==null||value==='')return '—';return numeric.has(key)?Number(value).toLocaleString('pt-BR',{maximumFractionDigits:4}):String(value);}
+ const columns=[['granja','GRANJA'],['galpao','GALPAO'],['tecnico','TÉCNICO'],['idade','IDADE'],['idd_umo','Idade última mortalidade'],['dias_atraso','DIAS ATRASO MORT.'],['idd_ups','Idade última pesagem'],['glp','GLP'],['tec','TÉC'],['status_peso','STATUS PESO']];
+ const numeric=new Set(['idade','idd_umo','idd_ups','dias_atraso']);
+ function format(value,key){if(value==null||value==='')return '—';if(key==='tecnico')return String(data.technicianName(value));return numeric.has(key)?Number(value).toLocaleString('pt-BR',{maximumFractionDigits:4}):String(value);}
  function headings(){E('lancHead').replaceChildren(...columns.map(([key,title])=>{
   const th=document.createElement('th');th.scope='col';th.setAttribute('aria-sort',order===key?(direction==='asc'?'ascending':'descending'):'none');
   const button=document.createElement('button');button.type='button';button.textContent=title+' ';const icon=document.createElement('span');icon.textContent=order===key?(direction==='asc'?'↑':'↓'):'↕';icon.ariaHidden='true';button.append(icon);
@@ -40,7 +40,7 @@
      if(key==='dias_atraso'&&row[key]!=null&&Number(row[key])>4)td.classList.add('lanc-delay');
      if(key==='status_peso'&&row[key]==='PESO ATRASADO'){const badge=document.createElement('span');badge.className='lanc-weight';badge.textContent=row[key];td.replaceChildren(badge);}tr.append(td);
     }return tr;});
-   if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=9;td.textContent='Nenhum lote para os filtros selecionados.';tr.append(td);rows.push(tr);}
+   if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=columns.length;td.textContent='Nenhum lote para os filtros selecionados.';tr.append(td);rows.push(tr);}
    E('lancRows').replaceChildren(...rows);E('lancCount').textContent=`${result.total.toLocaleString('pt-BR')} registros · colunas de mortalidade e peso`;
    E('lancUpdated').textContent=formatarDataHoraBR(result.atualizado_em);
    E('lancUpdated').title=result.example?'A planilha não informa coletado_em.':'MAX(coletado_em) da tabela física zootecnico.acompanhamento_lotes_criacao.';
