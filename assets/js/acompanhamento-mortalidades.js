@@ -52,5 +52,15 @@
  E('lancPrevious').onclick=()=>{if(!E('lancPrevious').disabled)load(page-1);};E('lancNext').onclick=()=>{if(!E('lancNext').disabled)load(page+1);};
  E('limparLancFiltros').onclick=async()=>{ready=false;pagination();filters.clear();try{if(await filters.loadOptions({preserve:false})!==false)load(1);}catch(error){showError(error);}};
  filters.register();headings();IndicatorFormulaUI.mount(E('lancFormulaMount'),'lanc.atraso lanc.glp lanc.tec lanc.peso');
- pagination();filters.loadOptions({preserve:false}).then(applied=>{if(applied!==false)load(1);}).catch(showError);
+ async function initialize(){
+  if(await filters.loadOptions({preserve:false})===false)return;
+  const field=fields.find(item=>item.apiKey==='data_base');
+  const latest=filters.getState(field).options.map(item=>item.value).filter(value=>/^\d{4}-\d{2}-\d{2}$/.test(value)).sort().pop();
+  if(latest){
+   filters.set('data_base',[latest]);
+   if(await filters.loadOptions({preserve:true})===false)return;
+  }
+  await load(1);
+ }
+ pagination();initialize().catch(showError);
 })();

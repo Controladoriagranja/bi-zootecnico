@@ -6,6 +6,7 @@ const audit=JSON.parse(fs.readFileSync(path.join(out,'inspecao-planilha.json'),'
 const vm=require('node:vm');
 const fields=['data_base','unidade','tecnico','granja','galpao','lote','dias_atraso','status_peso'];
 const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%2?'14660':'13886',galpao:String(i+1),tecnico:i%2?'HRN':'CVB',idade:14,idd_umo:i%3?14:null,dias_atraso:i%3?0:null,glp:String(i+1),tec:i%2?'HRN':'CVB',status_peso:i%5?'':'PESO ATRASADO',data_base:'2026-11-19',unidade:'052',lote:'0065'}));
+apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',tecnico:'OLD'});
 (async()=>{
  const boundaryRows=[
   {idade_atual:43,idade_ultima_mortalidade:39,idade_ultimo_peso:35},
@@ -81,6 +82,10 @@ const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%
   await page.evaluate(()=>sessionStorage.setItem('granjabi_auth_token','local-test-only'));await page.reload();
   await page.waitForFunction(()=>document.getElementById('lancSource').textContent.includes('registry'));
   mode='api';await page.reload();await page.waitForFunction(()=>document.getElementById('lancCount').textContent.startsWith('244'));
+  assert.equal(await page.locator('#lanc_data_base input[value="2026-11-19"]').isChecked(),true);
+  assert.equal(await page.locator('#lanc_data_base input[value="2026-10-31"]').isChecked(),false);
+  assert.ok(apiCalls.filter(u=>u.includes('/detalhes')).every(u=>new URL(u,'http://bi.test').searchParams.get('data_base')==='2026-11-19'));
+  assert.equal(await page.locator('#lanc_tecnico input[value="OLD"]').count(),0);
   assert.equal(await page.locator('#lancUpdated').textContent(),'19/11/2026 17:33');
   assert.ok(!(await page.locator('#lancSource').textContent()).includes('exemplo'));
   assert.equal((await page.locator('#lanc_data_base input[value="2026-11-19"]').locator('..').textContent()).trim(),'19/11/2026');
