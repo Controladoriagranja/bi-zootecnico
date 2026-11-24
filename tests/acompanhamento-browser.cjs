@@ -44,7 +44,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   });
   const url='http://bi.test/acompanhamento-mortalidades.html';
   await page.goto(url);await page.waitForFunction(()=>document.getElementById('lancCount').textContent.startsWith('219'));
-  assert.deepEqual((await page.locator('#lancHead button').allTextContents()).map(t=>t.replace(/[↑↓↕]/g,'').trim()),['GRANJA','GALPAO','TÉCNICO','IDADE','Idade última mortalidade','DIAS ATRASO MORT.','Idade última pesagem','GLP','TÉC','STATUS PESO']);
+  assert.deepEqual((await page.locator('#lancHead button').allTextContents()).map(t=>t.replace(/[↑↓↕]/g,'').trim()),['Granja','Galpão','Técnico','Idade','Idade última mortalidade','Dias atraso mort.','Idade última pesagem','Status peso']);
   assert.equal(await page.locator('#lancUpdated').textContent(),'—');
   const all=await page.evaluate(()=>LancMortalidadesData.query({},{size:500}));
   assert.equal(all.dados.length,219);
@@ -61,7 +61,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   const shown=all.dados.slice(0,100).filter(r=>r.dias_atraso>4).length;assert.equal(highlighted,shown);
   await page.locator('#lancFormulaMount button').click();
   await page.locator('#indicatorFormulaDialog').waitFor({state:'visible'});
-  assert.equal(await page.locator('#indicatorFormulaDialog [data-formula-section]').count(),4);
+  assert.equal(await page.locator('#indicatorFormulaDialog [data-formula-section]').count(),2);
   assert.match(await page.locator('#indicatorFormulaDialog').textContent(),/IDADE − Idade última mortalidade/);
   await page.locator('#indicatorFormulaDialog .if-close').click();
   await page.locator('#lanc_granja button').click();
@@ -97,7 +97,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(6)').textContent(),'—');
   assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(6)').textContent(),'0');
   assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(3)').textContent(),'CRISTIANO VALADARES BARRETO');
-  assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(9)').textContent(),'CVB');
+  assert.equal(await page.locator('#lancRows tr:nth-child(1) td').count(),8);
   assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(3)').textContent(),'HUGO RODRIGUES NOGUEIRA');
   assert.equal(await page.locator('#lanc_tecnico input[value="CVB"]').count(),1);
   assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(7)').textContent(),'—');
@@ -117,6 +117,6 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   mode='503';await page.reload();await page.locator('#lancError').waitFor({state:'visible'});
   assert.ok(!(await page.locator('#lancSource').textContent()).includes('Dados de exemplo'));
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({result:'PASS',columns:10,excelRowsChecked:219,weightDelayed:16,formulaModal:4,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,exampleFallbackOnly404:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
+  console.log(JSON.stringify({result:'PASS',columns:8,excelRowsChecked:219,weightDelayed:16,formulaModal:2,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,exampleFallbackOnly404:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

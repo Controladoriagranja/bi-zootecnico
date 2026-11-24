@@ -21,7 +21,7 @@
  const filters=new LancFilters({fields,optionsProvider:current=>data.options(current),optionsObserver:options=>{
   for(const key of ['data_base','unidade'])document.querySelector(`[data-lanc-filter="${key}"]`).hidden=!(options[key]?.length);
  },onChange:()=>load(1)});
- const columns=[['granja','GRANJA'],['galpao','GALPAO'],['tecnico','TÉCNICO'],['idade','IDADE'],['idd_umo','Idade última mortalidade'],['dias_atraso','DIAS ATRASO MORT.'],['idd_ups','Idade última pesagem'],['glp','GLP'],['tec','TÉC'],['status_peso','STATUS PESO']];
+ const columns=[['granja','Granja'],['galpao','Galpão'],['tecnico','Técnico'],['idade','Idade'],['idd_umo','Idade última mortalidade'],['dias_atraso','Dias atraso mort.'],['idd_ups','Idade última pesagem'],['status_peso','Status peso']];
  const numeric=new Set(['idade','idd_umo','idd_ups','dias_atraso']);
  function format(value,key){if(value==null||value==='')return '—';if(key==='tecnico')return String(data.technicianName(value));return numeric.has(key)?Number(value).toLocaleString('pt-BR',{maximumFractionDigits:4}):String(value);}
  function headings(){E('lancHead').replaceChildren(...columns.map(([key,title])=>{
@@ -51,7 +51,7 @@
  }
  E('lancPrevious').onclick=()=>{if(!E('lancPrevious').disabled)load(page-1);};E('lancNext').onclick=()=>{if(!E('lancNext').disabled)load(page+1);};
  E('limparLancFiltros').onclick=async()=>{ready=false;pagination();filters.clear();try{if(await filters.loadOptions({preserve:false})!==false)load(1);}catch(error){showError(error);}};
- filters.register();headings();IndicatorFormulaUI.mount(E('lancFormulaMount'),'lanc.atraso lanc.glp lanc.tec lanc.peso');
+ filters.register();headings();IndicatorFormulaUI.mount(E('lancFormulaMount'),'lanc.atraso lanc.peso');
  async function initialize(){
   if(await filters.loadOptions({preserve:false})===false)return;
   const field=fields.find(item=>item.apiKey==='data_base');
