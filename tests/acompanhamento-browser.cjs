@@ -22,12 +22,13 @@ const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%
  assert.deepEqual(Array.from(boundaries.dados,r=>r.dias_atraso),[4,5,6,null,-2]);
  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
  try{
-  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];let mode='404';
+  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];let mode='404';const apiCalls=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',async route=>{
    const u=new URL(route.request().url());
    if(u.hostname.endsWith('workers.dev')){
-    if(mode!=='api')return route.fulfill({status:mode==='404'?404:503,contentType:'application/json',body:JSON.stringify({detail:'BI indisponivel'})});
+    apiCalls.push(u.pathname+u.search);
+    if(mode!=='api')return route.fulfill({status:Number(mode),contentType:'application/json',body:JSON.stringify({detail:'BI indisponivel'})});
     const q=u.searchParams,selected=(ignore)=>apiRows.filter(r=>fields.every(k=>k===ignore||!q.has(k)||q.getAll(k).includes(String(r[k]??''))));
     if(u.pathname.endsWith('/filtros'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(Object.fromEntries(fields.map(k=>[k,[...new Set(selected(k).map(r=>r[k]).filter(v=>v!=null&&v!=='').map(String))]])))});
     const data=selected(),n=Number(q.get('pagina')||1),size=Number(q.get('tamanho')||100);
@@ -85,6 +86,15 @@ const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%
   assert.equal((await page.locator('#lanc_data_base input[value="2026-11-19"]').locator('..').textContent()).trim(),'19/11/2026');
   assert.equal(await page.locator('#lancRows tr:nth-child(1) td:nth-child(6)').textContent(),'—');
   assert.equal(await page.locator('#lancRows tr:nth-child(2) td:nth-child(6)').textContent(),'0');
+  await page.locator('#lancNext').click();await page.waitForFunction(()=>document.getElementById('lancPage').textContent==='2 / 3');
+  await page.locator('#lancPrevious').click();await page.waitForFunction(()=>document.getElementById('lancPage').textContent==='1 / 3');
+  assert.equal(await page.locator('#lancPrevious').isDisabled(),true);
+  mode='403';apiCalls.length=0;await page.reload();await page.locator('#lancError').waitFor({state:'visible'});
+  assert.equal(await page.locator('#lancPrevious').isDisabled(),true);assert.equal(await page.locator('#lancNext').isDisabled(),true);
+  assert.equal(await page.locator('#lancTable').getAttribute('aria-busy'),null);
+  assert.ok(!(await page.locator('#lancCount').textContent()).includes('Carregando'));
+  const deniedCalls=apiCalls.length;await page.evaluate(()=>{document.getElementById('lancPrevious').click();document.getElementById('lancNext').click();});
+  assert.equal(apiCalls.length,deniedCalls);assert.ok(!apiCalls.some(u=>u.includes('/detalhes')));
   mode='503';await page.reload();await page.locator('#lancError').waitFor({state:'visible'});
   assert.ok(!(await page.locator('#lancSource').textContent()).includes('Dados de exemplo'));
   assert.deepEqual(errors,[]);
