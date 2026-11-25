@@ -4,6 +4,7 @@ const {chromium}=require('C:/Users/vchaves/.cache/codex-runtimes/codex-primary-r
 const root=path.resolve(__dirname,'..'),out=path.join(root,'outputs/acompanhamento-lanc-mortalidades-20261123');
 const audit=JSON.parse(fs.readFileSync(path.join(out,'inspecao-planilha.json'),'utf8'));
 const vm=require('node:vm');
+const exampleRows=JSON.parse(fs.readFileSync(path.join(root,'outputs/acesso-tecnicos-acompanhamento-20261124/exemplos-teste-local.json'),'utf8'));
 const fields=['data_base','unidade','tecnico','granja','galpao','lote','dias_atraso','status_peso'];
 const apiRows=Array.from({length:244},(_,i)=>({chave_lote:'fixture-'+i,granja:i%2?'14660':'13886',galpao:String(i+1),tecnico:i%2?'HRN':'CVB',idade:14,idd_ups:i%2?7:null,idd_umo:i%3?14:null,dias_atraso:i%3?0:null,glp:String(i+1),tec:i%2?'HRN':'CVB',status_peso:i%5?'':'PESO ATRASADO',data_base:'2026-11-19',unidade:'052',lote:'0065'}));
 apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',tecnico:'OLD'});
@@ -16,7 +17,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   {idade_atual:10,idade_ultima_mortalidade:12,idade_ultimo_peso:null}
  ].map((r,i)=>({...r,example_id:String(i),granja:'1'}));
  const sandbox={window:{}};
- const adapter=fs.readFileSync(path.join(root,'assets/js/acompanhamento-mortalidades-data.js'),'utf8').replace(/const rawRows = .*;\r?\n/,`const rawRows = ${JSON.stringify(boundaryRows)};\n`);
+ const adapter=fs.readFileSync(path.join(root,'assets/js/acompanhamento-mortalidades-data.js'),'utf8').replace("Object.freeze({mode: 'api'","Object.freeze({mode: 'example'").replace(/const rawRows = .*\r?\n/,`const rawRows = ${JSON.stringify(boundaryRows)};\n`);
  vm.runInNewContext(adapter,sandbox);
  assert.equal(sandbox.window.LancMortalidadesData.technicianName(' cvb '),'CRISTIANO VALADARES BARRETO');
  assert.equal(sandbox.window.LancMortalidadesData.technicianName('NOVA_SIGLA'),'NOVA_SIGLA');
@@ -26,7 +27,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
  assert.deepEqual(Array.from(boundaries.dados,r=>r.dias_atraso),[4,5,6,null,-2]);
  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
  try{
-  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];let mode='404';const apiCalls=[];
+  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];let mode='example';const apiCalls=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',async route=>{
    const u=new URL(route.request().url());
@@ -40,7 +41,7 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
    }
    if(u.hostname!=='bi.test')return route.fulfill({status:404,body:''});
    const file=decodeURIComponent(u.pathname).replace(/^\//,'');
-   try{return route.fulfill({status:200,contentType:file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'application/octet-stream',body:fs.readFileSync(path.join(root,file))});}catch{return route.fulfill({status:404,body:''});}
+   try{let body=fs.readFileSync(path.join(root,file));if(mode==='example'&&file.endsWith('acompanhamento-mortalidades-data.js'))body=Buffer.from(body.toString().replace("Object.freeze({mode: 'api'","Object.freeze({mode: 'example'").replace(/const rawRows = .*\r?\n/,`const rawRows = ${JSON.stringify(exampleRows)};\n`));return route.fulfill({status:200,contentType:file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'application/octet-stream',body});}catch{return route.fulfill({status:404,body:''});}
   });
   const url='http://bi.test/acompanhamento-mortalidades.html';
   await page.goto(url);await page.waitForFunction(()=>document.getElementById('lancCount').textContent.startsWith('219'));
@@ -83,9 +84,11 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   }
   await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>document.documentElement.dataset.theme='dark');
   await page.screenshot({path:path.join(out,'exemplo-escuro.png'),fullPage:true});
-  // Sessao presente, mas novo registry ausente: identificar o exemplo, sem fingir banco.
-  await page.evaluate(()=>sessionStorage.setItem('granjabi_auth_token','local-test-only'));await page.reload();
-  await page.waitForFunction(()=>document.getElementById('lancSource').textContent.includes('registry'));
+  // Producao nunca substitui erro da API por exemplos de outros tecnicos.
+  mode='404';await page.evaluate(()=>sessionStorage.setItem('granjabi_auth_token','local-test-only'));await page.reload();
+  await page.locator('#lancError').waitFor({state:'visible'});
+  assert.equal(await page.locator('#lancRows tr').count(),0);
+  assert.ok(!(await page.locator('#lancSource').textContent()).includes('exemplo'));
   mode='api';await page.reload();await page.waitForFunction(()=>document.getElementById('lancCount').textContent.startsWith('244'));
   assert.equal(await page.locator('#lanc_data_base input[value="2026-11-19"]').isChecked(),true);
   assert.equal(await page.locator('#lanc_data_base input[value="2026-10-31"]').isChecked(),false);
@@ -132,6 +135,6 @@ apiRows.push({...apiRows[0],chave_lote:'older-fixture',data_base:'2026-10-31',te
   mode='503';await page.reload();await page.locator('#lancError').waitFor({state:'visible'});
   assert.ok(!(await page.locator('#lancSource').textContent()).includes('Dados de exemplo'));
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({result:'PASS',columns:8,excelRowsChecked:219,weightDelayed:16,formulaModal:2,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,exampleFallbackOnly404:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
+  console.log(JSON.stringify({result:'PASS',columns:8,excelRowsChecked:219,weightDelayed:16,formulaModal:2,filters:true,pagination:true,viewports:[390,768,1440],stickyFirstColumn:true,themes:2,realApiMode:true,noExampleFallback:true,freshness:'19/11/2026 17:33',zeroAndNull:true,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

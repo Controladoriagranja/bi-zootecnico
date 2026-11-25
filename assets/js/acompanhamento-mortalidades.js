@@ -8,7 +8,7 @@
  function pagination(){E('lancPrevious').disabled=busy||!ready||page<=1;E('lancNext').disabled=busy||!ready||page>=totalPages;}
  function showError(error){
   ready=false;totalPages=0;pagination();
-  E('lancError').textContent=error.status===403?'Esta tela está disponível somente para usuários com acesso geral à Integração.':error.message||'Falha na consulta.';E('lancError').classList.remove('hidden');
+  E('lancError').textContent=error.status===403?'Seu acesso a estes dados não está autorizado. Confira o vínculo técnico ou de equipe com o administrador.':error.message||'Falha na consulta.';E('lancError').classList.remove('hidden');
   E('lancCount').textContent='Consulta indisponível.';E('lancRows').replaceChildren();E('lancPage').textContent='';
   E('lancUpdated').textContent='—';E('lancSource').textContent='';
  }
