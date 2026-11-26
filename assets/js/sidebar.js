@@ -12,6 +12,7 @@
         { id: "historico", label: "Histórico de Lotes em Criação", href: "historico.html" },
         { id: "diferenca-abate", label: "Diferença de Aves Abatidas", href: "diferenca-aves-abatidas.html" },
         { id: "acompanhamento-mortalidades", label: "Acompanhamento Lan\u00e7. Mortalidades", href: "acompanhamento-mortalidades.html" },
+        { id: "consumo-racao", label: "Consumo Médio de Ração", href: "consumo-medio-racao.html" },
         { id: "formulas", label: "Fórmulas", href: "formulas.html" }
     ];
 

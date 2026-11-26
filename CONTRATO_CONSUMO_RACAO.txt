@@ -1,0 +1,89 @@
+﻿CONSUMO MÉDIO DE RAÇÃO — CONEXÃO À API EXISTENTE
+Atualizado em 26/11/2026. Somente frontend; nenhum backend/SQL/carga/publicação alterado.
+
+ROTA CONFIRMADA PELO JSON ENVIADO
+/api/portal/fabrica_racao/dados/consumo_medio_racao?pagina=1&tamanho=500
+Base: APP_CONFIG.API_URL, o Worker autenticado já usado pelo Zootécnico.
+Não chamar o IP interno 192.168.1.193:8010 pelo navegador do relatório.
+A configuração está em assets/js/consumo-racao-config.js, mode='api',
+transport='portal-paginated'. Nenhuma rota nova foi criada.
+
+CONTRATO REAL
+Resposta: esquema, tabela, colunas, dados, total, pagina, tamanho, total_paginas.
+O JSON fornecido tem 248 registros, 25 por página, 10 páginas e 34 colunas.
+A cópia da API de referência aceita tamanho até 500. Com 248 registros,
+normalmente basta uma chamada. Se o servidor retornar menos por página,
+o adaptador segue a paginação informada e valida todas as páginas.
+O adaptador só entrega os dados à apresentação depois de conferir total,
+quantidade de páginas, tamanho, colunas, empresa/unidade e chaves repetidas.
+Falha em qualquer página não produz totais sobre um conjunto parcial.
+Mudanças de contagem durante a consulta interrompem a leitura, permitindo tentar novamente.
+Não existe transação única entre requisições HTTP: a rota genérica não fornece
+versão de snapshot. Para volumes grandes/atualizações simultâneas, o backend
+pode futuramente fornecer um identificador de versão consistente entre páginas.
+Limite defensivo: 10.000 registros. Acima disso, planejar agregação no servidor.
+Os filtros e a paginação visual atuam localmente no conjunto completo carregado,
+sem nova requisição a cada clique. Não há cache persistente dos registros.
+
+CAMPOS E MAPEAMENTO
+Fonte: bi_granja / fabrica_racao.consumo_medio_racao. Empresa 1, unidade 53.
+Identidade do registro: chave_hash, mapeada para registro_id interno; não é lote único.
+O adaptador rejeita chaves ausentes/repetidas; não inventa uma deduplicação por lote.
+As quatro fases mantêm seus nomes físicos, incluindo fase_pre_menos_inicial.
+Pré-Inicial é apenas o rótulo da interface. Cons/Ave e Cons/Dia originais são
+preservados nos detalhes. Linhagens mistas continuam juntas, sem duplicar o registro.
+Fazenda / Integrado mostra Código - Integrado e filtra pelo código da fazenda.
+A rota consulta registros físicos. Não há geração de linhas de total na query
+observada. Se uma linha vier explicitamente como tipo_linha total/subtotal, ela
+é excluída. Linhas importadas como totais devem ser identificadas na origem,
+nunca inferidas apenas pelo nome de um integrado.
+
+ATUALIZAÇÃO E PERÍODO
+Última atualização = maior importado_em entre TODOS os registros recebidos,
+comparando instantes com offset. Não é a data da view, do navegador ou data do acerto.
+Exemplo real do JSON recebido: 2026-11-26T09:02:36.703746-03:00.
+Exibição: 26/11/2026 09:02, por formatarDataHoraBR compartilhada.
+Data inicial/final = menor/maior data de acerto recebida. Nenhuma data do dia inventada.
+Resposta vazia: período e atualização —. Datas de acerto não sofrem deslocamento de fuso.
+
+INDICADORES
+Consumo total por registro = soma das quatro fases, somente quando todas existem.
+Card total = soma desses registros completos, com cobertura informada.
+Aves dos registros = soma de qtde_aves informada, sem afirmar aves/lotes únicos.
+Consumo por ave = soma(consumo total) / soma(qtde_aves), sobre os MESMOS registros
+com consumo completo e aves > 0. Nunca média simples das razões.
+Cada fase usa seus próprios pares válidos de consumo e aves; o denominador aparece
+na interface/fx. Nulos não viram zero. Zero informado é preservado.
+Resumo por linhagem e evolução recalculam a razão dos componentes correspondentes.
+Semanas: segunda a domingo. Quantidade de registros não é quantidade de lotes únicos.
+Unidade não confirmada: manter escala original e rótulo unidade de origem, sem kg/g.
+Cons/Dia não confirmado: apenas valor informado, nunca somado nem usado nos indicadores.
+Standard é código. Não foi transformado em meta.
+Metas de fabrica_racao.metas continuam pendentes de contrato/valores/unidade/vigência.
+
+AUTENTICAÇÃO E PERMISSÕES
+Reutiliza apiGet, Bearer da sessão da Central e Worker, sem credenciais PostgreSQL.
+A cópia local do Worker encaminha /api/* à API privada, validando a sessão.
+Não houve mudança de permissões. As políticas do servidor devem autorizar esta rota.
+Acesso por técnico não pode ser criado por filtro de interface: esta tabela não
+fornece técnico no contrato recebido. Confirmar a política real com Anderson.
+403/401/404/erro não acionam demonstração silenciosa nem exibem totais parciais.
+Troca de sessão durante a leitura descarta a resposta.
+
+VALIDAÇÃO
+Testes locais: tests/consumo-racao-model.cjs e tests/consumo-racao-browser.cjs.
+Incluem múltiplas páginas, contagem/chaves inconsistentes, importado_em, resposta
+vazia, erro/permissão, autenticação, filtros, cálculo, gráficos e responsividade.
+Rede dos testes é simulada; não valida a rota do Worker em produção.
+Para conferir no portal publicado, entrar pela Central e abrir esta tela:
+1. Rede deve mostrar a rota acima NO DOMÍNIO DO WORKER, status 200.
+2. Registros deve corresponder a total da API, não só à quantidade da primeira página.
+3. Última atualização deve corresponder a MAX(importado_em) da resposta completa.
+4. Selecionar uma fazenda/período e conferir numerador e denominador no botão fx.
+Se houver 404, confirmar com Anderson o encaminhamento dessa rota no Worker atual.
+Se houver 403, revisar a autorização no servidor; não retirar a autenticação.
+
+DEMONSTRAÇÃO OPCIONAL
+Somente em localhost/127.0.0.1/::1 com ?demo=1. Dados sintéticos separados em
+assets/js/consumo-racao-demo.js e identificados na tela; não representam produção.
+Sem esse parâmetro a tela sempre consulta a API. Nenhum fallback automático.
