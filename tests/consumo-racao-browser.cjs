@@ -111,14 +111,15 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
   await page.evaluate(()=>{sessionStorage.setItem('granjabi_auth_token','changed-session');window.dispatchEvent(new Event('focus'));});
   await page.waitForFunction(()=>document.getElementById('feedState').dataset.state==='error');assert.equal(await page.locator('#feedTotal').textContent(),'—');
   mode='portal';const beforePortal=calls.length;await page.reload();await page.waitForFunction(()=>document.getElementById('feedRecords').textContent==='64');
-  await page.waitForFunction(()=>document.getElementById('feedTargetsStatus').textContent.includes('amarelo'));
+  await page.waitForFunction(()=>document.getElementById('feedTargetsStatus').textContent.includes('verde'));
   assert.equal(calls.length-beforePortal,3);assert.equal(await page.locator('#feedUpdated').textContent(),'26/11/2026 09:02');assert.equal(await page.locator('#feedDemo').isVisible(),false);
   assert.ok(await page.locator('#feedLineages td[class*=feed-target-]').count());assert.ok(await page.locator('#feedDetailRows td[class*=feed-target-]').count());
   assert.match(await page.locator('#feedLineages tr:first-child td:nth-child(4)').getAttribute('class'),/feed-target-/);
   assert.match(await page.locator('#feedLineages tr:first-child td:nth-child(6)').getAttribute('class'),/feed-target-/);
-  const target=page.locator('#feedLineages td[class*=feed-target-]').first();const background=await target.evaluate(el=>getComputedStyle(el).backgroundColor);
+  const target=page.locator('#feedLineages td[class*=feed-target-]').first();const foreground=await target.evaluate(el=>getComputedStyle(el).color);
+  assert.equal(await target.evaluate(el=>getComputedStyle(el).backgroundColor),await target.evaluate(el=>getComputedStyle(el.parentElement.lastElementChild).backgroundColor));
   await page.screenshot({path:path.join(out,'metas-tema-1.png'),fullPage:true});
-  await page.locator('[data-theme-toggle]').click();assert.notEqual(await target.evaluate(el=>getComputedStyle(el).backgroundColor),background);
+  await page.locator('[data-theme-toggle]').click();assert.notEqual(await target.evaluate(el=>getComputedStyle(el).color),foreground);
   await page.screenshot({path:path.join(out,'metas-tema-2.png'),fullPage:true});
   mode='portal-empty';await page.reload();await page.waitForFunction(()=>document.getElementById('feedState').dataset.state==='empty');assert.equal(await page.locator('#feedRecords').textContent(),'0');assert.equal(await page.locator('#feedUpdated').textContent(),'—');
   assert.deepEqual(errors,[]);

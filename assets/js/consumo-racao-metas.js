@@ -26,7 +26,7 @@ window.ConsumoRacaoMetas=(()=>{
   function compare(value,goal){
     if(value==null||goal==null||goal<=0)return null;
     const deviation=Math.abs(value-goal)/goal*100;
-    return {goal,deviation,tier:deviation<=1+1e-10?'yellow':deviation<=3+1e-10?'orange':'red'};
+    return {goal,deviation,tier:deviation<=1+1e-10?'green':deviation<=3+1e-10?'orange':'red'};
   }
   function grouped(metas,rows,phase){
     if(!mapping[phase]&&phase!=='consumo_total')return null;

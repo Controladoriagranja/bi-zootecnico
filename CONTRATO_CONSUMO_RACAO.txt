@@ -102,7 +102,7 @@ armazenados separadamente, aguardando confirmação do vínculo; não são somad
 Na tabela de linhagem, cores nos consumos por ave de Pré-Inicial, Inicial e Final,
 incluindo o Total das linhas. No detalhe: consumo da fase convertido para kg/ave
 somente para comparar e Cons/Ave original. Os valores exibidos não são modificados.
-Cor pelo desvio absoluto em relação à meta: até 1% amarelo; >1% até 3% laranja;
+Cor pelo desvio absoluto em relação à meta: até 1% verde; >1% até 3% laranja;
 >3% vermelho. Null, sem meta vigente, antes de 2026, Crescimento, Cons/Dia e soma
 de todas as fases ficam sem comparação. Na agregação, usar as mesmas aves/linhas
 no realizado e na meta ponderada; não fazer média simples das razões.

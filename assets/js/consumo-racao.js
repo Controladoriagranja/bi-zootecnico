@@ -144,7 +144,7 @@
         try{
           const loaded=await ConsumoRacaoMetas.load(ConsumoRacaoConfig.targetsEndpoint,{signal:request.signal});
           if(id!==loadId)return;adapter.assertSession();metas=loaded;renderLineages();renderDetails();
-          E('feedTargetsStatus').textContent=loaded.length?'Metas em kg/ave · amarelo: até ±1% · laranja: acima de ±1% até ±3% · vermelho: acima de ±3%. Meta de Crescimento = Crescimento + Crescimento 2; total = soma das fases vigentes.':'Nenhuma meta aplicável cadastrada.';
+          E('feedTargetsStatus').textContent=loaded.length?'Metas em kg/ave · verde: até ±1% · laranja: acima de ±1% até ±3% · vermelho: acima de ±3%. Meta de Crescimento = Crescimento + Crescimento 2; total = soma das fases vigentes.':'Nenhuma meta aplicável cadastrada.';
         }catch(error){
           if(id!==loadId||error?.name==='AbortError')return;
           if(error.code==='SESSION_CHANGED'){fail(error);return;}

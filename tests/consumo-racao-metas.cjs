@@ -4,7 +4,7 @@ for(const name of ['data','metas'])vm.runInContext(fs.readFileSync(path.join(roo
 const M=context.ConsumoRacaoMetas;
 const record={indicador_codigo:'plano_0001_fpi_cons_ave',ativo:true,tela:'consumo-medio-racao',unidade:'kg/ave',tabela_origem:'fabrica_racao.consumo_medio_racao',referencia_mes:'2026-01-01',valor_meta:.220};
 const metas=M.normalize([record]);
-for(const factor of [.99,1,1.01])assert.equal(M.compare(.220*factor,.220).tier,'yellow');
+for(const factor of [.99,1,1.01])assert.equal(M.compare(.220*factor,.220).tier,'green');
 for(const factor of [.97,1.03,.989,1.011])assert.equal(M.compare(.220*factor,.220).tier,'orange');
 for(const factor of [.969,1.031])assert.equal(M.compare(.220*factor,.220).tier,'red');
 assert.equal(M.compare(null,.22),null);assert.equal(M.compare(1,null),null);
@@ -14,13 +14,13 @@ const full=M.normalize([['fpi',.22],['fin',1],['fci',1],['fc2',1],['fab',1.9]].m
 assert.equal(M.find(full,'fase_crescimento','2026-11-26'),2);
 assert.ok(Math.abs(M.find(full,'consumo_total','2026-11-26')-5.12)<1e-10);
 assert.equal(M.find(full.filter(meta=>meta.code!=='plano_0001_fc2_cons_ave'),'fase_crescimento','2026-11-26'),null);
-assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,fase_crescimento:200},'fase_crescimento').tier,'yellow');
-assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,consumo_total:512,consumo_ave:5.12},'consumo_total').tier,'yellow');
-assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,consumo_total:512,consumo_ave:5.12},'consumo_ave').tier,'yellow');
-assert.equal(M.grouped(full,[{data:'2026-11-26',qtde_aves:100,consumo_total:512}],'consumo_total').tier,'yellow');
+assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,fase_crescimento:200},'fase_crescimento').tier,'green');
+assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,consumo_total:512,consumo_ave:5.12},'consumo_total').tier,'green');
+assert.equal(M.detail(full,{data:'2026-11-26',qtde_aves:100,consumo_total:512,consumo_ave:5.12},'consumo_ave').tier,'green');
+assert.equal(M.grouped(full,[{data:'2026-11-26',qtde_aves:100,consumo_total:512}],'consumo_total').tier,'green');
 assert.throws(()=>M.normalize([record,record]),/duplicada/);assert.throws(()=>M.normalize([{...record,unidade:'g/ave'}]),/unidade/);
 const rows=[{data:'2026-11-26',qtde_aves:100,fase_pre_menos_inicial:22},{data:'2026-11-26',qtde_aves:900,fase_pre_menos_inicial:198}];
-assert.equal(M.grouped(metas,rows,'fase_pre_menos_inicial').tier,'yellow');
+assert.equal(M.grouped(metas,rows,'fase_pre_menos_inicial').tier,'green');
 assert.equal(M.grouped(metas,[...rows,{data:'2025-12-31',qtde_aves:1,fase_pre_menos_inicial:.22}],'fase_pre_menos_inicial'),null);
-assert.equal(M.detail(metas,rows[0],'fase_pre_menos_inicial').tier,'yellow');assert.equal(M.detail(metas,rows[0],'fase_pre_menos_inicial_cons_dia'),null);
+assert.equal(M.detail(metas,rows[0],'fase_pre_menos_inicial').tier,'green');assert.equal(M.detail(metas,rows[0],'fase_pre_menos_inicial_cons_dia'),null);
 console.log(JSON.stringify({result:'PASS',absoluteThresholds:true,validFromJanuary2026:true,weightedDenominator:true,growthTarget:2,totalTarget:5.12,incompleteTargetsUncolored:true,nullUncolored:true}));

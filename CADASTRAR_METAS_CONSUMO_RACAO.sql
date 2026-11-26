@@ -23,7 +23,7 @@ WITH plano (indicador_codigo, indicador_nome, valor_meta, fase) AS (
             ELSE 'pendente_confirmacao' END,
         'vigencia_inicio', '2026-01-01',
         'desvio', 'ABS(realizado / meta - 1) * 100',
-        'amarelo_ate_pct', 1, 'laranja_ate_pct', 3,
+        'verde_ate_pct', 1, 'laranja_ate_pct', 3,
         'vermelho_acima_pct', 3
     )::text AS notas
     FROM plano
