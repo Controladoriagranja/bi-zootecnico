@@ -226,3 +226,8 @@ body[data-page="mapa-calor"] .page-header p{margin:4px 0;font-size:12px}
 .heat-sector[data-sector^="pcp_"] .heat-sector-map .heat-tile[data-metric="condenacao"]{grid-column:span 1}
 
 .heat-history-scroll{overflow-x:scroll;overflow-y:hidden;margin:4px 35px 12px 75px;scrollbar-color:#999 #ededed;scrollbar-width:auto}.heat-history-scroll>div{height:1px}.heat-history-scroll::-webkit-scrollbar{height:10px}.heat-history-scroll::-webkit-scrollbar-track{background:#ededed;border-radius:5px}.heat-history-scroll::-webkit-scrollbar-thumb{background:#999;border-radius:5px}.heat-history-scroll[hidden]{display:none}
+
+/* OTIF: um indicador no quadro proprio de Logistica. */
+.heat-sector[data-sector="logistica"] .heat-sector-map{grid-template-columns:1fr}
+.heat-sector[data-sector="logistica"] .heat-tile{grid-column:1!important;min-height:210px}
+@media(min-width:1700px){.heat-map:has([data-sector="logistica"]){grid-template-columns:repeat(5,minmax(0,1fr))}}
