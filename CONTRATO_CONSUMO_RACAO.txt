@@ -56,10 +56,13 @@ Cada fase usa seus próprios pares válidos de consumo e aves; o denominador apa
 na interface/fx. Nulos não viram zero. Zero informado é preservado.
 Resumo por linhagem e evolução recalculam a razão dos componentes correspondentes.
 Semanas: segunda a domingo. Quantidade de registros não é quantidade de lotes únicos.
-Unidade não confirmada: manter escala original e rótulo unidade de origem, sem kg/g.
+Unidade confirmada pelo usuário: consumo em kg e razão em kg/ave.
+0,256 kg/ave corresponde a 256 g/ave; manter a escala original e três casas fixas.
 Cons/Dia não confirmado: apenas valor informado, nunca somado nem usado nos indicadores.
 Standard é código. Não foi transformado em meta.
-Metas de fabrica_racao.metas continuam pendentes de contrato/valores/unidade/vigência.
+Cadastro proposto em CADASTRAR_METAS_CONSUMO_RACAO.sql, com fases do plano separadas
+e início em 01/01/2026. Abrangência do plano Misto e vínculos com as fases da tela
+ainda dependem de confirmação; não somar Crescimento/Crescimento 2 automaticamente.
 
 AUTENTICAÇÃO E PERMISSÕES
 Reutiliza apiGet, Bearer da sessão da Central e Worker, sem credenciais PostgreSQL.
@@ -87,3 +90,31 @@ DEMONSTRAÇÃO OPCIONAL
 Somente em localhost/127.0.0.1/::1 com ?demo=1. Dados sintéticos separados em
 assets/js/consumo-racao-demo.js e identificados na tela; não representam produção.
 Sem esse parâmetro a tela sempre consulta a API. Nenhum fallback automático.
+METAS E CORES — DEFINIÇÃO CONFIRMADA EM 26/11/2026
+Executar manualmente CADASTRAR_METAS_CONSUMO_RACAO.sql no Adminer / bi_granja.
+O SQL cadastra cinco fases separadas, em kg/ave, desde 01/01/2026, para todos os
+registros (sem restrição por sexo, linhagem ou Standard). Pode ser repetido para
+atualizar o mesmo código e mês, sem criar novos registros para essas chaves.
+Pré-Inicial 0,220; Inicial 1,000; Crescimento 1,000; Crescimento 2 1,000; Abate 1,900.
+A tela consulta /api/portal/fabrica_racao/dados/metas pelo Worker existente.
+Pré-Inicial → FPI; Inicial → FIN; Final → FAB. Crescimento/Crescimento 2 ficam
+armazenados separadamente, aguardando confirmação do vínculo; não são somados.
+Na tabela de linhagem, cores nos consumos por ave de Pré-Inicial, Inicial e Final,
+incluindo o Total das linhas. No detalhe: consumo da fase convertido para kg/ave
+somente para comparar e Cons/Ave original. Os valores exibidos não são modificados.
+Cor pelo desvio absoluto em relação à meta: até 1% amarelo; >1% até 3% laranja;
+>3% vermelho. Null, sem meta vigente, antes de 2026, Crescimento, Cons/Dia e soma
+de todas as fases ficam sem comparação. Na agregação, usar as mesmas aves/linhas
+no realizado e na meta ponderada; não fazer média simples das razões.
+Cores claras/escuras em variáveis CSS; tooltip mostra meta e desvio com três casas.
+Uma falha ao carregar metas preserva os dados e informa indisponibilidade abaixo
+da tabela, sem inventar metas ou cores. Nenhum SQL/backend foi executado.
+Testes: tests/consumo-racao-metas.cjs e tests/consumo-racao-browser.cjs.
+
+ATUALIZAÇÃO CONFIRMADA: META DE CRESCIMENTO
+Crescimento = soma das metas FCI + FC2 vigentes (2,000 kg/ave inicialmente).
+Total = soma das cinco metas vigentes (5,120 kg/ave inicialmente).
+Aplicar as cores também em Crescimento e Total/ave das linhagens e nos consumos
+correspondentes do detalhe. Dados ausentes ou componentes de meta ausentes
+continuam sem comparação. Nenhuma nova carga/SQL é necessária após o cadastro anterior.
+Esta definição substitui as notas anteriores de Crescimento pendente.

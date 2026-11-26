@@ -4,6 +4,8 @@ window.ConsumoRacaoConfig = Object.freeze({
   transport: 'portal-paginated',
   snapshotEndpoint: '/api/portal/fabrica_racao/dados/consumo_medio_racao',
   pageSize: 500,
+  consumptionUnit: 'kg', // Confirmado: 0,256 Cons/Ave = 256 g/ave.
+  targetsEndpoint: '/api/portal/fabrica_racao/dados/metas',
   requestParams: Object.freeze({}),
   maxRecords: 10000,
   contractVersion: 'consumo-racao-snapshot-v1'

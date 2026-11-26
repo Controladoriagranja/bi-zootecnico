@@ -179,7 +179,7 @@ window.ConsumoRacaoData = (() => {
     const detailCount=rows.filter(row=>!['total','subtotal'].includes(row.tipo_linha)).length;
     return {contract_version:config.contractVersion,arquivo:'fabrica_racao.consumo_medio_racao',completo:true,
       total_registros:detailCount,dados:rows,periodo_disponivel:{inicio:dates[0]??'',fim:dates.at(-1)??''},
-      atualizado_em:updated,unidade_consumo:null};
+      atualizado_em:updated,unidade_consumo:config.consumptionUnit??null};
   }
   return Object.freeze({phases,dimensions,number,day,normalize,matches,options,aggregate,group,evolution,ordered,create});
 })();

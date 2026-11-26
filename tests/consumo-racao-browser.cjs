@@ -13,6 +13,10 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
    const url=new URL(route.request().url());
    if(url.hostname.endsWith('workers.dev')){
     calls.push({url:route.request().url(),headers:route.request().headers()});
+    if(url.pathname==='/api/portal/fabrica_racao/dados/metas'){
+     const dados=[['fpi',.22],['fin',1],['fci',1],['fc2',1],['fab',1.9]].map(([phase,valor_meta])=>({indicador_codigo:`plano_0001_${phase}_cons_ave`,ativo:true,tela:'consumo-medio-racao',unidade:'kg/ave',tabela_origem:'fabrica_racao.consumo_medio_racao',referencia_mes:'2026-01-01',valor_meta}));
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({esquema:'fabrica_racao',tabela:'metas',dados,total:5,pagina:1,tamanho:500,total_paginas:1})});
+    }
     if(mode.startsWith('portal')){
      const all=mode==='portal-empty'?[]:fixture.dados.map(row=>({...row,chave_hash:row.registro_id,importado_em:'2026-11-26T09:02:36.703746-03:00'}));
      const pagina=Number(url.searchParams.get('pagina')),tamanho=32;
@@ -40,9 +44,29 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
   await page.goto(url+'?demo=1');await page.waitForFunction(()=>document.getElementById('feedRecords').textContent==='64',{},{timeout:8000}).catch(async error=>{console.error(await page.locator('#feedState').textContent(),errors);throw error;});
   assert.equal(calls.length,0);assert.equal(await page.locator('#feedDemo').isVisible(),true);
   assert.equal(await page.locator('#feed_nutricao,#feed_sexo').count(),0);
+  assert.doesNotMatch(await page.locator('#feedDetailTable thead').textContent(),/Nutrição|Sexo/);
+  assert.match(await page.locator('#feedPerBird').textContent(),/,\d{3}$/);
+  assert.match(await page.locator('#feedTotal').textContent(),/,\d{3}$/);
+  const decimals=await page.locator('#feedLineages tr:first-child td').allTextContents();
+  assert.ok(decimals.slice(1,6).every(value=>value==='—'||/,\d{3}$/.test(value)));
   const fieldTops=await page.locator('#feedFilters>.filter-field').evaluateAll(elements=>elements.map(el=>el.getBoundingClientRect().top));
   assert.equal(fieldTops.length,6);assert.ok(fieldTops.every(top=>Math.abs(top-fieldTops[0])<1));
   assert.ok((await page.locator('.feed-kpi').first().boundingBox()).height<110);
+  const headers=page.locator('#feedLineageTable thead th');
+  assert.equal(await headers.locator('button').count(),8);
+  const totalsBefore=await page.locator('#feedLineageTotal').textContent(),callsBeforeSort=calls.length;
+  for(let index=0;index<8;index++){
+   const button=headers.nth(index).locator('button');
+   if(await headers.nth(index).getAttribute('aria-sort')!=='none')await button.click();
+   for(let step=0;step<2;step++){
+    await button.click();const direction=await headers.nth(index).getAttribute('aria-sort');
+    const values=await page.locator(`#feedLineages tr td:nth-child(${index+1})`).allTextContents();
+    const valid=values.filter(value=>value!=='—').map(value=>index===0?value:Number(value.replaceAll('.','').replace(',','.')));
+    const expected=[...valid].sort((a,b)=>(index===0?a.localeCompare(b,'pt-BR',{numeric:true}):a-b)*(direction==='ascending'?1:-1));
+    assert.deepEqual(valid,expected);
+   }
+  }
+  assert.equal(await page.locator('#feedLineageTotal').textContent(),totalsBefore);assert.equal(calls.length,callsBeforeSort);
   assert.equal(await page.locator('#feedUpdated').textContent(),'—');assert.equal(await page.locator('#feedDetailRows tr').count(),25);
   assert.ok(await page.locator('#feedPhasesChart canvas').count());assert.ok(await page.locator('#feedEvolutionChart canvas').count());
   await page.locator('#feedNext').click();assert.equal(await page.locator('#feedPage').textContent(),'2 / 3');
@@ -87,7 +111,15 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
   await page.evaluate(()=>{sessionStorage.setItem('granjabi_auth_token','changed-session');window.dispatchEvent(new Event('focus'));});
   await page.waitForFunction(()=>document.getElementById('feedState').dataset.state==='error');assert.equal(await page.locator('#feedTotal').textContent(),'—');
   mode='portal';const beforePortal=calls.length;await page.reload();await page.waitForFunction(()=>document.getElementById('feedRecords').textContent==='64');
-  assert.equal(calls.length-beforePortal,2);assert.equal(await page.locator('#feedUpdated').textContent(),'26/11/2026 09:02');assert.equal(await page.locator('#feedDemo').isVisible(),false);
+  await page.waitForFunction(()=>document.getElementById('feedTargetsStatus').textContent.includes('amarelo'));
+  assert.equal(calls.length-beforePortal,3);assert.equal(await page.locator('#feedUpdated').textContent(),'26/11/2026 09:02');assert.equal(await page.locator('#feedDemo').isVisible(),false);
+  assert.ok(await page.locator('#feedLineages td[class*=feed-target-]').count());assert.ok(await page.locator('#feedDetailRows td[class*=feed-target-]').count());
+  assert.match(await page.locator('#feedLineages tr:first-child td:nth-child(4)').getAttribute('class'),/feed-target-/);
+  assert.match(await page.locator('#feedLineages tr:first-child td:nth-child(6)').getAttribute('class'),/feed-target-/);
+  const target=page.locator('#feedLineages td[class*=feed-target-]').first();const background=await target.evaluate(el=>getComputedStyle(el).backgroundColor);
+  await page.screenshot({path:path.join(out,'metas-tema-1.png'),fullPage:true});
+  await page.locator('[data-theme-toggle]').click();assert.notEqual(await target.evaluate(el=>getComputedStyle(el).backgroundColor),background);
+  await page.screenshot({path:path.join(out,'metas-tema-2.png'),fullPage:true});
   mode='portal-empty';await page.reload();await page.waitForFunction(()=>document.getElementById('feedState').dataset.state==='empty');assert.equal(await page.locator('#feedRecords').textContent(),'0');assert.equal(await page.locator('#feedUpdated').textContent(),'—');
   assert.deepEqual(errors,[]);
   console.log(JSON.stringify({result:'PASS',states:['pending','loading','ready','empty','error'],cascadingFilters:true,nameSearch:true,dateFilter:true,pagination:true,charts:true,mobileFilters:true,viewports:[1440,768,390],themes:2,existingAuthentication:true,noDemoFallback:true,sessionCleared:true,errors}));
