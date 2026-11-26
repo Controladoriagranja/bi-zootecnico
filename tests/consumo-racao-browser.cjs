@@ -39,6 +39,10 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
   const links=await page.locator('.side-nav-link').allTextContents();assert.match(links.at(-2),/Consumo Médio de Ração/);assert.match(links.at(-1),/Fórmulas/);
   await page.goto(url+'?demo=1');await page.waitForFunction(()=>document.getElementById('feedRecords').textContent==='64',{},{timeout:8000}).catch(async error=>{console.error(await page.locator('#feedState').textContent(),errors);throw error;});
   assert.equal(calls.length,0);assert.equal(await page.locator('#feedDemo').isVisible(),true);
+  assert.equal(await page.locator('#feed_nutricao,#feed_sexo').count(),0);
+  const fieldTops=await page.locator('#feedFilters>.filter-field').evaluateAll(elements=>elements.map(el=>el.getBoundingClientRect().top));
+  assert.equal(fieldTops.length,6);assert.ok(fieldTops.every(top=>Math.abs(top-fieldTops[0])<1));
+  assert.ok((await page.locator('.feed-kpi').first().boundingBox()).height<110);
   assert.equal(await page.locator('#feedUpdated').textContent(),'—');assert.equal(await page.locator('#feedDetailRows tr').count(),25);
   assert.ok(await page.locator('#feedPhasesChart canvas').count());assert.ok(await page.locator('#feedEvolutionChart canvas').count());
   await page.locator('#feedNext').click();assert.equal(await page.locator('#feedPage').textContent(),'2 / 3');
@@ -67,7 +71,7 @@ const fixture=JSON.parse(JSON.stringify(sandbox.window.ConsumoRacaoDemo));delete
    await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    const before=await page.locator('#feedDetailRows tr:first-child td:first-child').boundingBox();await page.locator('.feed-detail-scroll').evaluate(el=>el.scrollLeft=600);
    const after=await page.locator('#feedDetailRows tr:first-child td:first-child').boundingBox();assert.ok(Math.abs(before.x-after.x)<1);
-   if(width===390){await page.locator('.mobile-filter-toggle').click();await page.locator('#feed_sexo button').click();await page.locator('#feed_sexo input[value=Macho]').check();
+   if(width===390){await page.locator('.mobile-filter-toggle').click();await page.locator('#feed_linhagens button').click();await page.locator('#feed_linhagens input[value=ROSS]').check();
     await page.locator('.mobile-filter-apply').click();await page.waitForFunction(()=>Number(document.getElementById('feedRecords').textContent)<64);
     if(await page.locator('.mobile-filter-toggle').getAttribute('aria-expanded')==='true')await page.locator('.mobile-filter-toggle').click();}
    await page.screenshot({path:path.join(out,'viewport-'+width+'.png'),fullPage:true});

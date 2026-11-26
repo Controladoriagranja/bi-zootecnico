@@ -3,7 +3,7 @@
   'use strict';
   const D=ConsumoRacaoData,E=id=>document.getElementById(id),adapter=D.create();
   let snapshot=null,selected=[],summary=null,request=null,loadId=0,page=1,pageSize=25,sort='data',direction='desc',metric='perBird',grouping='dia';
-  const fields=[['fazenda','Fazenda / Integrado'],['galpao','Galpão'],['lote','Lote'],['nutricao','Nutrição'],['linhagens','Linhagem'],['sexo','Sexo']]
+  const fields=[['fazenda','Fazenda / Integrado'],['galpao','Galpão'],['lote','Lote'],['linhagens','Linhagem']]
     .map(([apiKey,label])=>({id:'feed_'+apiKey,apiKey,label,multi:true,search:true}));
   for(const field of fields){const host=document.createElement('div');host.className='filter-field';
     const label=document.createElement('span');label.textContent=field.label;const control=document.createElement('div');control.className='checkbox-multiselect';control.id=field.id;host.append(label,control);E('feedFilters').append(host);}
