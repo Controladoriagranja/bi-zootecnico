@@ -1,0 +1,36 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+const ctx={};ctx.window=ctx;vm.createContext(ctx);
+for(const file of ['data','stacked'])vm.runInContext(fs.readFileSync(path.join(__dirname,`../assets/js/consumo-racao-${file}.js`),'utf8'),ctx);
+const keys=ctx.ConsumoRacaoData.phases.map(p=>p.key);
+function row(date,birds,values){const r={data:date,qtde_aves:birds};keys.forEach((key,i)=>r[key]=values[i]);r.consumo_total=values.some(v=>v===null)?null:values.reduce((s,v)=>s+v,0);return r;}
+const rows=[row('2026-11-02',10,[2,10,20,18]),row('2026-11-03',90,[18,90,180,162]),row('2026-11-03',20,[4,null,40,36]),row('2026-11-09',0,[1,2,3,4])];
+const S=ctx.ConsumoRacaoStacked;
+const weekly=S.periods(rows,'semana','perBird');assert.equal(weekly.length,1);assert.equal(weekly[0].name,'2026-11-02');
+assert.equal(weekly[0].total,5);assert.equal(weekly[0].birds,100);assert.equal(weekly[0].records,2);
+assert.deepEqual(Array.from(weekly[0].values),[.2,1,2,1.8]);
+assert.equal(weekly[0].values.reduce((s,v)=>s+v,0),weekly[0].total);
+const totals=S.periods(rows,'mes','total');assert.equal(totals.length,1);assert.equal(totals[0].total,510);assert.equal(totals[0].records,3);
+assert.equal(totals[0].values.reduce((s,v)=>s+v,0),totals[0].total);
+assert.equal(S.periods(rows,'dia','perBird').length,2);
+assert.equal(S.periods([],'dia','total').length,0);
+assert.equal(S.periods([row('2026-11-02',10,[0,0,0,0])],'dia','perBird')[0].total,0);
+console.log('PASS: day/week/month, weighted ratios, matching stack/total, missing phases, zero birds and actual zero.');
+const layout=S.layout([{total:84288,values:[1,2,3,4]},{total:3171291,values:[5,6,7,8]},{total:1000000,values:[9,10,11,12]},{total:0,values:[0,0,0,0]}]);
+assert.equal(layout[0].height,.8);assert.equal(layout[1].height,1);
+assert.ok(layout[2].height>.8&&layout[2].height<1);assert.equal(layout[3].height,0);
+for(const item of layout){assert.equal(new Set(item.blocks).size,1);assert.ok(Math.abs(item.blocks.reduce((a,b)=>a+b,0)-item.height)<1e-12);}
+assert.deepEqual(Array.from(layout[0].values),[1,2,3,4]);assert.equal(layout[0].total,84288);
+assert.equal(S.layout([{total:5},{total:5}])[0].height,1);assert.equal(S.layout([]).length,0);
+console.log('PASS: equal visual blocks, restrained monotonic heights, true values retained, identical totals and zero.');
+assert.equal(S.visibleCount(1600,'perBird',30),10);
+assert.equal(S.visibleCount(1600,'total',30),8);
+assert.equal(S.visibleCount(375,'total',30),1);
+assert.equal(S.visibleCount(768,'perBird',30),4);
+assert.equal(S.visibleCount(1600,'total',2),2);
+console.log('PASS: readable column capacity for desktop, tablet, mobile and both measures.');
+assert.equal(S.weekLabel('2026-11-16'),'SEM 47');
+assert.equal(S.weekLabel('2026-11-09'),'SEM 46');
+assert.equal(S.weekLabel('2026-10-12'),'SEM 42');
+assert.equal(S.weekLabel('2025-12-29'),'SEM 1');
+assert.equal(S.weekLabel('2027-01-01'),'SEM 53');
+console.log('PASS: week numbers without date, including ISO year boundaries.');

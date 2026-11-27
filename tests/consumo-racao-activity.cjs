@@ -1,0 +1,22 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+let pending=0,workDone=false;const frames=[];
+const ctx={requestAnimationFrame:fn=>frames.push(fn),ApiActivity:{begin(){pending++;let done=false;return()=>{assert.equal(done,false);done=true;pending--;};}}};
+ctx.window=ctx;vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/consumo-racao-activity.js'),'utf8'),ctx);
+const tick=async()=>{const next=frames.splice(0);next.forEach(fn=>fn());await new Promise(resolve=>setImmediate(resolve));};
+(async()=>{
+  const task=ctx.FeedActivity.run(()=>{workDone=true;return 42;});
+  assert.equal(pending,1);assert.equal(workDone,false);
+  await tick();assert.equal(workDone,false);assert.equal(pending,1);
+  await tick();assert.equal(workDone,true);assert.equal(pending,1);
+  await tick();assert.equal(await task,42);assert.equal(pending,0);
+  const failure=ctx.FeedActivity.run(()=>{throw Error('test failure');});
+  const checked=assert.rejects(failure,/test failure/);
+  await tick();await tick();await tick();await checked;assert.equal(pending,0);
+  let release;const waiting=ctx.FeedActivity.run(()=>new Promise(resolve=>release=resolve));
+  const fast=ctx.FeedActivity.run(()=>1);
+  assert.equal(pending,2);await tick();await tick();await tick();await fast;
+  assert.equal(pending,1);release();await new Promise(resolve=>setImmediate(resolve));await tick();await waiting;
+  assert.equal(pending,0);
+  console.log('PASS: popup shown before work, retained through rendering, cleaned after errors and overlapping updates.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

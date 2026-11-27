@@ -2,30 +2,15 @@
 (() => {
   'use strict';
   const D=ConsumoRacaoData,E=id=>document.getElementById(id),adapter=D.create();
-  let snapshot=null,selected=[],summary=null,request=null,loadId=0,page=1,pageSize=25,sort='data',direction='desc',metric='perBird',grouping='dia';
+  let snapshot=null,selected=[],summary=null,request=null,loadId=0,page=1,pageSize=25,sort='data',direction='desc',metric='total',grouping='dia';
   let metas=[];
-  let lineageSort=0,lineageDirection='asc';
-  const lineageHeaders=[...E('feedLineageTable').querySelectorAll('thead th')];
-  function lineageHeadings(){
-    lineageHeaders.forEach((th,index)=>{
-      th.setAttribute('aria-sort',index===lineageSort?(lineageDirection==='asc'?'ascending':'descending'):'none');
-      th.querySelector('[data-sort-icon]').textContent=index===lineageSort?(lineageDirection==='asc'?'↑':'↓'):'↕';
-    });
-  }
-  lineageHeaders.forEach((th,index)=>{
-    const label=th.textContent,button=document.createElement('button'),icon=document.createElement('span');
-    button.type='button';button.title='Ordenar por '+label;button.append(document.createTextNode(label+' '));
-    icon.dataset.sortIcon='';icon.setAttribute('aria-hidden','true');button.append(icon);
-    button.onclick=()=>{if(!snapshot)return;lineageDirection=lineageSort===index&&lineageDirection==='asc'?'desc':'asc';lineageSort=index;renderLineages();};
-    th.replaceChildren(button);
-  });
-  lineageHeadings();
   const fields=[['fazenda','Fazenda / Integrado'],['galpao','Galpão'],['lote','Lote'],['linhagens','Linhagem']]
     .map(([apiKey,label])=>({id:'feed_'+apiKey,apiKey,label,multi:true,search:true}));
   for(const field of fields){const host=document.createElement('div');host.className='filter-field';
     const label=document.createElement('span');label.textContent=field.label;const control=document.createElement('div');control.className='checkbox-multiselect';control.id=field.id;host.append(label,control);E('feedFilters').append(host);}
   class FeedFilters extends FilterController {
     normalizeOptions(field,items){return (items||[]).map(item=>({value:String(item.value),label:String(item.label)}));}
+    loadOptions(options){return FeedActivity.run(()=>super.loadOptions(options));}
   }
   const filters=new FeedFilters({fields,contextProvider:()=>({inicio:E('feedStart').value,fim:E('feedEnd').value}),
     optionsProvider:async current=>snapshot?D.options(snapshot.rows,current):{},onChange:()=>render()});
@@ -40,11 +25,12 @@
     {key:'linhagens',label:'Linhagem'},{key:'standard',label:'Standard'},
     {key:'consumo_total',label:'Consumo total (kg)',kind:'number'},{key:'consumo_ave',label:'Consumo / ave (kg/ave)',kind:'number'},
     ...D.phases.flatMap(phase=>[
-      {key:phase.key,label:'Consumo (kg)',group:phase.label,kind:'number'},
-      {key:phase.key+'_cons_ave',label:'Cons/Ave (kg/ave) · original',group:phase.label,kind:'number'},
-      {key:phase.key+'_cons_dia',label:'Cons/Dia · original',group:phase.label,kind:'number',title:'Significado em confirmação. Valor não utilizado nos indicadores.'}
+      {key:phase.key,label:'Consumo (kg)',group:phase.label,phase:phase.key,kind:'number'},
+      {key:phase.key+'_cons_ave',label:'Cons/Ave (kg/ave) · original',group:phase.label,phase:phase.key,kind:'number'},
+      {key:phase.key+'_cons_dia',label:'Cons/Dia · original',group:phase.label,phase:phase.key,kind:'number',title:'Significado em confirmação. Valor não utilizado nos indicadores.'}
     ])
   ];
+  const visibleColumns=()=>FeedPhase.columns(columns);
   function cell(value,numeric=false){const td=document.createElement('td');td.textContent=value;if(numeric)td.className='feed-numeric';return td;}
   function targetCell(td,result){
     if(!result)return td;
@@ -59,16 +45,17 @@
     for(const id of ['feedStart','feedEnd','limparFeedFiltros','feedPageSize'])E(id).disabled=!value;
   }
   function clearDisplay(message){
+    document.dispatchEvent(new CustomEvent('feed:ranking-data',{detail:{rows:[],metas:[]}}));
     selected=[];summary=null;
     for(const id of ['feedTotal','feedBirds','feedPerBird','feedRecords','feedUpdated','feedPage','feedPageCount'])E(id).textContent='—';
-    E('feedCoverage').textContent='';E('feedLineageTotal').replaceChildren();
-    messageRow(E('feedLineages'),message,8);messageRow(E('feedDetailRows'),message,columns.length);
+    E('feedCoverage').textContent='';
+    messageRow(E('feedDetailRows'),message,visibleColumns().length);
     E('feedPrev').disabled=true;E('feedNext').disabled=true;
-    for(const id of ['feedPhasesEmpty','feedEvolutionEmpty']){E(id).hidden=false;E(id).textContent=message;}
-    phaseChart?.clear();evolutionChart?.clear();
+    for(const id of ['feedPhasesEmpty']){E(id).hidden=false;E(id).textContent=message;}
+    phaseChart?.clear();
   }
   function headings(){
-    E('feedDetailHead').replaceChildren(...columns.map(column=>{
+    E('feedDetailHead').replaceChildren(...visibleColumns().map(column=>{
       const th=document.createElement('th');th.scope='col';th.setAttribute('aria-sort',sort===column.key?(direction==='asc'?'ascending':'descending'):'none');
       const button=document.createElement('button');button.type='button';button.title=column.title||'Ordenar por '+column.label;
       const text=document.createElement('span');if(column.group){const group=document.createElement('small');group.textContent=column.group;text.append(group);}const label=document.createElement('span');label.textContent=column.label;text.append(label);
@@ -78,32 +65,17 @@
   }
   function renderDetails(){
     try{adapter.assertSession();}catch(error){fail(error);return;}
+    if(!visibleColumns().some(column=>column.key===sort)){sort='data';direction='desc';}
+    E('feedDetailTable').style.minWidth=FeedPhase.get()==='consumo_total'?'1200px':'1400px';
     headings();const rows=D.ordered(selected,sort,direction),pages=Math.ceil(rows.length/pageSize);page=Math.max(1,Math.min(page,pages||1));
     const shown=rows.slice((page-1)*pageSize,page*pageSize);
     E('feedDetailRows').replaceChildren(...shown.map(row=>{const tr=document.createElement('tr');tr.dataset.recordId=row.registro_id;
-      for(const column of columns){let value=row[column.key];if(column.key==='fazenda')value=`${row.codigo} - ${row.integrado||'Não informado'}`;
+      for(const column of visibleColumns()){let value=row[column.key];if(column.key==='fazenda')value=`${row.codigo} - ${row.integrado||'Não informado'}`;
         tr.append(targetCell(cell(column.kind==='date'?date(value):column.kind==='number'?num(value,column.digits??3):value||'—',column.kind==='number'),ConsumoRacaoMetas.detail(metas,row,column.key)));}return tr;}));
-    if(!shown.length)messageRow(E('feedDetailRows'),'Nenhum registro para os filtros selecionados.',columns.length);
+    if(!shown.length)messageRow(E('feedDetailRows'),'Nenhum registro para os filtros selecionados.',visibleColumns().length);
     E('feedPage').textContent=pages?`${page} / ${pages}`:'0 / 0';
     E('feedPageCount').textContent=rows.length?`${num((page-1)*pageSize+1,0)}–${num(Math.min(page*pageSize,rows.length),0)} de ${num(rows.length,0)} registros`:'0 registros';
     E('feedPrev').disabled=page<=1||!pages;E('feedNext').disabled=page>=pages||!pages;
-  }
-  function renderLineages(){
-    const makeRow=(name,item,rows)=>{const tr=document.createElement('tr');tr.append(cell(name));
-      for(const phase of item.phases){const td=cell(num(phase.perBird.value),true);td.title=`${num(phase.perBird.denominator,0)} aves em ${phase.perBird.records} registros válidos`;tr.append(targetCell(td,ConsumoRacaoMetas.grouped(metas,rows,phase.key)));}
-      const ratio=cell(num(item.perBird.value),true);ratio.title=`${num(item.perBird.denominator,0)} aves em ${item.perBird.records} registros válidos`;
-      tr.append(targetCell(ratio,ConsumoRacaoMetas.grouped(metas,rows,'consumo_total')),cell(num(item.birds,0),true),cell(num(item.records,0),true));return tr;};
-    const value=item=>lineageSort===0?item.name:lineageSort<=4?item.phases[lineageSort-1].perBird.value:lineageSort===5?item.perBird.value:lineageSort===6?item.birds:item.records;
-    const groups=D.group(selected,'linhagens').sort((a,b)=>{
-      const x=value(a),y=value(b);
-      if(x==null||y==null)return x==null?(y==null?a.name.localeCompare(b.name,'pt-BR'):1):-1;
-      const comparison=typeof x==='number'?x-y:x.localeCompare(y,'pt-BR',{numeric:true});
-      return comparison*(lineageDirection==='asc'?1:-1)||a.name.localeCompare(b.name,'pt-BR');
-    });
-    lineageHeadings();
-    E('feedLineages').replaceChildren(...groups.map(item=>makeRow(item.name,item,selected.filter(row=>(row.linhagens||'Não informado')===item.name))));
-    if(!selected.length)messageRow(E('feedLineages'),'Nenhum registro para os filtros selecionados.',8);
-    E('feedLineageTotal').replaceChildren(...(selected.length?[makeRow('Total',summary,selected)]:[]));
   }
   function renderNow(){
     adapter.assertSession();
@@ -119,9 +91,10 @@
     E('feedCoverage').textContent=selected.length?`Total: ${summary.totalRecords} de ${summary.records} registros com quatro fases informadas. Por ave: ${summary.perBird.records} registros com consumo completo e aves maiores que zero. Cada fase usa seu próprio conjunto de valores válidos.`:'';
     E('feedState').hidden=selected.length>0;
     if(!selected.length)state('empty','Nenhum registro neste recorte','Ajuste o período ou limpe os filtros para consultar outros registros disponíveis.');
-    renderLineages();renderDetails();drawCharts();
+    renderDetails();drawCharts();
+    document.dispatchEvent(new CustomEvent('feed:ranking-data',{detail:{rows:selected,metas}}));
   }
-  function render(){if(!snapshot)return;const finish=ApiActivity.begin();requestAnimationFrame(()=>{try{renderNow();}catch(error){fail(error);}finally{finish();}});}
+  function render(){if(!snapshot)return;return FeedActivity.run(()=>{try{renderNow();}catch(error){fail(error);}});}
   function fail(error){
     if(error?.name==='AbortError')return;
     if(error.code==='SESSION_CHANGED'||[401,403].includes(error.status)){
@@ -143,7 +116,7 @@
       if(!result.demonstration&&ConsumoRacaoConfig.targetsEndpoint){
         try{
           const loaded=await ConsumoRacaoMetas.load(ConsumoRacaoConfig.targetsEndpoint,{signal:request.signal});
-          if(id!==loadId)return;adapter.assertSession();metas=loaded;renderLineages();renderDetails();
+          if(id!==loadId)return;adapter.assertSession();metas=loaded;renderDetails();document.dispatchEvent(new CustomEvent('feed:ranking-data',{detail:{rows:selected,metas}}));
           E('feedTargetsStatus').textContent=loaded.length?'Metas em kg/ave · verde: até ±1% · laranja: acima de ±1% até ±3% · vermelho: acima de ±3%. Meta de Crescimento = Crescimento + Crescimento 2; total = soma das fases vigentes.':'Nenhuma meta aplicável cadastrada.';
         }catch(error){
           if(id!==loadId||error?.name==='AbortError')return;
@@ -154,44 +127,53 @@
     }catch(error){if(id===loadId)fail(error);}
     finally{if(id===loadId)E('feedDetailTable').setAttribute('aria-busy','false');}
   }
-  let phaseChart=null,evolutionChart=null;
+  let phaseChart=null;
   function drawCharts(){
     if(!summary)return;
-    E('feedPhaseSubtitle').textContent=`${metric==='total'?'Consumo total':'Consumo por ave'} · ${unit()}`;
-    E('feedEvolutionSubtitle').textContent=`Por data do acerto · ${metric==='total'?'consumo total':'consumo por ave'}`;
-    const hasPhase=summary.phases.some(phase=>(metric==='total'?phase.total:phase.perBird.value)!==null);
-    E('feedPhasesEmpty').hidden=hasPhase;E('feedPhasesEmpty').textContent='Sem consumo válido para os filtros selecionados.';
-    const periods=D.evolution(selected,grouping),hasEvolution=periods.some(item=>(metric==='total'?item.total:item.perBird.value)!==null);
-    E('feedEvolutionEmpty').hidden=hasEvolution;E('feedEvolutionEmpty').textContent='Sem consumo válido para os filtros selecionados.';
-    if(!hasPhase){phaseChart?.clear();}if(!hasEvolution){evolutionChart?.clear();}
-    if(!hasPhase&&!hasEvolution)return;
+    const periods=ConsumoRacaoStacked.layout(ConsumoRacaoStacked.periods(selected,grouping,metric,FeedPhase.get()));
+    E('feedPhasesEmpty').hidden=periods.length>0;
+    E('feedPhasesEmpty').textContent='Sem consumo completo válido para os filtros selecionados.';
+    if(!periods.length){phaseChart?.clear();return;}
     const style=getComputedStyle(document.body),color=name=>style.getPropertyValue(name).trim(),font=style.fontFamily;
-    const colors=D.phases.map((_,i)=>color('--feed-phase-'+i));
-    const tooltip={trigger:'axis',confine:true,renderMode:'richText',backgroundColor:color('--card'),borderColor:color('--border'),textStyle:{color:color('--foreground'),fontFamily:font}};
-    const axis={axisLine:{lineStyle:{color:color('--border')}},axisTick:{show:false},axisLabel:{color:color('--muted-foreground'),fontFamily:font,fontSize:11},splitLine:{lineStyle:{color:color('--border')}}};
-    if(hasPhase){phaseChart??=echarts.init(E('feedPhasesChart'));
-      phaseChart.setOption({animationDuration:180,textStyle:{fontFamily:font},grid:{left:90,right:26,top:24,bottom:44},
-        tooltip:{...tooltip,formatter:items=>{const phase=summary.phases[items[0].dataIndex];return `${phase.label}\n${metric==='total'?'Consumo':'Consumo/ave'}: ${num(metric==='total'?phase.total:phase.perBird.value)}\nBase por ave: ${num(phase.perBird.denominator,0)} aves\n${phase.perBird.records} registros válidos`; }},
-        xAxis:{...axis,type:'category',data:D.phases.map(phase=>phase.label),axisLabel:{...axis.axisLabel,interval:0,fontSize:10}},
-        yAxis:{...axis,type:'value',axisLabel:{...axis.axisLabel,formatter:value=>num(value)}},
-        series:[{type:'bar',barMaxWidth:55,label:{show:true,position:'top',color:color('--foreground'),formatter:params=>num(params.value)},
-          data:summary.phases.map((phase,i)=>({value:metric==='total'?phase.total:phase.perBird.value,itemStyle:{color:colors[i],borderRadius:[5,5,0,0]}}))}]},true);}
-    if(hasEvolution){evolutionChart??=echarts.init(E('feedEvolutionChart'));
-      const zoom=evolutionChart.getOption()?.dataZoom?.[0];
-      evolutionChart.setOption({animationDuration:180,textStyle:{fontFamily:font},grid:{left:90,right:24,top:24,bottom:78},
-        tooltip:{...tooltip,formatter:items=>{const item=periods[items[0].dataIndex];return `${date(item.name)}${grouping==='semana'?' · início da semana':''}\nConsumo${metric==='total'?'':'/ave'}: ${num(metric==='total'?item.total:item.perBird.value)}\n${item.records} registros\nBase por ave: ${num(item.perBird.denominator,0)} aves`; }},
-        xAxis:{...axis,type:'category',data:periods.map(item=>date(item.name)),boundaryGap:metric==='total',axisLabel:{...axis.axisLabel,hideOverlap:true}},
-        yAxis:{...axis,type:'value',axisLabel:{...axis.axisLabel,formatter:value=>num(value)}},
-        dataZoom:[{type:'slider',height:16,bottom:14,start:zoom?.start??0,end:zoom?.end??100,borderColor:color('--border'),textStyle:{color:color('--muted-foreground')}}],
-        series:[{type:metric==='total'?'bar':'line',name:'Consumo',data:periods.map(item=>metric==='total'?item.total:item.perBird.value),connectNulls:false,
-          itemStyle:{color:color('--primary')},lineStyle:{width:2},areaStyle:{opacity:.05},symbolSize:5,barMaxWidth:28}]},true);}
+    const numUnit=metric==='total'?'kg':'kg/ave';
+    const colors=[color('--feed-phase-0'),color('--feed-phase-3'),color('--feed-phase-2'),color('--feed-phase-1')];
+    const labels=periods.map(item=>grouping==='semana'?ConsumoRacaoStacked.weekLabel(item.name):grouping==='mes'?item.name.slice(0,7).split('-').reverse().join('/'):date(item.name));
+    phaseChart??=echarts.init(E('feedPhasesChart'));phaseChart.clear();
+    const visible=ConsumoRacaoStacked.visibleCount(E('feedPhasesChart').clientWidth,metric,periods.length);
+    const selectedPhase=FeedPhase.get(),isTotal=selectedPhase==='consumo_total';
+    const phaseName=isTotal?'Total':D.phases.find(phase=>phase.key===selectedPhase).label;
+    const series=D.phases.map((phase,index)=>({name:phase.label,type:'bar',stack:'consumo',barMaxWidth:130,
+      itemStyle:{color:colors[index]},label:{show:true,position:'inside',fontFamily:font,fontSize:12,fontWeight:600,
+        color:index===2?'#211b1d':'#ffffff',formatter:p=>num(periods[p.dataIndex].values[index])},labelLayout:{hideOverlap:true},
+      data:periods.map(item=>isTotal?item.blocks[index]:D.phases[index].key===selectedPhase?item.height:null)}));
+    // The total is a label at the top of the existing stack, never an extra segment.
+    series.push({name:'Total',type:'scatter',symbolSize:0,silent:true,tooltip:{show:false},
+      label:{show:true,position:'top',distance:10,color:color('--primary'),fontFamily:font,fontSize:12,lineHeight:16,fontWeight:700,formatter:p=>`${phaseName}:\n${num(periods[p.dataIndex].total)}\n${numUnit}`},
+      data:periods.map(item=>item.height)});
+    phaseChart.setOption({animation:false,textStyle:{fontFamily:font},
+      grid:{left:24,right:24,top:65,bottom:110},
+      legend:{bottom:40,data:[...D.phases.map(phase=>phase.label),'Total'],selected:Object.fromEntries([...D.phases.map(phase=>[phase.label,isTotal||phase.key===selectedPhase]),['Total',true]]),textStyle:{color:color('--foreground'),fontSize:13}},
+      tooltip:{trigger:'axis',confine:true,renderMode:'richText',backgroundColor:color('--card'),borderColor:color('--border'),textStyle:{color:color('--foreground'),fontFamily:font},
+        formatter:items=>{const item=periods[items[0].dataIndex];return `${labels[items[0].dataIndex]}${grouping==='semana'?' (início da semana)':''}\n${D.phases.map((phase,i)=>isTotal||phase.key===selectedPhase?`${phase.label}: ${num(item.values[i])} ${numUnit}`:null).filter(Boolean).join('\n')}\n${phaseName}: ${num(item.total)} ${numUnit}\nRegistros: ${num(item.records,0)}\nAves: ${num(item.birds,0)}`;}},
+      xAxis:{type:'category',data:labels,axisTick:{show:false},axisLabel:{color:color('--foreground'),fontSize:12,hideOverlap:true},axisLine:{lineStyle:{color:color('--border')}}},
+      yAxis:{type:'value',min:0,max:1.12,show:false},
+      dataZoom:[{type:'slider',height:18,bottom:8,startValue:0,endValue:visible-1,maxValueSpan:visible-1,minValueSpan:0,borderColor:color('--border'),textStyle:{color:color('--foreground')},labelFormatter:(_,label)=>label},{type:'inside',maxValueSpan:visible-1,minValueSpan:0,zoomOnMouseWheel:false,moveOnMouseWheel:false}],series
+    },true);
+    phaseChart.off('click');phaseChart.on('click',event=>{
+      if(event.componentType==='series')FeedPhase.set(event.seriesName==='Total'?'consumo_total':D.phases.find(phase=>phase.label===event.seriesName)?.key);
+    });
+    phaseChart.off('legendselectchanged');phaseChart.on('legendselectchanged',event=>FeedPhase.set(event.name==='Total'?'consumo_total':D.phases.find(phase=>phase.label===event.name)?.key));
   }
+  document.addEventListener('feed:phase-change',()=>{
+    page=1;if(snapshot){renderDetails();drawCharts();}else headings();
+    const scroll=E('feedDetailTable').closest('.feed-scroll');if(scroll)scroll.scrollLeft=0;
+  });
   E('feedPrev').onclick=()=>{if(!E('feedPrev').disabled){page--;renderDetails();}};
   E('feedNext').onclick=()=>{if(!E('feedNext').disabled){page++;renderDetails();}};
   E('feedPageSize').onchange=()=>{pageSize=Number(E('feedPageSize').value);page=1;renderDetails();};
   E('feedReload').onclick=load;
   E('limparFeedFiltros').onclick=async()=>{if(!snapshot)return;filters.clear();E('feedStart').value=snapshot.period.inicio;E('feedEnd').value=snapshot.period.fim;
-    try{await filters.loadOptions({preserve:false});render();}catch(error){fail(error);}};
+    try{await filters.loadOptions({preserve:false});FeedPhase.set('consumo_total');await render();}catch(error){fail(error);}};
   for(const id of ['feedStart','feedEnd'])E(id).addEventListener('change',async()=>{
     if(!snapshot||matchMedia('(max-width:767px)').matches)return;
     try{await filters.loadOptions({preserve:true});render();}catch(error){fail(error);}
@@ -201,8 +183,8 @@
   document.querySelectorAll('[data-feed-period]').forEach(button=>button.onclick=()=>{grouping=button.dataset.feedPeriod;
     document.querySelectorAll('[data-feed-period]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));drawCharts();});
   document.addEventListener('dashboard:theme-changed',drawCharts);
-  let resizeFrame;const resize=new ResizeObserver(()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{phaseChart?.resize();evolutionChart?.resize();});});
-  resize.observe(E('feedPhasesChart'));resize.observe(E('feedEvolutionChart'));
+  let resizeFrame,chartWidth=0;const resize=new ResizeObserver(()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{phaseChart?.resize();const width=E('feedPhasesChart').clientWidth;if(width!==chartWidth){chartWidth=width;drawCharts();}});});
+  resize.observe(E('feedPhasesChart'));
   window.addEventListener('focus',()=>{if(snapshot)try{adapter.assertSession();}catch(error){snapshot=null;enabled(false);fail(error);}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&snapshot)try{adapter.assertSession();}catch(error){snapshot=null;enabled(false);fail(error);}});
   filters.register();headings();enabled(false);E('feedDemo').hidden=!adapter.demonstration;load();

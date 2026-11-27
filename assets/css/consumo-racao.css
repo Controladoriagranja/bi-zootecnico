@@ -49,8 +49,8 @@
 #feedLineageTable th[aria-sort="ascending"] [data-sort-icon],#feedLineageTable th[aria-sort="descending"] [data-sort-icon] { color:var(--primary); }
 .feed-table tfoot td { font-weight:700; background:var(--secondary); }
 .feed-table .feed-numeric { font-variant-numeric:tabular-nums; }
-.feed-report { --feed-green-text:#00843d; --feed-orange-text:#b45700; --feed-red-text:#d12838; }
-[data-theme="dark"] .feed-report { --feed-green-text:#6add96; --feed-orange-text:#ffbd70; --feed-red-text:#ff929e; }
+.feed-report { --feed-green-text:#00843d; --feed-orange-text:#B36B00; --feed-red-text:#d12838; }
+[data-theme="dark"] .feed-report { --feed-green-text:#6add96; --feed-red-text:#ff929e; }
 .feed-report .feed-table td.feed-target-green { color:var(--feed-green-text); font-weight:600; }
 .feed-report .feed-table td.feed-target-orange { color:var(--feed-orange-text); font-weight:600; }
 .feed-report .feed-table td.feed-target-red { color:var(--feed-red-text); font-weight:600; }
@@ -78,3 +78,35 @@
 .feed-footer .button { min-height:34px; font-size:12px; }
 @media(max-width:1100px) { .feed-report .filters-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .feed-charts { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:767px) { .feed-report .filters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .feed-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .feed-kpi { padding:8px 10px; } .feed-heading,.feed-state { padding:15px; } .feed-state { align-items:flex-start; flex-direction:column; } .feed-chart { height:280px; } .feed-footer nav { width:100%; justify-content:space-between; } .feed-context { display:grid; } .feed-inset { padding:10px 14px; } }
+
+/* Readable typography. Intermediate classification uses --feed-orange-text in both themes. */
+.feed-report { font-size:16px; --muted-foreground:#5c5356; }
+[data-theme="dark"] .feed-report { --muted-foreground:#c0b7ba; }
+.feed-report .feed-table { font-size:14px; }
+.feed-report .feed-table td { font-weight:500; }
+
+
+.feed-report .feed-table tfoot td { font-weight:700; }
+.feed-report .feed-kpi h2 { font-size:14px; color:var(--foreground); }
+.feed-report .feed-kpi>strong { font-size:clamp(1.5rem,2vw,1.9rem); line-height:1.3; }
+.feed-report .feed-kpi { padding:12px 16px; }
+.feed-report .feed-kpi p,.feed-report .feed-heading p,#feedCoverage { display:none; }
+.feed-report .filter-field>span,.feed-report .filter-field>label,
+.feed-report input[type="date"],.feed-report .feed-page-size,
+.feed-report .feed-page-size select,.feed-report .feed-segment button,
+.feed-report .feed-footer,.feed-report .feed-footer .button { font-size:14px; }
+.feed-report .feed-context,.feed-report .feed-footnote { font-size:13px; }
+.feed-report .feed-heading h2 { font-size:18px; }
+.feed-report #feedDetailTable th button small { font-size:12px; }
+
+.feed-heading>div:first-child:has([data-formula-mount]),.feed-ranking-title,.feed-ranking-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.feed-ranking-context { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 20px 12px; font-size:13px; color:var(--muted-foreground); flex-wrap:wrap; }
+#feedRankingPicker { max-width:100%; min-height:38px; font:inherit; color:var(--foreground); background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px 10px; }
+.feed-ranking-scroll { max-height:560px; overflow:auto; }
+.feed-ranking-meta-row { position:relative; height:30px; margin:0 12px; overflow:hidden; }
+#feedRankingMeta { position:absolute; top:2px; transform:translateX(-50%); padding:3px 6px; color:#000000; background:#ffffff; border-radius:4px; font-size:13px; font-weight:600; white-space:nowrap; }
+.feed-ranking-controls .feed-segment { flex-wrap:wrap; max-width:100%; }
+.feed-stacked-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.feed-stacked-chart { height:460px; }
+@media(max-width:767px) { .feed-stacked-chart { height:420px; } .feed-stacked-controls { gap:8px; } }
+@media(max-width:767px) { .feed-ranking-context { padding:0 15px 12px; } .feed-ranking-controls { gap:8px; } }
