@@ -77,6 +77,15 @@
     E('feedPageCount').textContent=rows.length?`${num((page-1)*pageSize+1,0)}–${num(Math.min(page*pageSize,rows.length),0)} de ${num(rows.length,0)} registros`:'0 registros';
     E('feedPrev').disabled=page<=1||!pages;E('feedNext').disabled=page>=pages||!pages;
   }
+  function renderCards(){
+    const card=FeedPhase.cards(selected),phase=FeedPhase.get();
+    const label=phase==='consumo_total'?'Total':D.phases.find(item=>item.key===phase).label;
+    E('feedTotalTitle').textContent=phase==='consumo_total'?'Consumo total':`Consumo ${label}`;
+    E('feedTotal').textContent=num(card.total);E('feedBirds').textContent=num(card.birds,0);E('feedPerBird').textContent=num(card.perBird.value);E('feedRecords').textContent=num(card.records,0);
+    E('feedTotalNote').textContent=`${unit()} · ${card.totalRecords} registros com consumo informado`;
+    E('feedPerBirdNote').textContent=`${unit()}/ave · base: ${num(card.perBird.denominator,0)} aves`;
+    E('feedCoverage').textContent=selected.length?`Total: ${card.totalRecords} de ${card.records} registros com consumo informado informadas. Por ave: ${card.perBird.records} registros com consumo completo e aves maiores que zero. Cada fase usa seu próprio conjunto de valores válidos.`:'';
+  }
   function renderNow(){
     adapter.assertSession();
     const inicio=E('feedStart').value,fim=E('feedEnd').value;
@@ -85,10 +94,7 @@
     selected=snapshot.rows.filter(row=>D.matches(row,{...filters.values(),inicio,fim}));summary=D.aggregate(selected);page=1;
     E('feedPeriod').textContent=`Período selecionado: ${date(inicio)} a ${date(fim)}`;
     E('feedUpdated').textContent=formatarDataHoraBR(snapshot.updated);E('feedUpdated').title=snapshot.demonstration?'Demonstração sintética, sem coleta real.':'Última importação dos dados autorizados (importado_em).';
-    E('feedTotal').textContent=num(summary.total);E('feedBirds').textContent=num(summary.birds,0);E('feedPerBird').textContent=num(summary.perBird.value);E('feedRecords').textContent=num(summary.records,0);
-    E('feedTotalNote').textContent=`${unit()} · ${summary.totalRecords} registros com quatro fases`;
-    E('feedPerBirdNote').textContent=`${unit()}/ave · base: ${num(summary.perBird.denominator,0)} aves`;
-    E('feedCoverage').textContent=selected.length?`Total: ${summary.totalRecords} de ${summary.records} registros com quatro fases informadas. Por ave: ${summary.perBird.records} registros com consumo completo e aves maiores que zero. Cada fase usa seu próprio conjunto de valores válidos.`:'';
+    renderCards();
     E('feedState').hidden=selected.length>0;
     if(!selected.length)state('empty','Nenhum registro neste recorte','Ajuste o período ou limpe os filtros para consultar outros registros disponíveis.');
     renderDetails();drawCharts();
@@ -165,7 +171,7 @@
     phaseChart.off('legendselectchanged');phaseChart.on('legendselectchanged',event=>FeedPhase.set(event.name==='Total'?'consumo_total':D.phases.find(phase=>phase.label===event.name)?.key));
   }
   document.addEventListener('feed:phase-change',()=>{
-    page=1;if(snapshot){renderDetails();drawCharts();}else headings();
+    page=1;if(snapshot){renderCards();renderDetails();drawCharts();}else headings();
     const scroll=E('feedDetailTable').closest('.feed-scroll');if(scroll)scroll.scrollLeft=0;
   });
   E('feedPrev').onclick=()=>{if(!E('feedPrev').disabled){page--;renderDetails();}};
