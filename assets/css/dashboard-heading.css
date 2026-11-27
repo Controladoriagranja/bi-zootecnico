@@ -1,0 +1,43 @@
+/* Cabeçalhos compactos compartilhados por Matrizes e Zootécnico.
+   Referência: rótulo dourado, título escuro e fonte Geist. */
+:root {
+  --dashboard-heading-gold: #b17a28;
+}
+:root[data-theme="dark"] {
+  --dashboard-heading-gold: #e0b75d;
+}
+html body :is(.page-header, .lotes-compact-header, .mz-heading)[class] h1 {
+  font-family: "Geist Variable", "Geist", system-ui, sans-serif;
+  /* Regras de páginas antigas também usam !important no tamanho do título. */
+  font-size: 1.375rem !important;
+  font-weight: 760;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  margin: 0 0 .25rem;
+  overflow-wrap: anywhere;
+}
+html body :is(.page-header, .lotes-compact-header, .mz-heading)[class] :is(.eyebrow, .mz-eyebrow) {
+  display: block;
+  font-family: "Geist Variable", "Geist", system-ui, sans-serif;
+  color: var(--dashboard-heading-gold);
+  font-size: .625rem;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin: 0 0 .375rem;
+}
+html body :is(.page-header, .lotes-compact-header, .mz-heading)[class] > div:first-child {
+  min-width: 0;
+}
+html body :is(.page-header, .mz-heading)[class] > div:first-child > p {
+  font-family: "Geist Variable", "Geist", system-ui, sans-serif;
+  font-size: .8125rem;
+  line-height: 1.5;
+  margin-top: .25rem;
+}
+@media (max-width: 767px) {
+  html body :is(.page-header, .lotes-compact-header, .mz-heading)[class] h1 {
+    font-size: 1.25rem !important;
+  }
+}
