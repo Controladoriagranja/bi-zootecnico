@@ -1,0 +1,22 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+const context={window:{},Date,console};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/overview-efficiency.js'),'utf8'),context);
+const M=context.window.OverviewEfficiency;
+const payload={inicio:'2026-01-01',fim:'2026-11-26',periodos:[{chave:'2026-11-01',setores:[{id:'pcp_10',indicadores:[{id:'produtividade',valor:999},{id:'aves_media',valor:200}]},{id:'pcp_111',indicadores:[{id:'produtividade',valor:888}]},{id:'matrizes',indicadores:[{id:'produtividade',valor:77}]}]}]};
+const rows=[{data:'2026-11-02',unidade:'10',aves_abatidas_liquidas:99,capacidade_nominal_aves:100},{data:'2026-11-03',unidade:'10',aves_abatidas_liquidas:189,capacidade_nominal_aves:200},{data:'2026-11-02',unidade:'111',aves_abatidas_liquidas:98,capacidade_nominal_aves:100},{data:'2026-11-04',unidade:'10',aves_abatidas_liquidas:20,capacidade_nominal_aves:null}];
+const answer={ok:true,contrato:'eficiencia-abate-v1',revisao_formulas:'eficiencia-capacidade-v3',dias:rows};
+const result=M.combine(payload,answer,'mes'),metrics=result.periodos[0].setores;
+assert.equal(metrics[0].indicadores[0].id,'eficiencia');assert.equal(metrics[0].indicadores[0].valor,96);assert.equal(metrics[0].indicadores[0].meta,98);assert.equal(metrics[0].indicadores[0].cor,'laranja');
+assert.equal(metrics[1].indicadores[0].valor,98);assert.equal(metrics[1].indicadores[0].cor,'verde');assert.equal(metrics[2].indicadores[0].valor,77);
+assert.equal(metrics[0].indicadores[1].valor,200);assert.equal(payload.periodos[0].setores[0].indicadores[0].id,'produtividade');
+assert.equal(M.periodKey('2026-01-01','semana'),'2025-12-29');assert.equal(M.periodKey('2026-11-03','dia'),'2026-11-03');
+for(const [value,color] of [[98,'verde'],[99,'verde'],[98*.99,'amarelo'],[98*.98,'laranja'],[98*.97,'vermelho'],[null,'sem-dados']])assert.equal(M.grade(value).cor,color);
+assert.equal(M.metric([{capacidade_nominal_aves:100,aves_abatidas_liquidas:0}]).valor,0);
+assert.equal(M.metric([{capacidade_nominal_aves:0,aves_abatidas_liquidas:99}]).valor,null);
+assert.throws(()=>M.combine(payload,{...answer,dias:[rows[0],rows[0]]},'mes'),/mesmo dia/);
+assert.throws(()=>M.combine(payload,{...answer,revisao_formulas:'antiga'},'mes'),/revisão/);
+const unavailable=M.combine(payload,null,'mes','Serviço indisponível');assert.equal(unavailable.periodos[0].setores[0].indicadores[0].valor,null);assert.equal(unavailable.periodos[0].setores[0].indicadores[1].valor,200);
+(async()=>{
+ context.apiGet=async()=>{throw Object.assign(Error('Sem permissão'),{status:403});};assert.equal((await M.enrich(payload,'mes')).eficiencia_erro,'Sem permissão');
+ context.apiGet=async()=>{throw Object.assign(Error('Sessão alterada'),{code:'SESSION_CHANGED'});};await assert.rejects(M.enrich(payload,'mes'),/Sessão/);
+ console.log(JSON.stringify({result:'PASS',ratioOfSums:96,unitSeparation:true,target98:true,existingColors:true,invalidDaysExcluded:true,otherMetricsPreserved:true,noProductivityFallback:true}));
+})().catch(e=>{console.error(e);process.exitCode=1;});

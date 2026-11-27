@@ -1,0 +1,55 @@
+VISÃO GERAL — EFICIÊNCIA DE ABATE
+
+Backup anterior às alterações:
+_backup_antes_restaurar/20261127_visao_geral_eficiencia/
+Contém assets/js/mapa-calor.js, visao-geral.html e mapa-calor.html originais.
+Para desfazer somente esta mudança, restaurar esses três arquivos do backup.
+O módulo novo fica sem referência; não é necessário apagar nenhum arquivo.
+
+Alterações locais:
+- assets/js/overview-efficiency.js: consulta/valida a mesma API do BI-PCP,
+  agrupa por data/unidade e substitui o indicador Produtividade por Eficiência.
+- assets/js/mapa-calor.js: integra a eficiência nos cards/histórico e aponta
+  Ir para indicador para BI-PCP/index.html?relatorio=g5, com unidade e período.
+- visao-geral.html e mapa-calor.html: incluem o módulo e atualizam a versão JS.
+- tests/overview-efficiency.cjs e tests/overview-efficiency-browser.cjs.
+
+Fonte existente: /api/pcp/comparativo/eficiencia-abate, pelo Worker/autenticação
+atuais. Contrato eficiencia-abate-v1, revisão eficiencia-capacidade-v3.
+Sem SQL, novas rotas, mudanças no backend, no BI-PCP ou publicação.
+
+Ave Nova = unidade 10; Real Alimentos = unidade 111.
+Eficiência (%) = soma(aves_abatidas_liquidas) / soma(capacidade_nominal_aves) * 100.
+Mesmo conjunto de dias válidos nos dois componentes: capacidade positiva,
+aves não negativas e ambos numéricos. Não usar média simples de percentuais,
+nem o antigo indicador de aves/dia. Zero informado é preservado; sem base é —.
+Ano/mês/dia/semana usam o recorte da Visão Geral, limitado a D-1 pela API.
+Semana começa na segunda-feira, incluindo passagem entre anos.
+
+Meta NA VISÃO GERAL: 98%. Desvio relativo = (eficiência - 98) / 98 * 100.
+Maior é melhor. Meta atingida/superada: verde; até 1% abaixo: amarelo;
+acima de 1% e abaixo de 3%: laranja; a partir de 3% abaixo: vermelho.
+Usa as classes/visual existentes. O gráfico mantém a linha de meta em 98%.
+O relatório de destino do BI-PCP conserva sua configuração própria de metas;
+esta entrega não altera outro projeto.
+
+Navegação: relatorio=g5, unidade=10/111, data_inicio e data_fim exatas do
+período, origem=visao-geral e retorno contendo visao/ano/mes/periodo.
+Retorno usa o mecanismo já presente no BI-PCP e na Central. Mensal encaminha
+resumo=mes; diário/semanal mantêm o recorte de datas, sem incluir dias extras.
+
+Uma consulta adicional de eficiência atende os dois quadros e todos os períodos
+da resposta. Trocar apenas o período do seletor não faz nova requisição.
+Histórico mensal aproveita o cache já existente; diário/semanal reutilizam
+os períodos carregados. Não há cache novo persistente de dados ou credenciais.
+Falha da eficiência deixa esse indicador sem dados e informa indisponibilidade,
+preservando os outros indicadores. Nunca volta a exibir Produtividade no lugar.
+Sessão expirada/alterada segue o tratamento de autenticação existente.
+
+Validação local: razão das somas, unidade, cores/limites, meta, revisão de API,
+mensal/diário/semanal, gráfico, links, restauração de filtros, responsividade,
+tema, ausência de consultas em troca de período e erro isolado do indicador.
+Os testes interceptam a rede: não executam cargas nem consultam o servidor real.
+Depois de publicar, comparar um mesmo período/unidade com a Eficiência do BI-PCP
+e conferir a rota no Worker. Se faltar essa revisão na API real, a tela informa
+indisponibilidade em vez de usar a fórmula antiga.
