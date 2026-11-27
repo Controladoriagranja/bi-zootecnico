@@ -4,11 +4,41 @@ window.PcpCondenacoes=(()=>{
  const supplierKey=row=>JSON.stringify([row.granja??null,row.fornecedor??null]);
  const supplierPair=key=>{const pair=JSON.parse(key);return {granja:pair[0],fornecedor:pair[1]};};
  const supplierLabel=row=>(row.granja||'Granja não informada')+' - '+(row.fornecedor||'Fornecedor não informado');
+ // Mesma transição de Unidade / Turno da Produtividade; nomes preservados.
+ function normalizeView(value){
+  const selected=new Set(PcpMulti.values(value).flatMap(item=>item==='geral'||item==='both'?['10','111']:[item]));
+  if(selected.has('10')||(selected.has('1')&&selected.has('2'))){selected.add('10');selected.delete('1');selected.delete('2');}
+  if(selected.has('111')&&!selected.has('10')){selected.delete('1');selected.delete('2');}
+  return ['10','1','2','111'].filter(item=>selected.has(item)).join(',')||'10';
+ }
+ function bindUnitTurnView(select){
+  const multi=select.pcpMulti,state=multi.controller.getState(multi.field),descriptor=Object.getOwnPropertyDescriptor(select,'value');
+  const summary=multi.controller.summary;
+  multi.controller.summary=function(current){return current===state&&normalizeView([...current.selected].join(','))==='10,111'?'Ave Nova + Real':summary.call(this,current);};
+  Object.defineProperty(select,'value',{configurable:true,get:descriptor.get,set:value=>descriptor.set.call(select,normalizeView(value))});
+  state.host.addEventListener('change',event=>{
+   const input=event.target;
+   if(!input.matches('input[type="checkbox"]'))return;
+   event.stopImmediatePropagation();
+   // Como na Produtividade, o seletor genérico não cria misturas de geral/turnos.
+   if(input.hasAttribute('data-all')){select.value=select.value;return;}
+   const value=String(input.value);if(!['10','1','2','111'].includes(value))return;
+   const selected=new Set(PcpMulti.values(normalizeView(select.value)));
+   if(input.checked){
+    selected.add(value);
+    if(value==='10'){selected.delete('1');selected.delete('2');}
+    else if(value==='1'||value==='2'){selected.delete('10');selected.delete('111');}
+    else if(value==='111'){selected.delete('1');selected.delete('2');}
+   }else selected.delete(value);
+   select.value=normalizeView([...selected].join(','));select.dispatchEvent(new Event('change',{bubbles:true}));
+  },true);
+  select.value=select.value;
+ }
  function create(api){
   const el=document.createElement('dialog');el.className='cg-dialog cg-stops-dialog cg-cond-dialog';el.setAttribute('aria-label','Acompanhamento de condenações');
-  el.innerHTML='<header class="cg-stops-header"><div><h2>Acompanhamento de condenações</h2><p class="cg-cond-context"></p></div><div class="cg-cond-actions"><button class="button cg-cond-back" hidden>Voltar ao resumo</button><button class="button cg-cond-close">Fechar</button></div></header><div class="cg-stops-body"><div class="cg-cond-toolbar"><div class="cg-cond-view-filter"><label>Visão <select id="cgCondVisao" class="cg-stops-view"><option value="geral">Ave Nova + Real</option><option value="10">Ave Nova — Geral</option><option value="1">Ave Nova — 1º turno</option><option value="2">Ave Nova — 2º turno</option><option value="111">Real Alimentos</option></select></label></div><div class="cg-cond-filters"><label>Grupo<select id="cgCondGrupo"><option value="">Todos</option></select></label><label>Condenação<select id="cgCondCausa"><option value="">Todas</option></select></label><label>Técnico<select id="cgCondTecnico"><option value="">Todos</option></select></label><label>Granja - Fornecedor<select id="cgCondFornecedor"><option value="">Todos</option></select></label></div></div><p class="cg-cond-status" role="status"></p><section class="cg-cond-summary"></section><section class="cg-cond-detail" hidden><h3></h3><div class="pcp-table-scroll cg-cond-rows"></div></section></div>';
+  el.innerHTML='<header class="cg-stops-header"><div><h2>Acompanhamento de condenações</h2><p class="cg-cond-context"></p></div><div class="cg-cond-actions"><button class="button cg-cond-back" hidden>Voltar ao resumo</button><button class="button cg-cond-close">Fechar</button></div></header><div class="cg-stops-body"><div class="cg-cond-toolbar"><div class="cg-cond-view-filter"><label>Visão <select id="cgCondVisao" class="cg-stops-view"><option value="10">Ave Nova — Geral</option><option value="1">Ave Nova — 1º turno</option><option value="2">Ave Nova — 2º turno</option><option value="111">Real Alimentos</option></select></label></div><div class="cg-cond-filters"><label>Grupo<select id="cgCondGrupo"><option value="">Todos</option></select></label><label>Condenação<select id="cgCondCausa"><option value="">Todas</option></select></label><label>Técnico<select id="cgCondTecnico"><option value="">Todos</option></select></label><label>Granja - Fornecedor<select id="cgCondFornecedor"><option value="">Todos</option></select></label></div></div><p class="cg-cond-status" role="status"></p><section class="cg-cond-summary"></section><section class="cg-cond-detail" hidden><h3></h3><div class="pcp-table-scroll cg-cond-rows"></div></section></div>';
   document.body.append(el);const view=el.querySelector('#cgCondVisao'),status=el.querySelector('.cg-cond-status'),summary=el.querySelector('.cg-cond-summary'),detail=el.querySelector('.cg-cond-detail');let context={},controller,generation=0,selected=null,activeGroup=null,page=1,cache=null,cacheKey='',moreBusy=false,detailTotal=0,detailLoaded=0,detailSort=null,detailDirection='desc',supplierDetail=null,openingKey='',history=[],mode='mensal',entryContext=null,entryView='geral';const weeklyCache=new Map();let detailRows=[];
-  const technician=el.querySelector('#cgCondTecnico'),supplier=el.querySelector('#cgCondFornecedor'),back=el.querySelector('.cg-cond-back');const filters=el.querySelector('.cg-cond-filters'),groupFilter=el.querySelector('#cgCondGrupo'),causeFilter=el.querySelector('#cgCondCausa');PcpMulti.enhance(filters);PcpMulti.enhance(el.querySelector('.cg-cond-view-filter'));
+  const technician=el.querySelector('#cgCondTecnico'),supplier=el.querySelector('#cgCondFornecedor'),back=el.querySelector('.cg-cond-back');const filters=el.querySelector('.cg-cond-filters'),groupFilter=el.querySelector('#cgCondGrupo'),causeFilter=el.querySelector('#cgCondCausa');PcpMulti.enhance(filters);PcpMulti.enhance(el.querySelector('.cg-cond-view-filter'));bindUnitTurnView(view);
   const supplierState=supplier.pcpMulti.controller.getState(supplier.pcpMulti.field);
   supplierState.search.addEventListener('input',()=>{
    const normalize=value=>String(value||'').normalize('NFD').replace(/\p{M}/gu,'').toLocaleLowerCase('pt-BR').trim();
